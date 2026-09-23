@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Field — Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#111928; --nav:#0d1420; --card:#1a2535; --bdr:#2d3f55; --bdr2:rgba(75,85,99,0.4);
+  --t1:#fff; --t2:#9CA3AF; --t3:#4B5563;
+  --grn:#0E9F6E; --grn-l:#31C48D; --amb:#E3A008; --red:#F05252;
+  --mf:#3B82F6; --etf:#0E9F6E; --sma:#E3A008; --alt:#A78BFA;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t1);font-size:13px;display:flex;height:100vh;overflow:hidden;}
+
+/* SIDEBAR */
+.sidebar{width:56px;background:var(--nav);border-right:1px solid var(--bdr);display:flex;flex-direction:column;align-items:center;padding:12px 0;gap:4px;flex-shrink:0;}
+.sbi{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--t3);cursor:pointer;}
+.sbi:hover{background:rgba(255,255,255,0.06);color:var(--t2);}
+.sbi.on{background:rgba(14,159,110,0.18);color:var(--grn-l);}
+.logo{width:36px;height:36px;background:var(--grn);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;margin-bottom:8px;}
+.sp{flex:1;}
+
+/* MAIN */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+
+/* TOPBAR */
+.topbar{height:52px;background:var(--nav);border-bottom:1px solid var(--bdr);display:flex;align-items:center;padding:0 20px;gap:14px;flex-shrink:0;}
+.ttl{font-size:15px;font-weight:700;}
+.dt{font-size:12px;color:var(--t2);}
+.srch{flex:1;max-width:360px;background:rgba(255,255,255,0.05);border:1px solid var(--bdr);border-radius:8px;display:flex;align-items:center;gap:8px;padding:0 12px;height:32px;}
+.srch input{background:none;border:none;outline:none;font-family:'Inter',sans-serif;font-size:12px;color:var(--t1);flex:1;}
+.srch input::placeholder{color:var(--t3);}
+.tbr{margin-left:auto;display:flex;align-items:center;gap:8px;}
+.qsel{background:var(--card);border:1px solid var(--bdr);border-radius:6px;padding:5px 12px;font-size:12px;color:var(--t1);display:flex;align-items:center;gap:6px;cursor:pointer;}
+.tbtn{background:rgba(255,255,255,0.05);border:1px solid var(--bdr);border-radius:6px;padding:5px 12px;font-size:12px;color:var(--t2);display:flex;align-items:center;gap:5px;cursor:pointer;font-family:'Inter',sans-serif;}
+.tbtn.af{border-color:var(--grn);color:var(--grn-l);background:rgba(14,159,110,0.1);}
+
+/* SELECTIONS BAR */
+.sel-bar{min-height:32px;background:rgba(14,159,110,0.07);border-bottom:1px solid rgba(14,159,110,0.18);display:flex;align-items:center;padding:0 20px;gap:8px;font-size:12px;flex-shrink:0;}
+.sel-lbl{color:var(--t2);}
+.chip{background:rgba(14,159,110,0.15);border:1px solid rgba(14,159,110,0.35);border-radius:99px;padding:3px 10px;font-size:11px;color:var(--grn-l);display:flex;align-items:center;gap:5px;}
+.chip-x{cursor:pointer;opacity:.6;font-size:10px;}
+.no-sel{color:var(--t3);font-size:11px;font-style:italic;}
+
+/* CONTENT */
+.content{flex:1;overflow-y:auto;padding:12px 20px;display:flex;flex-direction:column;gap:10px;}
+
+/* KPI */
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
+.kpi{background:var(--card);border:1px solid var(--bdr);border-radius:10px;padding:14px 16px;}
+.kn{font-size:11px;font-weight:600;color:var(--t2);text-transform:uppercase;letter-spacing:.04em;margin-bottom:10px;}
+.kb{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.ks{font-size:10px;font-weight:500;color:var(--t3);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;}
+.kv{font-size:20px;font-weight:800;color:var(--t1);line-height:1;}
+.kv.ac{color:var(--grn-l);}
+.km{font-size:11px;color:var(--t2);margin-top:3px;}
+.pos{color:var(--grn-l);font-weight:600;}
+
+/* CHARTS */
+.cr{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.cc{background:var(--card);border:1px solid var(--bdr);border-radius:10px;padding:14px 16px;}
+.ch{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px;}
+.ct{font-size:13px;font-weight:700;}
+.leg{display:flex;gap:10px;flex-wrap:wrap;}
+.li{display:flex;align-items:center;gap:4px;font-size:11px;color:var(--t2);}
+.ld{width:8px;height:8px;border-radius:2px;flex-shrink:0;}
+.lda{width:14px;height:0;border-top:2px dashed currentColor;}
+.tg{display:flex;background:rgba(0,0,0,0.25);border:1px solid var(--bdr2);border-radius:6px;padding:2px;gap:1px;}
+.tb{padding:3px 10px;border-radius:4px;font-size:11px;font-weight:600;color:var(--t3);cursor:pointer;border:none;background:none;font-family:'Inter',sans-serif;transition:all .12s;}
+.tb.on{background:var(--grn);color:#fff;}
+
+/* BOTTOM ROW */
+.br{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+.bc{background:var(--card);border:1px solid var(--bdr);border-radius:10px;overflow:hidden;display:flex;flex-direction:column;}
+.bch{padding:10px 14px;border-bottom:1px solid var(--bdr2);display:flex;align-items:center;gap:8px;flex-shrink:0;}
+.bct{font-size:12px;font-weight:700;display:flex;align-items:center;gap:6px;flex:1;}
+
+/* TILE TOGGLE */
+.tt{display:flex;background:rgba(0,0,0,0.3);border:1px solid var(--bdr2);border-radius:6px;padding:2px;gap:1px;}
+.ttb{padding:3px 9px;border-radius:4px;font-size:10px;font-weight:700;color:var(--t3);cursor:pointer;border:none;background:none;font-family:'Inter',sans-serif;transition:all .12s;white-space:nowrap;}
+.ttb.on{background:var(--grn);color:#fff;}
+
+/* ROW TABLE ICON */
+.row-ico{width:22px;height:22px;border-radius:4px;background:rgba(255,255,255,0.05);border:1px solid var(--bdr2);display:inline-flex;align-items:center;justify-content:center;cursor:pointer;color:var(--t3);transition:all .12s;flex-shrink:0;}
+.row-ico:hover{background:rgba(14,159,110,0.15);border-color:rgba(14,159,110,0.4);color:var(--grn-l);}
+.row-ico.active{background:rgba(14,159,110,0.2);border-color:var(--grn);color:var(--grn-l);}
+
+/* DRAWER BACKDROP */
+.drawer-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;opacity:0;pointer-events:none;transition:opacity .2s;}
+.drawer-backdrop.open{opacity:1;pointer-events:all;}
+
+/* DRAWER PANEL */
+.drawer{position:fixed;right:0;top:0;bottom:0;width:500px;max-width:94vw;background:#1a2535;border-left:1px solid var(--bdr);z-index:201;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .25s cubic-bezier(.4,0,.2,1);}
+.drawer.open{transform:translateX(0);}
+
+/* DRAWER HEADER */
+.dh{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--bdr);flex-shrink:0;}
+.dh-left{display:flex;align-items:center;gap:10px;}
+.dh-title{font-size:15px;font-weight:700;}
+.dh-sub{font-size:12px;color:var(--t2);}
+.dh-close{width:32px;height:32px;border-radius:8px;background:rgba(255,255,255,0.06);border:1px solid var(--bdr2);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--t2);font-size:16px;line-height:1;}
+.dh-close:hover{background:rgba(240,82,82,0.15);border-color:rgba(240,82,82,0.4);color:var(--red);}
+
+/* DRAWER TABS */
+.drawer-tabs{display:flex;gap:0;border-bottom:1px solid var(--bdr);flex-shrink:0;}
+.dtab{padding:10px 20px;font-size:12px;font-weight:600;color:var(--t3);cursor:pointer;border-bottom:2px solid transparent;transition:all .12s;background:none;border-top:none;border-left:none;border-right:none;font-family:'Inter',sans-serif;}
+.dtab:hover{color:var(--t2);}
+.dtab.on{color:var(--grn-l);border-bottom-color:var(--grn);}
+
+/* DRAWER BODY */
+.drawer-body{flex:1;overflow-y:auto;overflow-x:hidden;padding:0;}
+
+/* DRAWER TABLE */
+.dt-wrap{padding:0;}
+.dt{width:100%;border-collapse:collapse;}
+.dt thead tr{background:#1e2c3d;position:sticky;top:0;z-index:2;}
+.dt th{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:var(--t2);padding:8px 16px;text-align:left;white-space:nowrap;border-bottom:1px solid var(--bdr);}
+.dt th.r{text-align:right;}
+.dt td{padding:9px 16px;font-size:12.5px;color:var(--t1);border-bottom:1px solid rgba(45,63,85,0.4);white-space:nowrap;vertical-align:middle;}
+.dt td.r{text-align:right;}
+.dt td.dim{color:var(--t2);}
+.dt td.acc{color:var(--grn-l);font-weight:600;}
+.dt td.neg{color:var(--red);font-weight:600;}
+.dt tbody tr:hover{background:rgba(255,255,255,0.025);}
+.dt tbody tr:last-child td{border-bottom:none;}
+
+/* DELTA BADGE */
+.delta{display:inline-flex;align-items:center;gap:3px;font-size:11px;font-weight:600;padding:1px 6px;border-radius:4px;}
+.delta.pos{color:var(--grn-l);background:rgba(49,196,141,0.1);}
+.delta.neg{color:var(--red);background:rgba(240,82,82,0.1);}
+.delta.neu{color:var(--t2);background:rgba(255,255,255,0.05);}
+
+/* SECTION HEADER IN DRAWER */
+.drawer-section{padding:10px 16px 6px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--t3);background:#1e2c3d;border-bottom:1px solid var(--bdr);}
+
+/* TABLE */
+.bt{width:100%;border-collapse:collapse;}
+.bt thead tr{border-bottom:1px solid var(--bdr2);}
+.bt th{font-size:9.5px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:var(--t3);padding:6px 10px;text-align:left;white-space:nowrap;}
+.bt th.r{text-align:right;}
+.bt td{padding:7px 10px;font-size:12px;color:var(--t1);border-bottom:1px solid rgba(45,63,85,0.5);white-space:nowrap;vertical-align:middle;}
+.bt td.r{text-align:right;}
+.bt td.dim{color:var(--t2);}
+.bt td.acc{color:var(--grn-l);font-weight:600;}
+.bt tbody tr:last-child td{border-bottom:none;}
+.bt tbody tr.cl{cursor:pointer;}
+.bt tbody tr.cl:hover{background:rgba(255,255,255,0.03);}
+.bt tbody tr.sel-row td{background:rgba(14,159,110,0.09);}
+.bt tbody tr.sel-row td:first-child{border-left:3px solid var(--grn);}
+.bt tbody tr.dm{opacity:0.28;}
+
+/* DRILL */
+.dr{background:rgba(0,0,0,0.22);}
+.dr td{padding:5px 10px 5px 28px;font-size:11px;color:var(--t2);border-bottom:1px solid rgba(45,63,85,0.25);}
+.dr td.r{text-align:right;}
+.dr td.as{text-align:right;color:var(--grn-l);font-size:11px;font-weight:600;}
+
+/* AV */
+.av{width:26px;height:26px;border-radius:99px;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;color:#fff;flex-shrink:0;}
+
+/* TYPE BADGES */
+.tb2{display:inline-block;padding:1px 6px;border-radius:3px;font-size:9px;font-weight:700;letter-spacing:.02em;flex-shrink:0;}
+.tw{background:rgba(59,130,246,0.15);color:#60A5FA;border:1px solid rgba(59,130,246,0.25);}
+.tr{background:rgba(14,159,110,0.15);color:#31C48D;border:1px solid rgba(14,159,110,0.25);}
+.tg2{background:rgba(227,160,8,0.15);color:#E3A008;border:1px solid rgba(227,160,8,0.25);}
+.tbk{background:rgba(167,139,250,0.15);color:#A78BFA;border:1px solid rgba(167,139,250,0.25);}
+
+/* EXP */
+.et{color:var(--t3);font-size:10px;cursor:pointer;margin-left:3px;padding:2px;}
+.et:hover{color:var(--grn-l);}
+</style>
+</head>
+<body>
+
+<div class="sidebar">
+  <div class="logo">F</div>
+  <div class="sbi on"><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor"><rect x="2" y="2" width="7" height="7" rx="1.5"/><rect x="11" y="2" width="7" height="7" rx="1.5"/><rect x="2" y="11" width="7" height="7" rx="1.5"/><rect x="11" y="11" width="7" height="7" rx="1.5"/></svg></div>
+  <div class="sbi"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 20 20"><polyline points="2,14 7,8 11,11 18,4"/></svg></div>
+  <div class="sbi"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 20 20"><circle cx="10" cy="10" r="7"/><path d="M10 7v3l2 2"/></svg></div>
+  <div class="sbi"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 20 20"><path d="M17 18v-2a4 4 0 00-4-4H7a4 4 0 00-4 4v2"/><circle cx="10" cy="7" r="4"/></svg></div>
+  <div class="sbi"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 20 20"><rect x="3" y="3" width="14" height="14" rx="2"/><path d="M9 3v14M3 9h14"/></svg></div>
+  <div class="sp"></div>
+  <div class="sbi"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 20 20"><circle cx="10" cy="10" r="3"/><path d="M10 1v2M10 17v2M1 10h2M17 10h2"/></svg></div>
+  <div class="sbi"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 20 20"><circle cx="10" cy="8" r="4"/><path d="M2 18c0-4 3.6-6 8-6s8 2 8 6"/></svg></div>
+</div>
+
+<div class="main">
+  <div class="topbar">
+    <span class="ttl">Dashboard</span>
+    <span class="dt">Thu Nov 20th 2025</span>
+    <div class="srch">
+      <svg width="13" height="13" fill="none" stroke="#4B5563" stroke-width="2" viewBox="0 0 20 20"><circle cx="9" cy="9" r="6"/><path d="M15 15l3 3"/></svg>
+      <input placeholder="Search by firm name, advisor, city, or CRD…">
+    </div>
+    <div class="tbr">
+      <div class="qsel">Q3 2025 <svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 10 10"><path d="M2 3l3 4 3-4"/></svg></div>
+      <button class="tbtn"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 16 16"><path d="M3 8h10M8 3v10"/><rect x="1" y="1" width="14" height="14" rx="2"/></svg>Export</button>
+      <button class="tbtn af"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 16 16"><path d="M2 4h12M5 8h6M8 12h0"/></svg>Filter</button>
+    </div>
+  </div>
+
+  <div class="sel-bar">
+    <span class="sel-lbl">Active Selections:</span>
+    <div id="chips"></div>
+  </div>
+
+  <div class="content">
+
+    <!-- KPI -->
+    <div class="kpi-row">
+      <div class="kpi"><div class="kn">Total AUM</div><div class="kb" id="k-aum"></div></div>
+      <div class="kpi"><div class="kn">Total Inflows</div><div class="kb" id="k-inf"></div></div>
+      <div class="kpi"><div class="kn">Net Flow</div><div class="kb" id="k-net"></div></div>
+      <div class="kpi"><div class="kn">Firms</div><div class="kb" id="k-frm"></div></div>
+    </div>
+
+    <!-- CHARTS -->
+    <div class="cr">
+      <div class="cc">
+        <div class="ch">
+          <div class="ct">Opportunity AUM vs. Market Share</div>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+            <div class="leg">
+              <span class="li"><span class="ld" style="background:var(--mf)"></span>MF</span>
+              <span class="li"><span class="ld" style="background:var(--etf)"></span>ETF</span>
+              <span class="li"><span class="ld" style="background:var(--sma)"></span>SMA</span>
+              <span class="li"><span class="ld" style="background:var(--alt)"></span>Alt</span>
+              <span class="li"><span class="lda" style="color:var(--amb)"></span>Mkt Shr%</span>
+            </div>
+            <div class="tg" id="tTabs">
+              <button class="tb on" onclick="setTrendTab('opp',this)">Opp AUM</button>
+              <button class="tb" onclick="setTrendTab('mkt',this)">Mkt Share</button>
+            </div>
+          </div>
+        </div>
+        <canvas id="tChart" height="155" style="width:100%;display:block;"></canvas>
+      </div>
+      <div class="cc">
+        <div class="ch">
+          <div class="ct">Firm Group Breakdown</div>
+          <div class="leg">
+            <span class="li"><span class="ld" style="background:var(--mf)"></span>MF</span>
+            <span class="li"><span class="ld" style="background:var(--etf)"></span>ETF</span>
+            <span class="li"><span class="ld" style="background:var(--sma)"></span>SMA</span>
+            <span class="li"><span class="ld" style="background:var(--alt)"></span>Alt</span>
+          </div>
+        </div>
+        <canvas id="gChart" height="155" style="width:100%;display:block;"></canvas>
+      </div>
+    </div>
+
+    <!-- BOTTOM THREE TILES -->
+    <div class="br">
+
+      <!-- SALES REP -->
+      <div class="bc">
+        <div class="bch">
+          <div class="bct">
+            <svg width="13" height="13" fill="none" stroke="#9CA3AF" stroke-width="1.8" viewBox="0 0 20 20"><circle cx="10" cy="7" r="4"/><path d="M3 18c0-4 3.1-6 7-6s7 2 7 6"/></svg>
+            Sales Rep
+          </div>
+          <div class="tt" id="sr-tt">
+            <button class="ttb on" onclick="tileView('sr','aum',this)">AUM</button>
+            <button class="ttb" onclick="tileView('sr','inflow',this)">Inflow</button>
+            <button class="ttb" onclick="tileView('sr','netflow',this)">Net</button>
+          </div>
+        </div>
+        <table class="bt">
+          <thead><tr>
+            <th>Sales Rep</th><th class="r">Mkt Opp</th><th class="r">Your AUM</th><th class="r">Mkt Shr</th><th class="r">ETF %</th><th style="width:32px;"></th>
+          </tr></thead>
+          <tbody id="sr-body"></tbody>
+        </table>
+      </div>
+
+      <!-- TOTAL FIRM AUM -->
+      <div class="bc">
+        <div class="bch">
+          <div class="bct">
+            <svg width="13" height="13" fill="none" stroke="#9CA3AF" stroke-width="1.8" viewBox="0 0 20 20"><rect x="2" y="7" width="16" height="11" rx="1.5"/><path d="M6 7V5a4 4 0 018 0v2"/></svg>
+            Total Firm AUM
+          </div>
+          <div class="tt" id="fm-tt">
+            <button class="ttb on" onclick="tileView('fm','aum',this)">AUM</button>
+            <button class="ttb" onclick="tileView('fm','inflow',this)">Inflow</button>
+            <button class="ttb" onclick="tileView('fm','netflow',this)">Net</button>
+          </div>
+        </div>
+        <table class="bt">
+          <thead><tr>
+            <th>Firm</th><th class="r">Mkt Opp</th><th class="r">Your AUM</th><th class="r">Mkt Shr</th><th class="r">ETF %</th><th style="width:32px;"></th>
+          </tr></thead>
+          <tbody id="fm-body"></tbody>
+        </table>
+      </div>
+
+      <!-- M* CATEGORIES -->
+      <div class="bc">
+        <div class="bch">
+          <div class="bct">
+            <svg width="13" height="13" fill="none" stroke="#9CA3AF" stroke-width="1.8" viewBox="0 0 20 20"><circle cx="10" cy="10" r="7"/><path d="M10 6v4l3 3"/></svg>
+            M* Categories
+          </div>
+          <div class="tt" id="ct-tt">
+            <button class="ttb on" onclick="tileView('ct','aum',this)">AUM</button>
+            <button class="ttb" onclick="tileView('ct','inflow',this)">Inflow</button>
+            <button class="ttb" onclick="tileView('ct','netflow',this)">Net</button>
+          </div>
+        </div>
+        <table class="bt">
+          <thead><tr>
+            <th>Fund Category</th><th class="r">Mkt Opp</th><th class="r">Your AUM</th><th class="r">Mkt Shr</th><th class="r">ETF Opp</th><th style="width:32px;"></th>
+          </tr></thead>
+          <tbody id="ct-body"></tbody>
+        </table>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- DRAWER BACKDROP -->
+<div class="drawer-backdrop" id="drawerBackdrop" onclick="closeDrawer()"></div>
+
+<!-- DRAWER PANEL -->
+<div class="drawer" id="drawerPanel">
+  <div class="dh">
+    <div class="dh-left">
+      <div>
+        <div class="dh-title" id="drawer-title">Vehicle Breakdown</div>
+        <div class="dh-sub" id="drawer-sub"></div>
+      </div>
+    </div>
+    <div class="dh-close" onclick="closeDrawer()">×</div>
+  </div>
+  <div class="drawer-tabs">
+  <div class="drawer-body" id="drawer-body"></div>
+</div>
+
+<script>
+// ═══ KPI DATA ═══════════════════════════════════════════════════
+const KPI = {
+  'k-aum':{ market:'$1,396B', yours:'$15.86B', meta:'12,847 firms',      ym:'1.14% share' },
+  'k-inf':{ market:'$473B',   yours:'$892M',   meta:'YTD gross inflows', ym:'↑ 12.3% YoY' },
+  'k-net':{ market:'$1,464B', yours:'$312M',   meta:'Total net flow',    ym:'↑ 23.1% YoY' },
+  'k-frm':{ market:'12,847',  yours:'1,856',   meta:'total firms',       ym:'↑ 327 new' },
+};
+
+// ═══ CHART DATA ══════════════════════════════════════════════════
+const TDATA = {
+  labels:['2024-Q3','2024-Q4','2025-Q1','2025-Q2'],
+  opp:[[320,180,90,50],[360,200,110,65],[410,240,130,80],[480,290,160,100]],
+  mktShr:[1.2,1.4,1.6,1.9],
+};
+const GDATA = {
+  labels:['Wire','RIA','Regional BD','Insurance','Bank'],
+  opp:[[580,320,140,80],[290,180,75,55],[190,120,50,30],[95,40,20,10],[70,30,12,8]],
+  mktShr:[1.74,0.93,0.71,0.81,0.76],
+};
+
+// ═══ BOTTOM TABLE DATA ═══════════════════════════════════════════
+// Each row: views:{aum,inflow,netflow} each with {mktOpp,yourVal,mktShr,extra}
+//           drill:{aum,inflow,netflow} each [{v,val,shr}]
+
+const SR = [
+  { name:'Tyler Ryan',    init:'TR', col:'#0E9F6E', firms:['Morgan Stanley','Ameriprise','LPL Financial'],
+    views:{ aum:{mktOpp:'$226B',yourVal:'$63.3M',mktShr:'2.37%',extra:'31.8%'}, inflow:{mktOpp:'$18.4B',yourVal:'$5.8M',mktShr:'0.31%',extra:'34.2%'}, netflow:{mktOpp:'$6.2B',yourVal:'$2.1M',mktShr:'0.34%',extra:'33.6%'} },
+    drill:{ aum:[{v:'MF',val:'$28.1M',shr:'1.82%'},{v:'ETF',val:'$20.1M',shr:'3.48%'},{v:'SMA',val:'$9.8M',shr:'1.20%'},{v:'Alt',val:'$5.3M',shr:'0.90%'}], inflow:[{v:'MF',val:'$2.4M',shr:'0.22%'},{v:'ETF',val:'$2.0M',shr:'0.38%'},{v:'SMA',val:'$0.9M',shr:'0.18%'},{v:'Alt',val:'$0.5M',shr:'0.14%'}], netflow:[{v:'MF',val:'$0.9M',shr:'0.24%'},{v:'ETF',val:'$0.7M',shr:'0.42%'},{v:'SMA',val:'$0.3M',shr:'0.20%'},{v:'Alt',val:'$0.2M',shr:'0.12%'}] }},
+  { name:'Amanda Torres', init:'AT', col:'#76A9FA', firms:['Wells Fargo','UBS'],
+    views:{ aum:{mktOpp:'$179B',yourVal:'$50.3M',mktShr:'2.04%',extra:'41.8%'}, inflow:{mktOpp:'$14.2B',yourVal:'$4.6M',mktShr:'0.32%',extra:'44.1%'}, netflow:{mktOpp:'$4.8B',yourVal:'$1.7M',mktShr:'0.35%',extra:'42.8%'} },
+    drill:{ aum:[{v:'MF',val:'$19.8M',shr:'1.40%'},{v:'ETF',val:'$21.0M',shr:'3.60%'},{v:'SMA',val:'$6.2M',shr:'0.98%'},{v:'Alt',val:'$3.3M',shr:'0.60%'}], inflow:[{v:'MF',val:'$1.7M',shr:'0.18%'},{v:'ETF',val:'$2.0M',shr:'0.40%'},{v:'SMA',val:'$0.6M',shr:'0.16%'},{v:'Alt',val:'$0.3M',shr:'0.10%'}], netflow:[{v:'MF',val:'$0.6M',shr:'0.20%'},{v:'ETF',val:'$0.7M',shr:'0.44%'},{v:'SMA',val:'$0.2M',shr:'0.18%'},{v:'Alt',val:'$0.2M',shr:'0.10%'}] }},
+  { name:'James Thompson',init:'JT', col:'#E3A008', firms:['RayJay','OSAIC'],
+    views:{ aum:{mktOpp:'$141B',yourVal:'$38.3M',mktShr:'1.90%',extra:'33.4%'}, inflow:{mktOpp:'$11.2B',yourVal:'$3.5M',mktShr:'0.31%',extra:'35.8%'}, netflow:{mktOpp:'$3.8B',yourVal:'$1.3M',mktShr:'0.34%',extra:'34.2%'} },
+    drill:{ aum:[{v:'MF',val:'$17.2M',shr:'1.50%'},{v:'ETF',val:'$12.8M',shr:'2.80%'},{v:'SMA',val:'$5.1M',shr:'0.88%'},{v:'Alt',val:'$3.2M',shr:'0.55%'}], inflow:[{v:'MF',val:'$1.5M',shr:'0.16%'},{v:'ETF',val:'$1.3M',shr:'0.32%'},{v:'SMA',val:'$0.4M',shr:'0.14%'},{v:'Alt',val:'$0.3M',shr:'0.10%'}], netflow:[{v:'MF',val:'$0.5M',shr:'0.18%'},{v:'ETF',val:'$0.5M',shr:'0.36%'},{v:'SMA',val:'$0.2M',shr:'0.16%'},{v:'Alt',val:'$0.1M',shr:'0.08%'}] }},
+  { name:'Lisa Patel',    init:'LP', col:'#A78BFA', firms:['JP Morgan Chase'],
+    views:{ aum:{mktOpp:'$127B',yourVal:'$34.3M',mktShr:'1.81%',extra:'33.8%'}, inflow:{mktOpp:'$10.1B',yourVal:'$3.1M',mktShr:'0.31%',extra:'35.2%'}, netflow:{mktOpp:'$3.4B',yourVal:'$1.1M',mktShr:'0.32%',extra:'34.6%'} },
+    drill:{ aum:[{v:'MF',val:'$15.6M',shr:'1.32%'},{v:'ETF',val:'$11.6M',shr:'2.48%'},{v:'SMA',val:'$4.4M',shr:'0.72%'},{v:'Alt',val:'$2.7M',shr:'0.48%'}], inflow:[{v:'MF',val:'$1.3M',shr:'0.14%'},{v:'ETF',val:'$1.1M',shr:'0.30%'},{v:'SMA',val:'$0.4M',shr:'0.12%'},{v:'Alt',val:'$0.3M',shr:'0.09%'}], netflow:[{v:'MF',val:'$0.5M',shr:'0.16%'},{v:'ETF',val:'$0.4M',shr:'0.34%'},{v:'SMA',val:'$0.1M',shr:'0.14%'},{v:'Alt',val:'$0.1M',shr:'0.07%'}] }},
+  { name:'David Chen',    init:'DC', col:'#06B6D4', firms:['Ameriprise','LPL Financial'],
+    views:{ aum:{mktOpp:'$111B',yourVal:'$29.7M',mktShr:'1.72%',extra:'33.0%'}, inflow:{mktOpp:'$8.8B',yourVal:'$2.7M',mktShr:'0.31%',extra:'34.6%'}, netflow:{mktOpp:'$3.0B',yourVal:'$1.0M',mktShr:'0.33%',extra:'33.8%'} },
+    drill:{ aum:[{v:'MF',val:'$13.0M',shr:'1.20%'},{v:'ETF',val:'$9.8M',shr:'2.20%'},{v:'SMA',val:'$4.2M',shr:'0.68%'},{v:'Alt',val:'$2.7M',shr:'0.42%'}], inflow:[{v:'MF',val:'$1.2M',shr:'0.12%'},{v:'ETF',val:'$0.9M',shr:'0.28%'},{v:'SMA',val:'$0.4M',shr:'0.11%'},{v:'Alt',val:'$0.2M',shr:'0.08%'}], netflow:[{v:'MF',val:'$0.4M',shr:'0.14%'},{v:'ETF',val:'$0.4M',shr:'0.32%'},{v:'SMA',val:'$0.1M',shr:'0.12%'},{v:'Alt',val:'$0.1M',shr:'0.06%'}] }},
+  { name:'Rachel Foster', init:'RF', col:'#F97316', firms:['Wells Fargo','RayJay'],
+    views:{ aum:{mktOpp:'$98B',yourVal:'$24.8M',mktShr:'1.60%',extra:'32.4%'}, inflow:{mktOpp:'$7.8B',yourVal:'$2.2M',mktShr:'0.28%',extra:'33.8%'}, netflow:{mktOpp:'$2.6B',yourVal:'$0.8M',mktShr:'0.31%',extra:'33.2%'} },
+    drill:{ aum:[{v:'MF',val:'$11.2M',shr:'1.08%'},{v:'ETF',val:'$8.0M',shr:'2.00%'},{v:'SMA',val:'$3.4M',shr:'0.58%'},{v:'Alt',val:'$2.2M',shr:'0.40%'}], inflow:[{v:'MF',val:'$0.9M',shr:'0.10%'},{v:'ETF',val:'$0.7M',shr:'0.24%'},{v:'SMA',val:'$0.3M',shr:'0.09%'},{v:'Alt',val:'$0.3M',shr:'0.07%'}], netflow:[{v:'MF',val:'$0.3M',shr:'0.12%'},{v:'ETF',val:'$0.3M',shr:'0.28%'},{v:'SMA',val:'$0.1M',shr:'0.10%'},{v:'Alt',val:'$0.1M',shr:'0.06%'}] }},
+  { name:'Marcus Webb',   init:'MW', col:'#F05252', firms:['UBS','OSAIC'],
+    views:{ aum:{mktOpp:'$82B',yourVal:'$21.3M',mktShr:'1.51%',extra:'32.5%'}, inflow:{mktOpp:'$6.5B',yourVal:'$1.9M',mktShr:'0.29%',extra:'33.4%'}, netflow:{mktOpp:'$2.2B',yourVal:'$0.7M',mktShr:'0.32%',extra:'32.8%'} },
+    drill:{ aum:[{v:'MF',val:'$9.6M',shr:'0.96%'},{v:'ETF',val:'$6.9M',shr:'1.88%'},{v:'SMA',val:'$2.8M',shr:'0.50%'},{v:'Alt',val:'$2.0M',shr:'0.36%'}], inflow:[{v:'MF',val:'$0.8M',shr:'0.08%'},{v:'ETF',val:'$0.6M',shr:'0.22%'},{v:'SMA',val:'$0.3M',shr:'0.08%'},{v:'Alt',val:'$0.2M',shr:'0.06%'}], netflow:[{v:'MF',val:'$0.3M',shr:'0.10%'},{v:'ETF',val:'$0.2M',shr:'0.26%'},{v:'SMA',val:'$0.1M',shr:'0.09%'},{v:'Alt',val:'$0.1M',shr:'0.05%'}] }},
+];
+
+const FM = [
+  { name:'LPL Financial',  type:'tr', mktOpp:'$146B',
+    views:{ aum:{mktOpp:'$146B',yourVal:'$37.5B',mktShr:'1.94%',extra:'31.8%'}, inflow:{mktOpp:'$11.6B',yourVal:'$3.4B',mktShr:'0.29%',extra:'33.2%'}, netflow:{mktOpp:'$3.9B',yourVal:'$1.2B',mktShr:'0.31%',extra:'32.6%'} },
+    drill:{ aum:[{v:'MF',val:'$16.5B',shr:'1.42%'},{v:'ETF',val:'$11.9B',shr:'2.82%'},{v:'SMA',val:'$5.8B',shr:'1.02%'},{v:'Alt',val:'$3.3B',shr:'0.68%'}], inflow:[{v:'MF',val:'$1.4B',shr:'0.18%'},{v:'ETF',val:'$1.1B',shr:'0.32%'},{v:'SMA',val:'$0.6B',shr:'0.12%'},{v:'Alt',val:'$0.3B',shr:'0.08%'}], netflow:[{v:'MF',val:'$0.5B',shr:'0.20%'},{v:'ETF',val:'$0.4B',shr:'0.36%'},{v:'SMA',val:'$0.2B',shr:'0.14%'},{v:'Alt',val:'$0.1B',shr:'0.09%'}] }},
+  { name:'Morgan Stanley', type:'tw',
+    views:{ aum:{mktOpp:'$130B',yourVal:'$53.0B',mktShr:'2.44%',extra:'32.4%'}, inflow:{mktOpp:'$10.4B',yourVal:'$4.8B',mktShr:'0.46%',extra:'34.8%'}, netflow:{mktOpp:'$3.5B',yourVal:'$1.7B',mktShr:'0.49%',extra:'33.9%'} },
+    drill:{ aum:[{v:'MF',val:'$23.8B',shr:'2.10%'},{v:'ETF',val:'$17.2B',shr:'3.40%'},{v:'SMA',val:'$7.4B',shr:'1.30%'},{v:'Alt',val:'$4.6B',shr:'0.80%'}], inflow:[{v:'MF',val:'$2.1B',shr:'0.28%'},{v:'ETF',val:'$1.7B',shr:'0.50%'},{v:'SMA',val:'$0.6B',shr:'0.18%'},{v:'Alt',val:'$0.4B',shr:'0.12%'}], netflow:[{v:'MF',val:'$0.8B',shr:'0.30%'},{v:'ETF',val:'$0.6B',shr:'0.56%'},{v:'SMA',val:'$0.2B',shr:'0.20%'},{v:'Alt',val:'$0.1B',shr:'0.14%'}] }},
+  { name:'Ameriprise',     type:'tw',
+    views:{ aum:{mktOpp:'$115B',yourVal:'$44.3B',mktShr:'2.42%',extra:'32.0%'}, inflow:{mktOpp:'$9.2B',yourVal:'$4.0B',mktShr:'0.43%',extra:'34.2%'}, netflow:{mktOpp:'$3.1B',yourVal:'$1.4B',mktShr:'0.45%',extra:'33.5%'} },
+    drill:{ aum:[{v:'MF',val:'$19.8B',shr:'2.00%'},{v:'ETF',val:'$14.2B',shr:'3.20%'},{v:'SMA',val:'$6.2B',shr:'1.10%'},{v:'Alt',val:'$4.1B',shr:'0.72%'}], inflow:[{v:'MF',val:'$1.8B',shr:'0.26%'},{v:'ETF',val:'$1.4B',shr:'0.46%'},{v:'SMA',val:'$0.5B',shr:'0.16%'},{v:'Alt',val:'$0.3B',shr:'0.10%'}], netflow:[{v:'MF',val:'$0.6B',shr:'0.28%'},{v:'ETF',val:'$0.5B',shr:'0.52%'},{v:'SMA',val:'$0.2B',shr:'0.18%'},{v:'Alt',val:'$0.1B',shr:'0.12%'}] }},
+  { name:'Wells Fargo',    type:'tw',
+    views:{ aum:{mktOpp:'$107B',yourVal:'$39.5B',mktShr:'2.16%',extra:'32.6%'}, inflow:{mktOpp:'$8.6B',yourVal:'$3.6B',mktShr:'0.42%',extra:'34.4%'}, netflow:{mktOpp:'$2.9B',yourVal:'$1.3B',mktShr:'0.45%',extra:'33.7%'} },
+    drill:{ aum:[{v:'MF',val:'$17.8B',shr:'1.82%'},{v:'ETF',val:'$12.9B',shr:'2.90%'},{v:'SMA',val:'$5.6B',shr:'0.98%'},{v:'Alt',val:'$3.2B',shr:'0.64%'}], inflow:[{v:'MF',val:'$1.6B',shr:'0.22%'},{v:'ETF',val:'$1.2B',shr:'0.44%'},{v:'SMA',val:'$0.5B',shr:'0.14%'},{v:'Alt',val:'$0.3B',shr:'0.09%'}], netflow:[{v:'MF',val:'$0.6B',shr:'0.26%'},{v:'ETF',val:'$0.5B',shr:'0.50%'},{v:'SMA',val:'$0.1B',shr:'0.16%'},{v:'Alt',val:'$0.1B',shr:'0.10%'}] }},
+  { name:'RayJay',         type:'tg2',
+    views:{ aum:{mktOpp:'$68B',yourVal:'$20.7B',mktShr:'1.85%',extra:'31.2%'}, inflow:{mktOpp:'$5.4B',yourVal:'$1.9B',mktShr:'0.35%',extra:'32.8%'}, netflow:{mktOpp:'$1.8B',yourVal:'$0.7B',mktShr:'0.39%',extra:'32.0%'} },
+    drill:{ aum:[{v:'MF',val:'$9.3B',shr:'1.52%'},{v:'ETF',val:'$6.4B',shr:'2.40%'},{v:'SMA',val:'$3.2B',shr:'0.82%'},{v:'Alt',val:'$1.8B',shr:'0.52%'}], inflow:[{v:'MF',val:'$0.8B',shr:'0.18%'},{v:'ETF',val:'$0.6B',shr:'0.34%'},{v:'SMA',val:'$0.3B',shr:'0.11%'},{v:'Alt',val:'$0.2B',shr:'0.07%'}], netflow:[{v:'MF',val:'$0.3B',shr:'0.20%'},{v:'ETF',val:'$0.2B',shr:'0.38%'},{v:'SMA',val:'$0.1B',shr:'0.12%'},{v:'Alt',val:'$0.1B',shr:'0.08%'}] }},
+  { name:'UBS',            type:'tw',
+    views:{ aum:{mktOpp:'$63B',yourVal:'$25.9B',mktShr:'2.33%',extra:'32.6%'}, inflow:{mktOpp:'$5.0B',yourVal:'$2.4B',mktShr:'0.48%',extra:'34.4%'}, netflow:{mktOpp:'$1.7B',yourVal:'$0.8B',mktShr:'0.47%',extra:'33.6%'} },
+    drill:{ aum:[{v:'MF',val:'$11.7B',shr:'1.90%'},{v:'ETF',val:'$8.4B',shr:'3.00%'},{v:'SMA',val:'$3.8B',shr:'0.90%'},{v:'Alt',val:'$2.0B',shr:'0.60%'}], inflow:[{v:'MF',val:'$1.0B',shr:'0.24%'},{v:'ETF',val:'$0.8B',shr:'0.46%'},{v:'SMA',val:'$0.4B',shr:'0.14%'},{v:'Alt',val:'$0.2B',shr:'0.09%'}], netflow:[{v:'MF',val:'$0.4B',shr:'0.26%'},{v:'ETF',val:'$0.3B',shr:'0.50%'},{v:'SMA',val:'$0.1B',shr:'0.15%'},{v:'Alt',val:'$0.0B',shr:'0.10%'}] }},
+  { name:'OSAIC',          type:'tr',
+    views:{ aum:{mktOpp:'$49B',yourVal:'$14.5B',mktShr:'1.67%',extra:'28.2%'}, inflow:{mktOpp:'$3.9B',yourVal:'$1.3B',mktShr:'0.33%',extra:'30.1%'}, netflow:{mktOpp:'$1.3B',yourVal:'$0.5B',mktShr:'0.38%',extra:'29.6%'} },
+    drill:{ aum:[{v:'MF',val:'$6.6B',shr:'1.38%'},{v:'ETF',val:'$4.1B',shr:'2.20%'},{v:'SMA',val:'$2.4B',shr:'0.72%'},{v:'Alt',val:'$1.4B',shr:'0.48%'}], inflow:[{v:'MF',val:'$0.6B',shr:'0.16%'},{v:'ETF',val:'$0.4B',shr:'0.28%'},{v:'SMA',val:'$0.2B',shr:'0.10%'},{v:'Alt',val:'$0.1B',shr:'0.06%'}], netflow:[{v:'MF',val:'$0.2B',shr:'0.18%'},{v:'ETF',val:'$0.2B',shr:'0.32%'},{v:'SMA',val:'$0.1B',shr:'0.11%'},{v:'Alt',val:'$0.0B',shr:'0.07%'}] }},
+  { name:'JP Morgan Chase',type:'tbk',
+    views:{ aum:{mktOpp:'$37B',yourVal:'$14.4B',mktShr:'1.74%',extra:'39.6%'}, inflow:{mktOpp:'$3.0B',yourVal:'$1.3B',mktShr:'0.43%',extra:'41.8%'}, netflow:{mktOpp:'$1.0B',yourVal:'$0.5B',mktShr:'0.50%',extra:'40.9%'} },
+    drill:{ aum:[{v:'MF',val:'$5.8B',shr:'1.30%'},{v:'ETF',val:'$5.7B',shr:'3.20%'},{v:'SMA',val:'$1.8B',shr:'0.62%'},{v:'Alt',val:'$1.1B',shr:'0.44%'}], inflow:[{v:'MF',val:'$0.5B',shr:'0.18%'},{v:'ETF',val:'$0.5B',shr:'0.48%'},{v:'SMA',val:'$0.2B',shr:'0.10%'},{v:'Alt',val:'$0.1B',shr:'0.07%'}], netflow:[{v:'MF',val:'$0.2B',shr:'0.22%'},{v:'ETF',val:'$0.2B',shr:'0.54%'},{v:'SMA',val:'$0.1B',shr:'0.12%'},{v:'Alt',val:'$0.0B',shr:'0.08%'}] }},
+];
+
+const CT = [
+  { name:'Large Growth',        views:{ aum:{mktOpp:'$409B',yourVal:'$1,025B',mktShr:'0.29%',extra:'$402B'}, inflow:{mktOpp:'$32.7B',yourVal:'$82.0B',mktShr:'0.25%',extra:'$36.2B'}, netflow:{mktOpp:'$11.0B',yourVal:'$29.4B',mktShr:'0.27%',extra:'$13.1B'} }, drill:{ aum:[{v:'MF',val:'$448B',shr:'0.18%'},{v:'ETF',val:'$402B',shr:'0.42%'},{v:'SMA',val:'$120B',shr:'0.14%'},{v:'Alt',val:'$55B',shr:'0.08%'}], inflow:[{v:'MF',val:'$35.8B',shr:'0.14%'},{v:'ETF',val:'$36.2B',shr:'0.32%'},{v:'SMA',val:'$7.2B',shr:'0.10%'},{v:'Alt',val:'$2.8B',shr:'0.06%'}], netflow:[{v:'MF',val:'$12.8B',shr:'0.16%'},{v:'ETF',val:'$13.1B',shr:'0.36%'},{v:'SMA',val:'$2.6B',shr:'0.11%'},{v:'Alt',val:'$0.9B',shr:'0.07%'}] }},
+  { name:'Large Value',         views:{ aum:{mktOpp:'$223B',yourVal:'$693B',mktShr:'2.95%',extra:'$352B'}, inflow:{mktOpp:'$17.8B',yourVal:'$55.4B',mktShr:'2.64%',extra:'$31.7B'}, netflow:{mktOpp:'$6.0B',yourVal:'$19.9B',mktShr:'2.80%',extra:'$11.4B'} }, drill:{ aum:[{v:'MF',val:'$242B',shr:'2.20%'},{v:'ETF',val:'$352B',shr:'3.80%'},{v:'SMA',val:'$72B',shr:'1.40%'},{v:'Alt',val:'$27B',shr:'0.80%'}], inflow:[{v:'MF',val:'$19.3B',shr:'1.76%'},{v:'ETF',val:'$31.7B',shr:'2.90%'},{v:'SMA',val:'$3.2B',shr:'1.10%'},{v:'Alt',val:'$1.2B',shr:'0.60%'}], netflow:[{v:'MF',val:'$6.9B',shr:'1.90%'},{v:'ETF',val:'$11.4B',shr:'3.20%'},{v:'SMA',val:'$1.1B',shr:'1.20%'},{v:'Alt',val:'$0.5B',shr:'0.65%'}] }},
+  { name:'Int. Core-Plus',      views:{ aum:{mktOpp:'$131B',yourVal:'$460B',mktShr:'1.26%',extra:'$45B'}, inflow:{mktOpp:'$10.5B',yourVal:'$36.8B',mktShr:'1.13%',extra:'$4.1B'}, netflow:{mktOpp:'$3.5B',yourVal:'$13.2B',mktShr:'1.19%',extra:'$1.5B'} }, drill:{ aum:[{v:'MF',val:'$380B',shr:'1.10%'},{v:'ETF',val:'$45B',shr:'1.80%'},{v:'SMA',val:'$28B',shr:'0.70%'},{v:'Alt',val:'$7B',shr:'0.30%'}], inflow:[{v:'MF',val:'$30.4B',shr:'0.88%'},{v:'ETF',val:'$4.1B',shr:'1.36%'},{v:'SMA',val:'$1.7B',shr:'0.54%'},{v:'Alt',val:'$0.6B',shr:'0.22%'}], netflow:[{v:'MF',val:'$10.9B',shr:'0.96%'},{v:'ETF',val:'$1.5B',shr:'1.52%'},{v:'SMA',val:'$0.6B',shr:'0.60%'},{v:'Alt',val:'$0.2B',shr:'0.24%'}] }},
+  { name:'Foreign Large Blend', views:{ aum:{mktOpp:'$88B',yourVal:'$100B',mktShr:'0.12%',extra:'$268B'}, inflow:{mktOpp:'$7.0B',yourVal:'$8.0B',mktShr:'0.11%',extra:'$24.1B'}, netflow:{mktOpp:'$2.4B',yourVal:'$2.9B',mktShr:'0.12%',extra:'$8.7B'} }, drill:{ aum:[{v:'MF',val:'$55B',shr:'0.08%'},{v:'ETF',val:'$268B',shr:'0.18%'},{v:'SMA',val:'$18B',shr:'0.05%'},{v:'Alt',val:'$9B',shr:'0.03%'}], inflow:[{v:'MF',val:'$4.4B',shr:'0.06%'},{v:'ETF',val:'$24.1B',shr:'0.14%'},{v:'SMA',val:'$1.1B',shr:'0.04%'},{v:'Alt',val:'$0.5B',shr:'0.02%'}], netflow:[{v:'MF',val:'$1.6B',shr:'0.07%'},{v:'ETF',val:'$8.7B',shr:'0.16%'},{v:'SMA',val:'$0.4B',shr:'0.04%'},{v:'Alt',val:'$0.2B',shr:'0.02%'}] }},
+  { name:'Mid-Cap Growth',      views:{ aum:{mktOpp:'$64B',yourVal:'$362B',mktShr:'0.57%',extra:'$29B'}, inflow:{mktOpp:'$5.1B',yourVal:'$28.9B',mktShr:'0.51%',extra:'$2.6B'}, netflow:{mktOpp:'$1.7B',yourVal:'$10.4B',mktShr:'0.55%',extra:'$0.9B'} }, drill:{ aum:[{v:'MF',val:'$295B',shr:'0.44%'},{v:'ETF',val:'$29B',shr:'0.82%'},{v:'SMA',val:'$28B',shr:'0.38%'},{v:'Alt',val:'$10B',shr:'0.20%'}], inflow:[{v:'MF',val:'$23.6B',shr:'0.35%'},{v:'ETF',val:'$2.6B',shr:'0.62%'},{v:'SMA',val:'$1.7B',shr:'0.29%'},{v:'Alt',val:'$1.0B',shr:'0.15%'}], netflow:[{v:'MF',val:'$8.5B',shr:'0.38%'},{v:'ETF',val:'$0.9B',shr:'0.70%'},{v:'SMA',val:'$0.6B',shr:'0.32%'},{v:'Alt',val:'$0.4B',shr:'0.16%'}] }},
+  { name:'Global Large Stock',  views:{ aum:{mktOpp:'$78B',yourVal:'$680B',mktShr:'0.74%',extra:'$5B'}, inflow:{mktOpp:'$6.2B',yourVal:'$54.4B',mktShr:'0.66%',extra:'$0.5B'}, netflow:{mktOpp:'$2.1B',yourVal:'$19.6B',mktShr:'0.70%',extra:'$0.2B'} }, drill:{ aum:[{v:'MF',val:'$580B',shr:'0.62%'},{v:'ETF',val:'$5B',shr:'0.92%'},{v:'SMA',val:'$68B',shr:'0.50%'},{v:'Alt',val:'$27B',shr:'0.35%'}], inflow:[{v:'MF',val:'$46.4B',shr:'0.50%'},{v:'ETF',val:'$0.5B',shr:'0.70%'},{v:'SMA',val:'$5.4B',shr:'0.40%'},{v:'Alt',val:'$2.1B',shr:'0.26%'}], netflow:[{v:'MF',val:'$16.7B',shr:'0.54%'},{v:'ETF',val:'$0.2B',shr:'0.78%'},{v:'SMA',val:'$1.9B',shr:'0.44%'},{v:'Alt',val:'$0.8B',shr:'0.28%'}] }},
+  { name:'Diversified Emerging',views:{ aum:{mktOpp:'$58B',yourVal:'$204B',mktShr:'0.35%',extra:'$110B'}, inflow:{mktOpp:'$4.6B',yourVal:'$16.3B',mktShr:'0.28%',extra:'$9.9B'}, netflow:{mktOpp:'$1.6B',yourVal:'$5.9B',mktShr:'0.30%',extra:'$3.6B'} }, drill:{ aum:[{v:'MF',val:'$148B',shr:'0.28%'},{v:'ETF',val:'$110B',shr:'0.48%'},{v:'SMA',val:'$32B',shr:'0.22%'},{v:'Alt',val:'$14B',shr:'0.12%'}], inflow:[{v:'MF',val:'$11.8B',shr:'0.22%'},{v:'ETF',val:'$9.9B',shr:'0.36%'},{v:'SMA',val:'$3.2B',shr:'0.17%'},{v:'Alt',val:'$1.4B',shr:'0.09%'}], netflow:[{v:'MF',val:'$4.3B',shr:'0.24%'},{v:'ETF',val:'$3.6B',shr:'0.40%'},{v:'SMA',val:'$1.1B',shr:'0.19%'},{v:'Alt',val:'$0.5B',shr:'0.10%'}] }},
+  { name:'Muni National Long',  views:{ aum:{mktOpp:'$33B',yourVal:'$139B',mktShr:'0.51%',extra:'$48B'}, inflow:{mktOpp:'$2.6B',yourVal:'$11.1B',mktShr:'0.46%',extra:'$4.3B'}, netflow:{mktOpp:'$0.9B',yourVal:'$4.0B',mktShr:'0.44%',extra:'$1.6B'} }, drill:{ aum:[{v:'MF',val:'$102B',shr:'0.42%'},{v:'ETF',val:'$48B',shr:'0.70%'},{v:'SMA',val:'$24B',shr:'0.30%'},{v:'Alt',val:'$13B',shr:'0.18%'}], inflow:[{v:'MF',val:'$8.2B',shr:'0.34%'},{v:'ETF',val:'$4.3B',shr:'0.54%'},{v:'SMA',val:'$1.9B',shr:'0.24%'},{v:'Alt',val:'$1.0B',shr:'0.14%'}], netflow:[{v:'MF',val:'$2.9B',shr:'0.36%'},{v:'ETF',val:'$1.6B',shr:'0.60%'},{v:'SMA',val:'$0.7B',shr:'0.26%'},{v:'Alt',val:'$0.4B',shr:'0.15%'}] }},
+];
+
+// ═══ FIRM → CATEGORIES MAP ══════════════════════════════════════
+const FC = {
+  'LPL Financial':  ['Large Growth','Large Value','Int. Core-Plus','Mid-Cap Growth'],
+  'Morgan Stanley': ['Large Growth','Large Value','Foreign Large Blend','Global Large Stock','Diversified Emerging'],
+  'Ameriprise':     ['Large Growth','Int. Core-Plus','Mid-Cap Growth','Global Large Stock'],
+  'Wells Fargo':    ['Large Value','Int. Core-Plus','Foreign Large Blend','Muni National Long'],
+  'RayJay':         ['Large Growth','Mid-Cap Growth','Diversified Emerging'],
+  'UBS':            ['Large Growth','Large Value','Foreign Large Blend','Global Large Stock'],
+  'OSAIC':          ['Int. Core-Plus','Mid-Cap Growth','Muni National Long'],
+  'JP Morgan Chase':['Large Value','Foreign Large Blend','Diversified Emerging','Muni National Long'],
+};
+const cat2firms = c => Object.keys(FC).filter(f=>(FC[f]||[]).includes(c));
+
+// ═══ STATE ══════════════════════════════════════════════════════
+let filter = null;   // {type:'sr'|'fm'|'ct', idx:number}
+let drill  = {};
+
+// ═══ CROSS-FILTER VISIBILITY ════════════════════════════════════
+function vis() {
+  const all = {sr:SR.map((_,i)=>i), fm:FM.map((_,i)=>i), ct:CT.map((_,i)=>i)};
+  if (!filter) return all;
+  const {type,idx} = filter;
+
+  if (type==='sr') {
+    const rep    = SR[idx];
+    const fIdxs  = FM.map((f,i)=>rep.firms.includes(f.name)?i:-1).filter(x=>x>=0);
+    const cSet   = new Set();
+    fIdxs.forEach(fi=>(FC[FM[fi].name]||[]).forEach(c=>cSet.add(c)));
+    return {sr:[idx], fm:fIdxs, ct:CT.map((c,i)=>cSet.has(c.name)?i:-1).filter(x=>x>=0)};
+  }
+  if (type==='fm') {
+    const fn    = FM[idx].name;
+    const sIdxs = SR.map((r,i)=>r.firms.includes(fn)?i:-1).filter(x=>x>=0);
+    const cats  = FC[fn]||[];
+    return {sr:sIdxs, fm:[idx], ct:CT.map((c,i)=>cats.includes(c.name)?i:-1).filter(x=>x>=0)};
+  }
+  if (type==='ct') {
+    const cn    = CT[idx].name;
+    const fns   = cat2firms(cn);
+    const fIdxs = FM.map((f,i)=>fns.includes(f.name)?i:-1).filter(x=>x>=0);
+    const sIdxs = SR.map((r,i)=>r.firms.some(fn=>fns.includes(fn))?i:-1).filter(x=>x>=0);
+    return {sr:sIdxs, fm:fIdxs, ct:[idx]};
+  }
+  return all;
+}
+
+// ═══ CLICK HANDLER ══════════════════════════════════════════════
+function rowClick(type, idx) {
+  filter = (filter && filter.type===type && filter.idx===idx) ? null : {type,idx};
+  renderChips();
+  renderSR(); renderFM(); renderCT();
+  updateKPIsAndCharts();
+}
+
+// ═══ TILE VIEW TOGGLE ═══════════════════════════════════════════
+let tileViews = { sr:'aum', fm:'aum', ct:'aum' };
+
+function tileView(tile, v, btn) {
+  tileViews[tile] = v;
+  document.querySelectorAll(`#${tile}-tt .ttb`).forEach(b => b.classList.remove('on'));
+  btn.classList.add('on');
+  if (tile==='sr') renderSR();
+  if (tile==='fm') renderFM();
+  if (tile==='ct') renderCT();
+}
+
+// ═══ ROW DRAWER ═════════════════════════════════════════════════
+let drawerCtx = null;
+
+const ROW_ICO = `<svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 16 16"><rect x="1" y="1" width="14" height="14" rx="2"/><path d="M1 5h14M1 9h14M5 5v9"/></svg>`;
+
+function openRowDrawer(tile, idx, event) {
+  event.stopPropagation();
+  const data = tile==='sr' ? SR[idx] : tile==='fm' ? FM[idx] : CT[idx];
+  drawerCtx  = { tile, idx, data };
+  document.querySelectorAll('.row-ico').forEach(el => el.classList.remove('active'));
+  const ico = document.getElementById(`row-ico-${tile}-${idx}`);
+  if (ico) ico.classList.add('active');
+  const sub = tile==='sr' ? 'Sales Rep · Vehicle Breakdown'
+            : tile==='fm' ? 'Firm · Vehicle Breakdown'
+            :               'M* Category · Vehicle Breakdown';
+  document.getElementById('drawer-title').textContent = data.name;
+  document.getElementById('drawer-sub').textContent   = sub;
+  renderRowDrawer();
+  document.getElementById('drawerBackdrop').classList.add('open');
+  document.getElementById('drawerPanel').classList.add('open');
+}
+
+function closeDrawer() {
+  document.getElementById('drawerBackdrop').classList.remove('open');
+  document.getElementById('drawerPanel').classList.remove('open');
+  document.querySelectorAll('.row-ico').forEach(el => el.classList.remove('active'));
+  drawerCtx = null;
+}
+
+function renderRowDrawer() {
+  if (!drawerCtx) return;
+  const { data } = drawerCtx;
+  const VC_MAP    = { MF:VC[0], ETF:VC[1], SMA:VC[2], Alt:VC[3] };
+  const VEH_NAMES = { MF:'Mutual Fund', ETF:'Exchange Traded Fund', SMA:'Separately Managed Acct', Alt:'Alternative' };
+
+  // ── Summary strip: 3 panels side by side ──
+  const cols = [
+    { label:'AUM',      color:'var(--grn-l)', bg:'rgba(14,159,110,0.05)',  d: data.views.aum,     valLbl:'Your AUM',  etfLbl:'ETF %' },
+    { label:'Inflow',   color:'#76A9FA',      bg:'rgba(118,169,250,0.05)', d: data.views.inflow,  valLbl:'Inflow',    etfLbl:'ETF Inflow' },
+    { label:'Net Flow', color:'var(--amb)',   bg:'rgba(227,160,8,0.05)',   d: data.views.netflow, valLbl:'Net Flow',  etfLbl:'ETF Net' },
+  ];
+
+  const summaryHTML = `
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);border-bottom:1px solid var(--bdr);">
+      ${cols.map((col, ci) => `
+        <div style="padding:14px 16px;background:${col.bg};${ci < 2 ? 'border-right:1px solid var(--bdr);' : ''}">
+          <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:${col.color};margin-bottom:10px;">${col.label}</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+            <div><div style="font-size:9px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.04em;margin-bottom:2px;">Mkt Opp</div>
+                 <div style="font-size:14px;font-weight:800;color:var(--t1);">${col.d.mktOpp}</div></div>
+            <div><div style="font-size:9px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.04em;margin-bottom:2px;">${col.valLbl}</div>
+                 <div style="font-size:14px;font-weight:800;color:var(--grn-l);">${col.d.yourVal}</div></div>
+            <div><div style="font-size:9px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.04em;margin-bottom:2px;">Mkt Share</div>
+                 <div style="font-size:14px;font-weight:800;color:var(--grn-l);">${col.d.mktShr}</div></div>
+            <div><div style="font-size:9px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.04em;margin-bottom:2px;">${col.etfLbl}</div>
+                 <div style="font-size:14px;font-weight:800;color:var(--t2);">${col.d.extra}</div></div>
+          </div>
+        </div>`).join('')}
+    </div>`;
+
+  // ── Three stacked sections, each with a simple 4-col table ──
+  const VIEWS = [
+    { key:'aum',     label:'AUM',      color:'var(--grn-l)', bg:'rgba(14,159,110,0.06)' },
+    { key:'inflow',  label:'Inflow',   color:'#76A9FA',      bg:'rgba(118,169,250,0.06)' },
+    { key:'netflow', label:'Net Flow', color:'var(--amb)',   bg:'rgba(227,160,8,0.06)' },
+  ];
+
+  const sections = VIEWS.map(view => {
+    const rows = ['MF','ETF','SMA','Alt'].map(v => {
+      const d = data.drill[view.key].find(x => x.v===v);
+      if (!d) return '';
+      const vNum  = parseFloat(d.val.replace(/[^0-9.]/g,''));
+      const sNum  = parseFloat(d.shr) / 100;
+      const unit  = d.val.includes('B') ? 'B' : 'M';
+      const oppRaw = (vNum && sNum) ? vNum / sNum : 0;
+      const opp   = oppRaw >= 1000 && unit==='M'
+                    ? '$' + (oppRaw/1000).toFixed(1) + 'B'
+                    : '$' + oppRaw.toFixed(1) + unit;
+      return `
+        <tr>
+          <td>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <div style="width:8px;height:8px;border-radius:2px;background:${VC_MAP[v]};flex-shrink:0;"></div>
+              <span style="font-weight:700;color:${VC_MAP[v]};">${v}</span>
+              <span style="color:var(--t2);font-size:11px;">${VEH_NAMES[v]}</span>
+            </div>
+          </td>
+          <td class="r" style="color:var(--t2);">${opp}</td>
+          <td class="r" style="color:var(--grn-l);font-weight:700;">${d.val}</td>
+          <td class="r" style="color:var(--t2);font-size:11px;">${d.shr}</td>
+        </tr>`;
+    }).join('');
+
+    return `
+      <div style="border-bottom:1px solid var(--bdr);">
+        <div style="padding:8px 16px 6px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:${view.color};background:${view.bg};border-bottom:1px solid var(--bdr);">${view.label}</div>
+        <table class="dt" style="width:100%;">
+          <thead><tr>
+            <th>Vehicle</th>
+            <th class="r" style="color:var(--t3);">Mkt Opp</th>
+            <th class="r" style="color:var(--t3);">Your AUM</th>
+            <th class="r" style="color:var(--t3);">Mkt Shr</th>
+          </tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>`;
+  }).join('');
+
+  const tableHTML = sections;
+
+  document.getElementById('drawer-body').innerHTML = summaryHTML + tableHTML;
+}
+
+// ═══ CHIPS BAR ══════════════════════════════════════════════════
+function renderChips() {
+  const el = document.getElementById('chips');
+  if (!filter) { el.innerHTML='<span class="no-sel">Click any row to cross-filter all three tiles</span>'; return; }
+  const {type,idx} = filter;
+  let lbl, col='#0E9F6E';
+  if (type==='sr') { lbl=SR[idx].name; col=SR[idx].col; }
+  if (type==='fm') lbl=FM[idx].name;
+  if (type==='ct') lbl=CT[idx].name;
+  const tlbl = type==='sr'?'Rep':type==='fm'?'Firm':'Category';
+  const v  = vis();
+  const ct = `${v.sr.length} rep${v.sr.length!==1?'s':''} · ${v.fm.length} firm${v.fm.length!==1?'s':''} · ${v.ct.length} cat${v.ct.length!==1?'s':''}`;
+  el.innerHTML=`
+    <div class="chip" style="background:${col}22;border-color:${col};color:${col};">
+      <span style="font-size:9px;font-weight:600;opacity:.7;">${tlbl}</span> ${lbl}
+      <span class="chip-x" onclick="clearF()">×</span>
+    </div>
+    <span style="font-size:11px;color:var(--t2);">${ct}</span>`;
+}
+function clearF() { filter=null; renderChips(); renderSR(); renderFM(); renderCT(); updateKPIsAndCharts(); }
+
+// ═══ KPI ════════════════════════════════════════════════════════
+// Parse a value string like '$63.3M' or '$14.5B' into a number (in Millions)
+function parseM(s) {
+  if (!s) return 0;
+  const n = parseFloat(s.replace(/[^0-9.]/g,''));
+  if (s.includes('B')) return n * 1000;
+  return n;
+}
+function fmtM(n) {
+  if (n >= 1000000) return '$' + (n/1000000).toFixed(2) + 'T';
+  if (n >= 1000)    return '$' + (n/1000).toFixed(1) + 'B';
+  return '$' + n.toFixed(1) + 'M';
+}
+
+function updateKPIsAndCharts() {
+  if (!filter) {
+    // Restore base KPIs
+    renderKPIs();
+    initCharts();
+    return;
+  }
+
+  const v = vis();
+
+  // Sum Your AUM across visible firms
+  const visibleFirms = v.fm.map(i => FM[i]);
+  const totalYoursAUM    = visibleFirms.reduce((a,f) => a + parseM(f.views.aum.mktOpp.replace('$','') ? f.views.aum.yourVal : '0'), 0);
+  const totalMktOpp      = visibleFirms.reduce((a,f) => a + parseM(f.views.aum.mktOpp), 0);
+  const totalInfYours    = visibleFirms.reduce((a,f) => a + parseM(f.views.inflow.yourVal), 0);
+  const totalInfMkt      = visibleFirms.reduce((a,f) => a + parseM(f.views.inflow.mktOpp), 0);
+  const totalNetYours    = visibleFirms.reduce((a,f) => a + parseM(f.views.netflow.yourVal), 0);
+  const totalNetMkt      = visibleFirms.reduce((a,f) => a + parseM(f.views.netflow.mktOpp), 0);
+  const totalAUMYours    = visibleFirms.reduce((a,f) => a + parseM(f.views.aum.yourVal), 0);
+
+  const aumShr  = totalMktOpp  > 0 ? ((totalAUMYours  / totalMktOpp)  * 100).toFixed(2) + '% share' : '—';
+  const infShr  = totalInfMkt  > 0 ? '↑ ' + ((totalInfYours / totalInfMkt) * 100).toFixed(2) + '% shr' : '—';
+  const netShr  = totalNetMkt  > 0 ? '↑ ' + ((totalNetYours / totalNetMkt) * 100).toFixed(2) + '% shr' : '—';
+
+  const firmCount = v.fm.length;
+
+  function setKPI(id, market, yours, meta, ym) {
+    document.getElementById(id).innerHTML=`
+      <div><div class="ks">Market</div><div class="kv">${market}</div><div class="km">${meta}</div></div>
+      <div><div class="ks">Yours</div><div class="kv ac">${yours}</div><div class="km"><span class="pos">${ym}</span></div></div>`;
+  }
+
+  setKPI('k-aum', fmtM(totalMktOpp),   fmtM(totalAUMYours),  `${firmCount} firm${firmCount!==1?'s':''}`, aumShr);
+  setKPI('k-inf', fmtM(totalInfMkt),   fmtM(totalInfYours),  'filtered inflows', infShr);
+  setKPI('k-net', fmtM(totalNetMkt),   fmtM(totalNetYours),  'filtered net flow', netShr);
+  setKPI('k-frm', visibleFirms.length.toString(), v.sr.length.toString(), 'firms in filter', `${v.sr.length} rep${v.sr.length!==1?'s':''}`);
+
+  // Rebuild charts from visible firm AUM drill data (vehicle breakdown)
+  const vehicles = ['MF','ETF','SMA','Alt'];
+  const oppByVehicle = vehicles.map(veh =>
+    visibleFirms.reduce((a,f) => {
+      const d = f.drill.aum.find(x => x.v===veh);
+      return a + (d ? parseM(d.val) : 0);
+    }, 0)
+  );
+
+  // Trend chart: scale base TDATA by ratio of filtered/total AUM
+  const ratio = totalAUMYours > 0 ? totalAUMYours / parseM('$504.5B') : 1; // 504.5B = sum of all firm AUM
+  const filteredTDATA = {
+    labels: TDATA.labels,
+    opp: TDATA.opp.map(q => q.map(v => Math.round(v * ratio))),
+    mktShr: TDATA.mktShr.map(v => parseFloat((v * ratio * 2).toFixed(2))),
+  };
+
+  // Firm group chart: show per-category breakdown for filtered firms
+  const visibleCats = v.ct.map(i => CT[i]);
+  const catOpp = visibleCats.slice(0,5).map(cat =>
+    vehicles.map(veh => {
+      const d = cat.drill.aum.find(x => x.v===veh);
+      return d ? parseM(d.val) : 0;
+    })
+  );
+  const filteredGDATA = {
+    labels: visibleCats.slice(0,5).map(c => c.name.length > 12 ? c.name.slice(0,12)+'…' : c.name),
+    opp: catOpp.length > 0 ? catOpp : [[1,0,0,0]],
+    mktShr: visibleCats.slice(0,5).map(c => parseFloat(c.views.aum.mktShr)),
+  };
+
+  stackedBar('tChart', filteredTDATA, tv==='opp' ? filteredTDATA.mktShr : null);
+  groupBars('gChart', filteredGDATA);
+}
+
+function renderKPIs() {
+  Object.entries(KPI).forEach(([id,d])=>{
+    document.getElementById(id).innerHTML=`
+      <div><div class="ks">Market</div><div class="kv">${d.market}</div><div class="km">${d.meta}</div></div>
+      <div><div class="ks">Yours</div><div class="kv ac">${d.yours}</div><div class="km"><span class="pos">${d.ym}</span></div></div>`;
+  });
+}
+
+// ═══ CHART DRAW ════════════════════════════════════════════════
+const VA=['rgba(59,130,246,0.85)','rgba(14,159,110,0.85)','rgba(227,160,8,0.85)','rgba(167,139,250,0.85)'];
+function stackedBar(cid,data,trend){
+  const c=document.getElementById(cid);if(!c)return;
+  const dpr=window.devicePixelRatio||1,W=c.offsetWidth||420,H=155;
+  c.width=W*dpr;c.height=H*dpr;c.style.width=W+'px';c.style.height=H+'px';
+  const x=c.getContext('2d');x.scale(dpr,dpr);
+  const P={t:10,r:38,b:26,l:42};
+  const cW=W-P.l-P.r,cH=H-P.t-P.b,n=data.labels.length;
+  const bW=Math.min(56,(cW/n)*0.52),gap=cW/n;
+  const tots=data.opp.map(q=>q.reduce((a,b)=>a+b,0)),mx=Math.max(...tots)*1.12;
+  x.strokeStyle='rgba(75,85,99,0.28)';x.lineWidth=0.5;x.setLineDash([3,4]);
+  for(let g=0;g<=3;g++){const y=P.t+(g/3)*cH;x.beginPath();x.moveTo(P.l,y);x.lineTo(W-P.r,y);x.stroke();const v=Math.round(mx*(1-g/3));x.fillStyle='#4B5563';x.font='9px Inter';x.textAlign='right';x.fillText('$'+(v>=1000?(v/1000).toFixed(0)+'B':v+'B'),P.l-4,y+3);}
+  x.setLineDash([]);
+  data.opp.forEach((s,i)=>{
+    const cx=P.l+i*gap+gap/2,bx=cx-bW/2;let yb=P.t+cH;
+    s.forEach((v,si)=>{const bH=(v/mx)*cH;x.fillStyle=VA[si];
+      if(si===s.length-1){x.beginPath();x.moveTo(bx+3,yb-bH);x.lineTo(bx+bW-3,yb-bH);x.arcTo(bx+bW,yb-bH,bx+bW,yb,3);x.lineTo(bx+bW,yb);x.lineTo(bx,yb);x.arcTo(bx,yb-bH,bx+bW,yb-bH,3);x.closePath();x.fill();}
+      else x.fillRect(bx,yb-bH,bW,bH);
+      yb-=bH;
+    });
+    x.fillStyle='#6B7280';x.font='9.5px Inter';x.textAlign='center';x.fillText(data.labels[i],cx,H-6);
+  });
+  if(trend){
+    const ms=Math.max(...trend)*1.3;
+    x.strokeStyle='#E3A008';x.lineWidth=1.8;x.setLineDash([5,4]);
+    x.beginPath();trend.forEach((v,i)=>{const cx=P.l+i*gap+gap/2,y=P.t+cH-(v/ms)*cH;i===0?x.moveTo(cx,y):x.lineTo(cx,y);});x.stroke();x.setLineDash([]);
+    trend.forEach((v,i)=>{const cx=P.l+i*gap+gap/2,y=P.t+cH-(v/ms)*cH;x.beginPath();x.arc(cx,y,3,0,Math.PI*2);x.fillStyle='#E3A008';x.fill();});
+    x.fillStyle='#E3A008';x.font='9px Inter';x.textAlign='left';
+    x.fillText('Mkt%',W-P.r+3,P.t+cH-(trend[trend.length-1]/ms)*cH+3);
+  }
+}
+function groupBars(cid,data){
+  const c=document.getElementById(cid);if(!c)return;
+  const dpr=window.devicePixelRatio||1,W=c.offsetWidth||420,H=155;
+  c.width=W*dpr;c.height=H*dpr;c.style.width=W+'px';c.style.height=H+'px';
+  const x=c.getContext('2d');x.scale(dpr,dpr);
+  const P={t:10,r:14,b:34,l:42};
+  const cW=W-P.l-P.r,cH=H-P.t-P.b,n=data.labels.length;
+  const bW=Math.min(46,(cW/n)*0.5),gap=cW/n;
+  const tots=data.opp.map(q=>q.reduce((a,b)=>a+b,0)),mx=Math.max(...tots)*1.12;
+  x.strokeStyle='rgba(75,85,99,0.28)';x.lineWidth=0.5;x.setLineDash([3,4]);
+  for(let g=0;g<=3;g++){const y=P.t+(g/3)*cH;x.beginPath();x.moveTo(P.l,y);x.lineTo(W-P.r,y);x.stroke();const v=Math.round(mx*(1-g/3));x.fillStyle='#4B5563';x.font='9px Inter';x.textAlign='right';x.fillText('$'+(v>=1000?(v/1000).toFixed(0)+'B':v+'B'),P.l-4,y+3);}
+  x.setLineDash([]);
+  data.opp.forEach((s,i)=>{
+    const cx=P.l+i*gap+gap/2,bx=cx-bW/2;let yb=P.t+cH;
+    s.forEach((v,si)=>{const bH=(v/mx)*cH;x.fillStyle=VA[si];x.fillRect(bx,yb-bH,bW,bH);yb-=bH;});
+    x.fillStyle='#6B7280';x.font='9.5px Inter';x.textAlign='center';x.fillText(data.labels[i],cx,H-20);
+    x.fillStyle='#9CA3AF';x.font='9px Inter';x.fillText(data.mktShr[i]+'%',cx,H-7);
+  });
+}
+let tv='opp';
+function setTrendTab(v,btn){tv=v;document.querySelectorAll('#tTabs .tb').forEach(b=>b.classList.remove('on'));btn.classList.add('on');stackedBar('tChart',TDATA,tv==='opp'?TDATA.mktShr:null);}
+function initCharts(){stackedBar('tChart',TDATA,tv==='opp'?TDATA.mktShr:null);groupBars('gChart',GDATA);}
+
+// ═══ TABLE HELPERS ═══════════════════════════════════════════════
+const VC=['#3B82F6','#0E9F6E','#E3A008','#A78BFA'];
+function typbdg(t){const c={tw:'tw',tr:'tr',tg2:'tg2',tbk:'tbk'};const l={tw:'WIRE',tr:'RIA',tg2:'REGIONAL',tbk:'BANK'};return`<span class="tb2 ${c[t]||'tr'}">${l[t]||'RIA'}</span>`;}
+function rowIcoBtn(tile,i){return `<button class="row-ico" id="row-ico-${tile}-${i}" onclick="openRowDrawer('${tile}',${i},event)" title="Vehicle breakdown">${ROW_ICO}</button>`;}
+
+// ═══ RENDER SALES REP ════════════════════════════════════════════
+function renderSR(){
+  const v = vis();
+  document.getElementById('sr-body').innerHTML = SR.map((r,i) => {
+    const d   = r.views[tileViews.sr];
+    const sel = filter?.type==='sr' && filter.idx===i;
+    const dim = !!filter && !v.sr.includes(i);
+    return `<tr class="cl${sel?' sel-row':''}${dim?' dm':''}" onclick="rowClick('sr',${i})">
+      <td><div style="display:flex;align-items:center;gap:7px;">
+        <div class="av" style="background:${r.col};">${r.init}</div>
+        <span style="font-weight:${sel?700:500};">${r.name}</span>
+      </div></td>
+      <td class="r dim">${d.mktOpp}</td><td class="r acc">${d.yourVal}</td><td class="r acc">${d.mktShr}</td><td class="r dim">${d.extra}</td>
+      <td style="padding:4px 8px;text-align:center;">${rowIcoBtn('sr',i)}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ═══ RENDER FIRMS ════════════════════════════════════════════════
+function renderFM(){
+  const v = vis();
+  document.getElementById('fm-body').innerHTML = FM.map((r,i) => {
+    const d   = r.views[tileViews.fm];
+    const sel = filter?.type==='fm' && filter.idx===i;
+    const dim = !!filter && !v.fm.includes(i);
+    return `<tr class="cl${sel?' sel-row':''}${dim?' dm':''}" onclick="rowClick('fm',${i})">
+      <td><div style="display:flex;align-items:center;gap:6px;">
+        ${typbdg(r.type)}<span style="font-weight:${sel?700:500};">${r.name}</span>
+      </div></td>
+      <td class="r dim">${d.mktOpp}</td><td class="r acc">${d.yourVal}</td><td class="r acc">${d.mktShr}</td><td class="r dim">${d.extra}</td>
+      <td style="padding:4px 8px;text-align:center;">${rowIcoBtn('fm',i)}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ═══ RENDER CATEGORIES ═══════════════════════════════════════════
+function renderCT(){
+  const v = vis();
+  document.getElementById('ct-body').innerHTML = CT.map((r,i) => {
+    const d   = r.views[tileViews.ct];
+    const sel = filter?.type==='ct' && filter.idx===i;
+    const dim = !!filter && !v.ct.includes(i);
+    return `<tr class="cl${sel?' sel-row':''}${dim?' dm':''}" onclick="rowClick('ct',${i})">
+      <td><span style="font-weight:${sel?700:500};">${r.name}</span></td>
+      <td class="r dim">${d.mktOpp}</td><td class="r acc">${d.yourVal}</td><td class="r acc">${d.mktShr}</td><td class="r dim">${d.extra}</td>
+      <td style="padding:4px 8px;text-align:center;">${rowIcoBtn('ct',i)}</td>
+    </tr>`;
+  }).join('');
+}
+
+document.addEventListener('keydown', e => { if(e.key==='Escape') closeDrawer(); });
+
+// ═══ INIT ════════════════════════════════════════════════════════
+renderKPIs();
+renderChips();
+renderSR(); renderFM(); renderCT();
+requestAnimationFrame(initCharts);
+window.addEventListener('resize', initCharts);
+</script>
+</body>
+</html>

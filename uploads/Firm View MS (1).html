@@ -1,0 +1,1114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Morgan Stanley — Firm Breakdown | Field</title>
+<style>
+  :root {
+    --bg-base:        #0d1117;
+    --bg-card:        #131b24;
+    --bg-card-alt:    #172030;
+    --bg-row-hover:   #1a2535;
+    --bg-header:      #0b1520;
+    --bg-plat-row:    #182230;
+    --bg-vehicle-row: #141d27;
+    --border:         #1e2d3d;
+    --border-light:   #243548;
+    --text-primary:   #e8edf3;
+    --text-secondary: #8899aa;
+    --text-muted:     #566778;
+    --accent-teal:    #00c896;
+    --accent-teal-dim:#0d9e73;
+    --accent-blue:    #3b82f6;
+    --accent-purple:  #8b5cf6;
+    --accent-gold:    #f59e0b;
+    --accent-red:     #ef4444;
+    --accent-orange:  #f97316;
+    --accent-green:   #22c55e;
+    --accent-cyan:    #06b6d4;
+    --group-aum:      #00c896;
+    --group-inflow:   #3b82f6;
+    --group-netflow:  #f59e0b;
+    --radius-sm:      6px;
+    --radius-md:      10px;
+    --radius-lg:      14px;
+    --font:           'Inter', 'Segoe UI', system-ui, sans-serif;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--font);
+    background: var(--bg-base);
+    color: var(--text-primary);
+    font-size: 13px;
+    line-height: 1.5;
+    padding: 20px;
+    min-height: 100vh;
+  }
+
+  .panel {
+    max-width: 1600px;
+    margin: 0 auto;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+  }
+
+  /* ── HEADER BAR ──────────────────────────────────────── */
+  .panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 24px;
+    border-bottom: 1px solid var(--border);
+  }
+  .panel-title {
+    display: flex; align-items: center; gap: 14px;
+  }
+  .firm-logo {
+    width: 44px; height: 44px;
+    background: #1a2535;
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-sm);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 9px; font-weight: 700;
+    color: var(--text-secondary);
+    text-align: center; line-height: 1.15;
+    padding: 4px;
+  }
+  .panel-title h1 {
+    font-size: 20px; font-weight: 700;
+    color: var(--text-primary);
+    letter-spacing: -0.3px;
+  }
+  .panel-subtitle {
+    font-size: 12px; color: var(--text-muted);
+    margin-top: 2px;
+  }
+  .header-right {
+    display: flex; align-items: center; gap: 10px;
+  }
+  .filter-pill {
+    background: var(--bg-card-alt);
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    font-size: 11px;
+    padding: 5px 12px;
+    border-radius: var(--radius-sm);
+  }
+  .close-btn {
+    width: 28px; height: 28px;
+    background: var(--bg-card-alt);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text-secondary);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; cursor: pointer;
+    transition: border-color .15s, color .15s;
+  }
+  .close-btn:hover { border-color: var(--accent-teal); color: var(--accent-teal); }
+
+  /* ── SUMMARY RIBBON ──────────────────────────────────── */
+  .summary-ribbon {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .summary-cell {
+    padding: 18px 24px;
+    border-right: 1px solid var(--border);
+    position: relative;
+  }
+  .summary-cell:last-child { border-right: none; }
+  .summary-cell::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  }
+  .summary-cell.aum::before     { background: var(--group-aum); }
+  .summary-cell.inflow::before  { background: var(--group-inflow); }
+  .summary-cell.netflow::before { background: var(--group-netflow); }
+
+  .summary-label {
+    font-size: 11px; font-weight: 700;
+    letter-spacing: .8px;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+  .summary-label.aum     { color: var(--group-aum); }
+  .summary-label.inflow  { color: var(--group-inflow); }
+  .summary-label.netflow { color: var(--group-netflow); }
+
+  .summary-metrics {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px;
+  }
+  .metric-stack { display: flex; flex-direction: column; gap: 3px; }
+  .metric-label {
+    font-size: 10px; color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: .4px;
+  }
+  .metric-value {
+    font-size: 20px; font-weight: 700;
+    color: var(--text-primary);
+    letter-spacing: -0.4px;
+  }
+
+  /* ── TABLE ──────────────────────────────────────────── */
+  .table-wrap { overflow-x: auto; }
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  .data-table thead tr.group-row th {
+    padding: 10px 14px;
+    font-size: 11px; font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .8px;
+    text-align: center;
+    border-bottom: 1px solid var(--border);
+    border-right: 1px solid var(--border);
+    position: sticky; top: 0;
+  }
+  .data-table thead tr.group-row th:last-child { border-right: none; }
+  .group-header.aum     { color: var(--group-aum);    background: rgba(0,200,150,0.07); }
+  .group-header.inflow  { color: var(--group-inflow); background: rgba(59,130,246,0.07); }
+  .group-header.netflow { color: var(--group-netflow); background: rgba(245,158,11,0.07); }
+  .group-header.dim     { background: var(--bg-header); }
+
+  .data-table thead tr.col-row th {
+    padding: 9px 14px;
+    font-size: 10px; font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg-header);
+    white-space: nowrap;
+  }
+  .data-table thead tr.col-row th.r { text-align: right; }
+  .data-table thead tr.col-row th.l { text-align: left; }
+  .data-table thead tr.col-row th.group-end { border-right: 1px solid var(--border); }
+
+  .data-table tbody td {
+    padding: 10px 14px;
+    font-size: 12.5px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+  }
+  .data-table tbody td.r { text-align: right; }
+  .data-table tbody td.group-end { border-right: 1px solid var(--border); }
+  .data-table tbody tr:last-child td { border-bottom: none; }
+
+  /* Platform row */
+  tr.plat-row td {
+    background: var(--bg-plat-row);
+    font-weight: 700;
+    font-size: 13px;
+    color: var(--text-primary);
+    padding: 14px 14px;
+    border-bottom: 1px solid var(--border-light);
+    border-top: 1px solid var(--border-light);
+  }
+  tr.plat-row td.group-end { border-right: 1px solid var(--border-light); }
+  .plat-label {
+    display: flex; align-items: center; gap: 10px;
+  }
+  .plat-bar {
+    width: 4px; height: 22px; border-radius: 2px;
+  }
+  .plat-pm       { background: var(--accent-teal); }
+  .plat-uma-d    { background: var(--accent-blue); }
+  .plat-uma-nd   { background: var(--accent-purple); }
+  .plat-consult  { background: var(--accent-orange); }
+
+  /* Vehicle subheader row */
+  tr.veh-row td {
+    background: var(--bg-vehicle-row);
+    font-weight: 600;
+    color: var(--text-primary);
+    padding: 9px 14px 9px 28px;
+    font-size: 12.5px;
+  }
+  .veh-label {
+    display: inline-flex; align-items: center; gap: 10px;
+  }
+  .v-badge {
+    display: inline-flex;
+    align-items: center; justify-content: center;
+    width: 36px; height: 20px;
+    border-radius: 4px;
+    font-size: 10px; font-weight: 700;
+    letter-spacing: .3px;
+  }
+  .v-mf   { background: #1e3355; color: #6ea8fe; }
+  .v-etf  { background: #0f2a2a; color: #34d399; }
+  .v-sma  { background: #3a2a1e; color: #fbbf24; }
+  .v-priv { background: #2a1e45; color: #c4b5fd; }
+
+  /* Subcategory (M*) leaf row */
+  tr.sub-row td { padding: 9px 14px 9px 14px; }
+  tr.sub-row:hover td { background: var(--bg-row-hover); }
+  .sub-label {
+    padding-left: 58px;
+    color: var(--text-secondary);
+    font-size: 12.5px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .sub-dot {
+    width: 5px; height: 5px; border-radius: 50%;
+    background: var(--text-muted);
+    flex-shrink: 0;
+  }
+
+  .val-bold  { font-weight: 700; color: var(--text-primary); }
+  .val-dim   { color: var(--text-secondary); }
+  .val-muted { color: var(--text-muted); font-size: 12px; }
+  .val-share { color: var(--text-secondary); font-weight: 500; }
+
+  /* Share bar */
+  .share-bar-wrap {
+    display: inline-flex; flex-direction: column;
+    align-items: flex-end; gap: 3px;
+  }
+  .share-bar {
+    width: 52px; height: 3px;
+    background: var(--border);
+    border-radius: 2px; overflow: hidden;
+  }
+  .share-fill { height: 100%; border-radius: 2px; }
+  .share-fill.aum     { background: var(--group-aum); }
+  .share-fill.inflow  { background: var(--group-inflow); }
+  .share-fill.netflow { background: var(--group-netflow); }
+  .share-pct {
+    font-size: 11px; font-weight: 600;
+    color: var(--text-secondary);
+  }
+
+  /* Expand caret */
+  .caret {
+    display: inline-block;
+    width: 12px; height: 12px;
+    color: var(--text-muted);
+    transition: transform .15s;
+    flex-shrink: 0;
+  }
+  .caret.open { transform: rotate(90deg); color: var(--text-secondary); }
+
+  /* ── FOOTER ─────────────────────────────────────────── */
+  .panel-footer {
+    padding: 12px 24px;
+    font-size: 11px;
+    color: var(--text-muted);
+    border-top: 1px solid var(--border);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .legend-dots { display: flex; gap: 14px; }
+  .legend-item { display: flex; align-items: center; gap: 6px; }
+  .legend-dot { width: 9px; height: 9px; border-radius: 50%; }
+  .ld-aum { background: var(--group-aum); }
+  .ld-inflow { background: var(--group-inflow); }
+  .ld-netflow { background: var(--group-netflow); }
+</style>
+</head>
+<body>
+<div class="panel">
+
+  <!-- ─── HEADER ─── -->
+  <div class="panel-header">
+    <div class="panel-title">
+      <div class="firm-logo">MORGAN<br>STANLEY</div>
+      <div>
+        <h1>Morgan Stanley</h1>
+        <div class="panel-subtitle">Firm · Breakdown by Platform › Vehicle › Morningstar Category</div>
+      </div>
+    </div>
+    <div class="header-right">
+      <span class="filter-pill">As of Apr 2026</span>
+      <span class="filter-pill">TTM</span>
+      <button class="close-btn" aria-label="Close">×</button>
+    </div>
+  </div>
+
+  <!-- ─── SUMMARY RIBBON ─── -->
+  <div class="summary-ribbon">
+    <div class="summary-cell aum">
+      <div class="summary-label aum">AUM</div>
+      <div class="summary-metrics">
+        <div class="metric-stack">
+          <span class="metric-label">Mkt Opp</span>
+          <span class="metric-value">$130B</span>
+        </div>
+        <div class="metric-stack">
+          <span class="metric-label">Your AUM</span>
+          <span class="metric-value">$53.0B</span>
+        </div>
+        <div class="metric-stack">
+          <span class="metric-label">Mkt Share</span>
+          <span class="metric-value">2.44%</span>
+        </div>
+      </div>
+    </div>
+    <div class="summary-cell inflow">
+      <div class="summary-label inflow">INFLOW</div>
+      <div class="summary-metrics">
+        <div class="metric-stack">
+          <span class="metric-label">Mkt Opp</span>
+          <span class="metric-value">$10.4B</span>
+        </div>
+        <div class="metric-stack">
+          <span class="metric-label">Inflow</span>
+          <span class="metric-value">$4.8B</span>
+        </div>
+        <div class="metric-stack">
+          <span class="metric-label">Mkt Share</span>
+          <span class="metric-value">0.46%</span>
+        </div>
+      </div>
+    </div>
+    <div class="summary-cell netflow">
+      <div class="summary-label netflow">NET FLOW</div>
+      <div class="summary-metrics">
+        <div class="metric-stack">
+          <span class="metric-label">Mkt Opp</span>
+          <span class="metric-value">$3.5B</span>
+        </div>
+        <div class="metric-stack">
+          <span class="metric-label">Net Flow</span>
+          <span class="metric-value">$1.7B</span>
+        </div>
+        <div class="metric-stack">
+          <span class="metric-label">Mkt Share</span>
+          <span class="metric-value">0.49%</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── DATA TABLE ─── -->
+  <div class="table-wrap">
+    <table class="data-table">
+      <thead>
+        <tr class="group-row">
+          <th class="group-header dim group-end" style="width:360px"></th>
+          <th colspan="3" class="group-header aum group-end">AUM</th>
+          <th colspan="3" class="group-header inflow group-end">Inflow</th>
+          <th colspan="3" class="group-header netflow">Net Flow</th>
+        </tr>
+        <tr class="col-row">
+          <th class="l group-end">Platform › Vehicle › M★ Category</th>
+          <th class="r">Mkt Opp</th>
+          <th class="r">Yours</th>
+          <th class="r group-end">Mkt Share</th>
+          <th class="r">Mkt Opp</th>
+          <th class="r">Yours</th>
+          <th class="r group-end">Mkt Share</th>
+          <th class="r">Mkt Opp</th>
+          <th class="r">Yours</th>
+          <th class="r">Mkt Share</th>
+        </tr>
+      </thead>
+      <tbody>
+
+        <!-- ══════════ PORTFOLIO MANAGEMENT ══════════ -->
+        <tr class="plat-row">
+          <td class="group-end">
+            <div class="plat-label">
+              <span class="plat-bar plat-pm"></span>
+              <svg class="caret open" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 3 8 6 4 9"/></svg>
+              Portfolio Management
+            </div>
+          </td>
+          <td class="r val-dim">$45.5B</td>
+          <td class="r val-bold">$18.5B</td>
+          <td class="r group-end"><span class="share-pct">2.70%</span></td>
+          <td class="r val-dim">$3.6B</td>
+          <td class="r val-bold">$1.7B</td>
+          <td class="r group-end"><span class="share-pct">0.52%</span></td>
+          <td class="r val-dim">$1.2B</td>
+          <td class="r val-bold">$0.6B</td>
+          <td class="r"><span class="share-pct">0.55%</span></td>
+        </tr>
+
+        <!-- PM / MF -->
+        <tr class="veh-row">
+          <td class="group-end"><span class="veh-label"><span class="v-badge v-mf">MF</span> Mutual Fund</span></td>
+          <td class="r val-dim">$18.2B</td>
+          <td class="r val-bold">$7.4B</td>
+          <td class="r group-end"><span class="share-pct">2.62%</span></td>
+          <td class="r val-dim">$1.45B</td>
+          <td class="r val-bold">$0.68B</td>
+          <td class="r group-end"><span class="share-pct">0.49%</span></td>
+          <td class="r val-dim">$0.48B</td>
+          <td class="r val-bold">$0.24B</td>
+          <td class="r"><span class="share-pct">0.54%</span></td>
+        </tr>
+        <tr class="sub-row">
+          <td class="group-end"><div class="sub-label"><span class="sub-dot"></span>Large Growth</div></td>
+          <td class="r val-dim">$7.5B</td>
+          <td class="r val-bold">$3.2B</td>
+          <td class="r group-end"><div class="share-bar-wrap"><span class="share-pct">0.45%</span><div class="share-bar"><div class="share-fill aum" style="width:45%"></div></div></div></td>
+          <td class="r val-dim">$0.61B</td>
+          <td class="r val-bold">$0.29B</td>
+          <td class="r group-end"><div class="share-bar-wrap"><span class="share-pct">0.48%</span><div class="share-bar"><div class="share-fill inflow" style="width:48%"></div></div></div></td>
+          <td class="r val-dim">$0.20B</td>
+          <td class="r val-bold">$0.11B</td>
+          <td class="r"><div class="share-bar-wrap"><span class="share-pct">0.55%</span><div class="share-bar"><div class="share-fill netflow" style="width:55%"></div></div></div></td>
+        </tr>
+        <tr class="sub-row">
+          <td class="group-end"><div class="sub-label"><span class="sub-dot"></span>Large Blend</div></td>
+          <td class="r val-dim">$6.3B</td>
+          <td class="r val-bold">$2.6B</td>
+          <td class="r group-end"><div class="share-bar-wrap"><span class="share-pct">0.43%</span><div class="share-bar"><div class="share-fill aum" style="width:43%"></div></div></div></td>
+          <td class="r val-dim">$0.51B</td>
+          <td class="r val-bold">$0.24B</td>
+          <td class="r group-end"><div class="share-bar-wrap"><span class="share-pct">0.49%</span><div class="share-bar"><div class="share-fill inflow" style="width:49%"></div></div></div></td>
+          <td class="r val-dim">$0.17B</td>
+          <td class="r val-bold">$0.09B</td>
+          <td class="r"><div class="share-bar-wrap"><span class="share-pct">0.54%</span><div class="share-bar"><div class="share-fill netflow" style="width:54%"></div></div></div></td>
+        </tr>
+        <tr class="sub-row">
+          <td class="group-end"><div class="sub-label"><span class="sub-dot"></span>Intermediate Core Bond</div></td>
+          <td class="r val-dim">$4.4B</td>
+          <td class="r val-bold">$1.6B</td>
+          <td class="r group-end"><div class="share-bar-wrap"><span class="share-pct">0.36%</span><div class="share-bar"><div class="share-fill aum" style="width:36%"></div></div></div></td>
+          <td class="r val-dim">$0.33B</td>
+          <td class="r val-bold">$0.15B</td>
+          <td class="r group-end"><div class="share-bar-wrap"><span class="share-pct">0.45%</span><div class="share-bar"><div class="share-fill inflow" style="width:45%"></div></div></div></td>
+          <td class="r val-dim">$0.11B</td>
+          <td class="r val-bold">$0.04B</td>
+          <td class="r"><div class="share-bar-wrap"><span class="share-pct">0.36%</span><div class="share-bar"><div class="share-fill netflow" style="width:36%"></div></div></div></td>
+        </tr>
+
+        <!-- PM / ETF -->
+        <tr class="veh-row">
+          <td class="group-end"><span class="veh-label"><span class="v-badge v-etf">ETF</span> Exchange Traded Fund</span></td>
+          <td class="r val-dim">$13.7B</td>
+          <td class="r val-bold">$5.5B</td>
+          <td class="r group-end"><span class="share-pct">2.57%</span></td>
+          <td class="r val-dim">$1.08B</td>
+          <td class="r val-bold">$0.52B</td>
+          <td class="r group-end"><span class="share-pct">0.48%</span></td>
+          <td class="r val-dim">$0.36B</td>
+          <td class="r val-bold">$0.18B</td>
+          <td class="r"><span class="share-pct">0.50%</span></td>
+        </tr>
+        <tr class="sub-row">
+          <td class="group-end"><div class="sub-label"><span class="sub-dot"></span>Large Blend</div></td>
+          <td class="r val-dim">$6.1B</td>
+          <td class="r val-bold">$2.6B</td>
+          <td class="r group-end"><div class="share-bar-wrap"><span class="share-pct">0.43%</span><div class="share-bar"><div class="share-fill aum" style="width:43%"></div></div></div></td>
+          <td class="r val-dim">$0.49B</td>
+          <td class="r val-bold">$0.24B</td>
+          <td class="r group-end"><div class="share-bar-wrap"><span class="share-pct">0.49%</span><div class="share-bar"><div class="share-fill inflow" style="width:49%"></div></div></div></td>
+          <td class="r val-dim">$0.16B</td>
+          <td class="r val-bold">$0.09B</td>
+          <td class="r"><div class="share-bar-wrap"><span class="share-pct">0.56%</span><div class="share-bar"><div class="share-fill netflow" style="width:56%"></div></div></div></td>
+        </tr>
+        <tr class="sub-row">
+          <td class="group-end"><div class="sub-label"><span class="sub-dot"></span>Large Growth</div></td>
+          <td class="r val-dim">$4.6B</td>
+          <td class="r val-bold">$1.8B</td>
+          <td class="r group-end"><div class="share-bar-wrap"><span class="share-pct">0.39%</span><div class="share-bar"><div class="share-fill aum" style="width:39%"></div></div></div></td>
+          <td class="r val-dim">$0.36B</td>
+          <td class="r val-bold">$0.17B</td>
+          <td class="r group-end"><div class="share-bar-wrap"><span class="share-pct">0.47%</span><div class="share-bar"><div class="share-fill inflow" style="width:47%"></div></div></div></td>
+          <td class="r val-dim">$0.12B</td>
+          <td class="r val-bold">$0.06B</td>
+          <td class="r"><div class="share-bar-wrap"><span class="share-pct">0.50%</span><div class="share-bar"><div class="share-fill netflow" style="width:50%"></div></div></div></td>
+        </tr>
+        <tr class="sub-row">
+          <td class="group-end"><div class="sub-label"><span class="sub-dot"></span>Intermediate Core Bond</div></td>
+          <td class="r val-dim">$3.0B</td>
+          <td class="r val-bold">$1.1B</td>
+          <td class="r group-end"><div class="share-bar-wrap"><span class="share-pct">0.37%</span><div class="share-bar"><div class="share-fill aum" style="width:37%"></div></div></div></td>
+          <td class="r val-dim">$0.23B</td>
+          <td class="r val-bold">$0.11B</td>
+          <td class="r group-end"><div class="share-bar-wrap"><span class="share-pct">0.48%</span><div class="share-bar"><div class="share-fill inflow" style="width:48%"></div></div></div></td>
+          <td class="r val-dim">$0.08B</td>
+          <td class="r val-bold">$0.03B</td>
+          <td class="r"><div class="share-bar-wrap"><span class="share-pct">0.38%</span><div class="share-bar"><div class="share-fill netflow" style="width:38%"></div></div></div></td>
+        </tr>
+
+        <!-- PM / Privates -->
+        <tr class="veh-row">
+          <td class="group-end"><span class="veh-label"><span class="v-badge v-priv">PRIV</span> Private Markets</span></td>
+          <td class="r val-dim">$13.6B</td>
+          <td class="r val-bold">$5.6B</td>
+          <td class="r group-end"><span class="share-pct">2.76%</span></td>
+          <td class="r val-dim">$1.07B</td>
+          <td class="r val-bold">$0.50B</td>
+          <td class="r group-end"><span class="share-pct">0.47%</span></td>
+          <td class="r val-dim">$0.36B</td>
+          <td class="r val-bold">$0.18B</td>
+          <td class="r"><span class="share-pct">0.50%</span></td>
+        </tr>
+        <tr class="sub-row">
+          <td class="group-end"><div class="sub-label"><span class="sub-dot"></span>Private Equity</div></td>
+          <td class="r val-dim">$5.8B</td>
+          <td class="r val-bold">$2.4B</td>
+          <td class="r group-end"><div class="share-bar-wrap"><span class="share-pct">0.41%</span><div class="share-bar"><div class="share-fill aum" style="width:41%"></div></div></div></td>
+          <td class="r val-dim">$0.46B</td>
+          <td class="r val-bold">$0.22B</td>
+          <td class="r group-end"><div class="share-bar-wrap"><span class="share-pct">0.48%</span><div class="share-bar"><div class="share-fill inflow" style="width:48%"></div></div></div></td>
+          <td class="r val-dim">$0.15B</td>
+          <td class="r val-bold">$0.08B</td>
+          <td class="r"><div class="share-bar-wrap"><span class="share-pct">0.53%</span><div class="share-bar"><div class="share-fill netflow" style="width:53%"></div></div></div></td>
+        </tr>
+        <tr class="sub-row">
+          <td class="group-end"><div class="sub-label"><span class="sub-dot"></span>Private Credit</div></td>
+          <td class="r val-dim">$4.8B</td>
+          <td class="r val-bold">$2.0B</td>
+          <td class="r group-end"><div class="share-bar-wrap"><span class="share-pct">0.42%</span><div class="share-bar"><div class="share-fill aum" style="width:42%"></div></div></div></td>
+          <td class="r val-dim">$0.38B</td>
+          <td class="r val-bold">$0.18B</td>
+          <td class="r group-end"><div class="share-bar-wrap"><span class="share-pct">0.47%</span><div class="share-bar"><div class="share-fill inflow" style="width:47%"></div></div></div></td>
+          <td class="r val-dim">$0.13B</td>
+          <td class="r val-bold">$0.07B</td>
+          <td class="r"><div class="share-bar-wrap"><span class="share-pct">0.54%</span><div class="share-bar"><div class="share-fill netflow" style="width:54%"></div></div></div></td>
+        </tr>
+        <tr class="sub-row">
+          <td class="group-end"><div class="sub-label"><span class="sub-dot"></span>Real Estate</div></td>
+          <td class="r val-dim">$3.0B</td>
+          <td class="r val-bold">$1.2B</td>
+          <td class="r group-end"><div class="share-bar-wrap"><span class="share-pct">0.40%</span><div class="share-bar"><div class="share-fill aum" style="width:40%"></div></div></div></td>
+          <td class="r val-dim">$0.23B</td>
+          <td class="r val-bold">$0.10B</td>
+          <td class="r group-end"><div class="share-bar-wrap"><span class="share-pct">0.43%</span><div class="share-bar"><div class="share-fill inflow" style="width:43%"></div></div></div></td>
+          <td class="r val-dim">$0.08B</td>
+          <td class="r val-bold">$0.03B</td>
+          <td class="r"><div class="share-bar-wrap"><span class="share-pct">0.38%</span><div class="share-bar"><div class="share-fill netflow" style="width:38%"></div></div></div></td>
+        </tr>
+
+        <!-- ══════════ UMA FA DISC ══════════ -->
+        <tr class="plat-row">
+          <td class="group-end">
+            <div class="plat-label">
+              <span class="plat-bar plat-uma-d"></span>
+              <svg class="caret open" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 3 8 6 4 9"/></svg>
+              UMA FA Discretionary
+            </div>
+          </td>
+          <td class="r val-dim">$36.4B</td>
+          <td class="r val-bold">$14.8B</td>
+          <td class="r group-end"><span class="share-pct">2.49%</span></td>
+          <td class="r val-dim">$2.9B</td>
+          <td class="r val-bold">$1.3B</td>
+          <td class="r group-end"><span class="share-pct">0.45%</span></td>
+          <td class="r val-dim">$0.98B</td>
+          <td class="r val-bold">$0.47B</td>
+          <td class="r"><span class="share-pct">0.48%</span></td>
+        </tr>
+
+        <!-- UMA FA D / MF -->
+        <tr class="veh-row">
+          <td class="group-end"><span class="veh-label"><span class="v-badge v-mf">MF</span> Mutual Fund</span></td>
+          <td class="r val-dim">$14.6B</td>
+          <td class="r val-bold">$5.9B</td>
+          <td class="r group-end"><span class="share-pct">2.48%</span></td>
+          <td class="r val-dim">$1.16B</td>
+          <td class="r val-bold">$0.53B</td>
+          <td class="r group-end"><span class="share-pct">0.46%</span></td>
+          <td class="r val-dim">$0.39B</td>
+          <td class="r val-bold">$0.19B</td>
+          <td class="r"><span class="share-pct">0.48%</span></td>
+        </tr>
+        <tr class="sub-row">
+          <td class="group-end"><div class="sub-label"><span class="sub-dot"></span>Large Growth</div></td>
+          <td class="r val-dim">$6.0B</td>
+          <td class="r val-bold">$2.5B</td>
+          <td class="r group-end"><div class="share-bar-wrap"><span class="share-pct">0.42%</span><div class="share-bar"><div class="share-fill aum" style="width:42%"></div></div></div></td>
+          <td class="r val-dim">$0.49B</td>
+          <td class="r val-bold">$0.23B</td>
+          <td class="r group-end"><div class="share-bar-wrap"><span class="share-pct">0.47%</span><div class="share-bar"><div class="share-fill inflow" style="width:47%"></div></div></div></td>
+          <td class="r val-dim">$0.16B</td>
+          <td class="r val-bold">$0.09B</td>
+          <td class="r"><div class="share-bar-wrap"><span class="share-pct">0.56%</span><div class="share-bar"><div class="share-fill netflow" style="width:56%"></div></div></div></td>
+        </tr>
+        <tr class="sub-row">
+          <td class="group-end"><div class="sub-label"><span class="sub-dot"></span>Intermediate Core Bond</div></td>
+          <td class="r val-dim">$5.1B</td>
+          <td class="r val-bold">$2.0B</td>
+          <td class="r group-end"><div class="share-bar-wrap"><span class="share-pct">0.39%</span><div class="share-bar"><div class="share-fill aum" style="width:39%"></div></div></div></td>
+          <td class="r val-dim">$0.41B</td>
+          <td class="r val-bold">$0.18B</td>
+          <td class="r group-end"><div class="share-bar-wrap"><span class="share-pct">0.44%</span><div class="share-bar"><div class="share-fill inflow" style="width:44%"></div></div></div></td>
+          <td class="r val-dim">$0.14B</td>
+          <td class="r val-bold">$0.06B</td>
+          <td class="r"><div class="share-bar-wrap"><span class="share-pct">0.43%</span><div class="share-bar"><div class="share-fill netflow" style="width:43%"></div></div></div></td>
+        </tr>
+        <tr class="sub-row">
+          <td class="group-end"><div class="sub-label"><span class="sub-dot"></span>Large Blend</div></td>
+          <td class="r val-dim">$3.5B</td>
+          <td class="r val-bold">$1.4B</td>
+          <td class="r group-end"><div class="share-bar-wrap"><span class="share-pct">0.40%</span><div class="share-bar"><div class="share-fill aum" style="width:40%"></div></div></div></td>
+          <td class="r val-dim">$0.26B</td>
+          <td class="r val-bold">$0.12B</td>
+          <td class="r group-end"><div class="share-bar-wrap"><span class="share-pct">0.46%</span><div class="share-bar"><div class="share-fill inflow" style="width:46%"></div></div></div></td>
+          <td class="r val-dim">$0.09B</td>
+          <td class="r val-bold">$0.04B</td>
+          <td class="r"><div class="share-bar-wrap"><span class="share-pct">0.44%</span><div class="share-bar"><div class="share-fill netflow" style="width:44%"></div></div></div></td>
+        </tr>
+
+        <!-- UMA FA D / ETF -->
+        <tr class="veh-row">
+          <td class="group-end"><span class="veh-label"><span class="v-badge v-etf">ETF</span> Exchange Traded Fund</span></td>
+          <td class="r val-dim">$10.9B</td>
+          <td class="r val-bold">$4.4B</td>
+          <td class="r group-end"><span class="share-pct">2.49%</span></td>
+          <td class="r val-dim">$0.87B</td>
+          <td class="r val-bold">$0.40B</td>
+          <td class="r group-end"><span class="share-pct">0.46%</span></td>
+          <td class="r val-dim">$0.29B</td>
+          <td class="r val-bold">$0.14B</td>
+          <td class="r"><span class="share-pct">0.48%</span></td>
+        </tr>
+        <tr class="sub-row">
+          <td class="group-end"><div class="sub-label"><span class="sub-dot"></span>Large Blend</div></td>
+          <td class="r val-dim">$4.9B</td>
+          <td class="r val-bold">$2.0B</td>
+          <td class="r group-end"><div class="share-bar-wrap"><span class="share-pct">0.41%</span><div class="share-bar"><div class="share-fill aum" style="width:41%"></div></div></div></td>
+          <td class="r val-dim">$0.39B</td>
+          <td class="r val-bold">$0.19B</td>
+          <td class="r group-end"><div class="share-bar-wrap"><span class="share-pct">0.49%</span><div class="share-bar"><div class="share-fill inflow" style="width:49%"></div></div></div></td>
+          <td class="r val-dim">$0.13B</td>
+          <td class="r val-bold">$0.07B</td>
+          <td class="r"><div class="share-bar-wrap"><span class="share-pct">0.54%</span><div class="share-bar"><div class="share-fill netflow" style="width:54%"></div></div></div></td>
+        </tr>
+        <tr class="sub-row">
+          <td class="group-end"><div class="sub-label"><span class="sub-dot"></span>Large Growth</div></td>
+          <td class="r val-dim">$3.7B</td>
+          <td class="r val-bold">$1.5B</td>
+          <td class="r group-end"><div class="share-bar-wrap"><span class="share-pct">0.41%</span><div class="share-bar"><div class="share-fill aum" style="width:41%"></div></div></div></td>
+          <td class="r val-dim">$0.29B</td>
+          <td class="r val-bold">$0.14B</td>
+          <td class="r group-end"><div class="share-bar-wrap"><span class="share-pct">0.48%</span><div class="share-bar"><div class="share-fill inflow" style="width:48%"></div></div></div></td>
+          <td class="r val-dim">$0.10B</td>
+          <td class="r val-bold">$0.05B</td>
+          <td class="r"><div class="share-bar-wrap"><span class="share-pct">0.50%</span><div class="share-bar"><div class="share-fill netflow" style="width:50%"></div></div></div></td>
+        </tr>
+        <tr class="sub-row">
+          <td class="group-end"><div class="sub-label"><span class="sub-dot"></span>Intermediate Core Bond</div></td>
+          <td class="r val-dim">$2.3B</td>
+          <td class="r val-bold">$0.9B</td>
+          <td class="r group-end"><div class="share-bar-wrap"><span class="share-pct">0.39%</span><div class="share-bar"><div class="share-fill aum" style="width:39%"></div></div></div></td>
+          <td class="r val-dim">$0.19B</td>
+          <td class="r val-bold">$0.07B</td>
+          <td class="r group-end"><div class="share-bar-wrap"><span class="share-pct">0.37%</span><div class="share-bar"><div class="share-fill inflow" style="width:37%"></div></div></div></td>
+          <td class="r val-dim">$0.06B</td>
+          <td class="r val-bold">$0.02B</td>
+          <td class="r"><div class="share-bar-wrap"><span class="share-pct">0.33%</span><div class="share-bar"><div class="share-fill netflow" style="width:33%"></div></div></div></td>
+        </tr>
+
+        <!-- UMA FA D / SMA -->
+        <tr class="veh-row">
+          <td class="group-end"><span class="veh-label"><span class="v-badge v-sma">SMA</span> Separately Managed Acct</span></td>
+          <td class="r val-dim">$10.9B</td>
+          <td class="r val-bold">$4.5B</td>
+          <td class="r group-end"><span class="share-pct">2.52%</span></td>
+          <td class="r val-dim">$0.87B</td>
+          <td class="r val-bold">$0.37B</td>
+          <td class="r group-end"><span class="share-pct">0.43%</span></td>
+          <td class="r val-dim">$0.30B</td>
+          <td class="r val-bold">$0.14B</td>
+          <td class="r"><span class="share-pct">0.47%</span></td>
+        </tr>
+        <tr class="sub-row">
+          <td class="group-end"><div class="sub-label"><span class="sub-dot"></span>Large Growth</div></td>
+          <td class="r val-dim">$5.0B</td>
+          <td class="r val-bold">$2.1B</td>
+          <td class="r group-end"><div class="share-bar-wrap"><span class="share-pct">0.42%</span><div class="share-bar"><div class="share-fill aum" style="width:42%"></div></div></div></td>
+          <td class="r val-dim">$0.40B</td>
+          <td class="r val-bold">$0.18B</td>
+          <td class="r group-end"><div class="share-bar-wrap"><span class="share-pct">0.45%</span><div class="share-bar"><div class="share-fill inflow" style="width:45%"></div></div></div></td>
+          <td class="r val-dim">$0.14B</td>
+          <td class="r val-bold">$0.07B</td>
+          <td class="r"><div class="share-bar-wrap"><span class="share-pct">0.50%</span><div class="share-bar"><div class="share-fill netflow" style="width:50%"></div></div></div></td>
+        </tr>
+        <tr class="sub-row">
+          <td class="group-end"><div class="sub-label"><span class="sub-dot"></span>Muni National Interm</div></td>
+          <td class="r val-dim">$3.6B</td>
+          <td class="r val-bold">$1.5B</td>
+          <td class="r group-end"><div class="share-bar-wrap"><span class="share-pct">0.42%</span><div class="share-bar"><div class="share-fill aum" style="width:42%"></div></div></div></td>
+          <td class="r val-dim">$0.29B</td>
+          <td class="r val-bold">$0.12B</td>
+          <td class="r group-end"><div class="share-bar-wrap"><span class="share-pct">0.41%</span><div class="share-bar"><div class="share-fill inflow" style="width:41%"></div></div></div></td>
+          <td class="r val-dim">$0.10B</td>
+          <td class="r val-bold">$0.05B</td>
+          <td class="r"><div class="share-bar-wrap"><span class="share-pct">0.50%</span><div class="share-bar"><div class="share-fill netflow" style="width:50%"></div></div></div></td>
+        </tr>
+        <tr class="sub-row">
+          <td class="group-end"><div class="sub-label"><span class="sub-dot"></span>Large Value</div></td>
+          <td class="r val-dim">$2.3B</td>
+          <td class="r val-bold">$0.9B</td>
+          <td class="r group-end"><div class="share-bar-wrap"><span class="share-pct">0.39%</span><div class="share-bar"><div class="share-fill aum" style="width:39%"></div></div></div></td>
+          <td class="r val-dim">$0.18B</td>
+          <td class="r val-bold">$0.07B</td>
+          <td class="r group-end"><div class="share-bar-wrap"><span class="share-pct">0.39%</span><div class="share-bar"><div class="share-fill inflow" style="width:39%"></div></div></div></td>
+          <td class="r val-dim">$0.06B</td>
+          <td class="r val-bold">$0.02B</td>
+          <td class="r"><div class="share-bar-wrap"><span class="share-pct">0.33%</span><div class="share-bar"><div class="share-fill netflow" style="width:33%"></div></div></div></td>
+        </tr>
+
+        <!-- ══════════ UMA NON DISC ══════════ -->
+        <tr class="plat-row">
+          <td class="group-end">
+            <div class="plat-label">
+              <span class="plat-bar plat-uma-nd"></span>
+              <svg class="caret open" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 3 8 6 4 9"/></svg>
+              UMA Non-Discretionary
+            </div>
+          </td>
+          <td class="r val-dim">$28.6B</td>
+          <td class="r val-bold">$11.7B</td>
+          <td class="r group-end"><span class="share-pct">2.39%</span></td>
+          <td class="r val-dim">$2.3B</td>
+          <td class="r val-bold">$1.0B</td>
+          <td class="r group-end"><span class="share-pct">0.43%</span></td>
+          <td class="r val-dim">$0.77B</td>
+          <td class="r val-bold">$0.37B</td>
+          <td class="r"><span class="share-pct">0.47%</span></td>
+        </tr>
+
+        <!-- UMA ND / MF -->
+        <tr class="veh-row">
+          <td class="group-end"><span class="veh-label"><span class="v-badge v-mf">MF</span> Mutual Fund</span></td>
+          <td class="r val-dim">$11.4B</td>
+          <td class="r val-bold">$4.7B</td>
+          <td class="r group-end"><span class="share-pct">2.43%</span></td>
+          <td class="r val-dim">$0.92B</td>
+          <td class="r val-bold">$0.42B</td>
+          <td class="r group-end"><span class="share-pct">0.46%</span></td>
+          <td class="r val-dim">$0.31B</td>
+          <td class="r val-bold">$0.15B</td>
+          <td class="r"><span class="share-pct">0.48%</span></td>
+        </tr>
+        <tr class="sub-row">
+          <td class="group-end"><div class="sub-label"><span class="sub-dot"></span>Large Blend</div></td>
+          <td class="r val-dim">$4.7B</td>
+          <td class="r val-bold">$2.0B</td>
+          <td class="r group-end"><div class="share-bar-wrap"><span class="share-pct">0.43%</span><div class="share-bar"><div class="share-fill aum" style="width:43%"></div></div></div></td>
+          <td class="r val-dim">$0.38B</td>
+          <td class="r val-bold">$0.18B</td>
+          <td class="r group-end"><div class="share-bar-wrap"><span class="share-pct">0.47%</span><div class="share-bar"><div class="share-fill inflow" style="width:47%"></div></div></div></td>
+          <td class="r val-dim">$0.13B</td>
+          <td class="r val-bold">$0.06B</td>
+          <td class="r"><div class="share-bar-wrap"><span class="share-pct">0.46%</span><div class="share-bar"><div class="share-fill netflow" style="width:46%"></div></div></div></td>
+        </tr>
+        <tr class="sub-row">
+          <td class="group-end"><div class="sub-label"><span class="sub-dot"></span>Large Growth</div></td>
+          <td class="r val-dim">$4.0B</td>
+          <td class="r val-bold">$1.7B</td>
+          <td class="r group-end"><div class="share-bar-wrap"><span class="share-pct">0.43%</span><div class="share-bar"><div class="share-fill aum" style="width:43%"></div></div></div></td>
+          <td class="r val-dim">$0.32B</td>
+          <td class="r val-bold">$0.15B</td>
+          <td class="r group-end"><div class="share-bar-wrap"><span class="share-pct">0.47%</span><div class="share-bar"><div class="share-fill inflow" style="width:47%"></div></div></div></td>
+          <td class="r val-dim">$0.11B</td>
+          <td class="r val-bold">$0.06B</td>
+          <td class="r"><div class="share-bar-wrap"><span class="share-pct">0.55%</span><div class="share-bar"><div class="share-fill netflow" style="width:55%"></div></div></div></td>
+        </tr>
+        <tr class="sub-row">
+          <td class="group-end"><div class="sub-label"><span class="sub-dot"></span>Intermediate Core Bond</div></td>
+          <td class="r val-dim">$2.7B</td>
+          <td class="r val-bold">$1.0B</td>
+          <td class="r group-end"><div class="share-bar-wrap"><span class="share-pct">0.37%</span><div class="share-bar"><div class="share-fill aum" style="width:37%"></div></div></div></td>
+          <td class="r val-dim">$0.22B</td>
+          <td class="r val-bold">$0.09B</td>
+          <td class="r group-end"><div class="share-bar-wrap"><span class="share-pct">0.41%</span><div class="share-bar"><div class="share-fill inflow" style="width:41%"></div></div></div></td>
+          <td class="r val-dim">$0.07B</td>
+          <td class="r val-bold">$0.03B</td>
+          <td class="r"><div class="share-bar-wrap"><span class="share-pct">0.43%</span><div class="share-bar"><div class="share-fill netflow" style="width:43%"></div></div></div></td>
+        </tr>
+
+        <!-- UMA ND / ETF -->
+        <tr class="veh-row">
+          <td class="group-end"><span class="veh-label"><span class="v-badge v-etf">ETF</span> Exchange Traded Fund</span></td>
+          <td class="r val-dim">$8.6B</td>
+          <td class="r val-bold">$3.5B</td>
+          <td class="r group-end"><span class="share-pct">2.44%</span></td>
+          <td class="r val-dim">$0.69B</td>
+          <td class="r val-bold">$0.32B</td>
+          <td class="r group-end"><span class="share-pct">0.46%</span></td>
+          <td class="r val-dim">$0.23B</td>
+          <td class="r val-bold">$0.12B</td>
+          <td class="r"><span class="share-pct">0.52%</span></td>
+        </tr>
+        <tr class="sub-row">
+          <td class="group-end"><div class="sub-label"><span class="sub-dot"></span>Large Blend</div></td>
+          <td class="r val-dim">$3.9B</td>
+          <td class="r val-bold">$1.6B</td>
+          <td class="r group-end"><div class="share-bar-wrap"><span class="share-pct">0.41%</span><div class="share-bar"><div class="share-fill aum" style="width:41%"></div></div></div></td>
+          <td class="r val-dim">$0.31B</td>
+          <td class="r val-bold">$0.14B</td>
+          <td class="r group-end"><div class="share-bar-wrap"><span class="share-pct">0.45%</span><div class="share-bar"><div class="share-fill inflow" style="width:45%"></div></div></div></td>
+          <td class="r val-dim">$0.10B</td>
+          <td class="r val-bold">$0.06B</td>
+          <td class="r"><div class="share-bar-wrap"><span class="share-pct">0.60%</span><div class="share-bar"><div class="share-fill netflow" style="width:60%"></div></div></div></td>
+        </tr>
+        <tr class="sub-row">
+          <td class="group-end"><div class="sub-label"><span class="sub-dot"></span>Large Growth</div></td>
+          <td class="r val-dim">$2.8B</td>
+          <td class="r val-bold">$1.2B</td>
+          <td class="r group-end"><div class="share-bar-wrap"><span class="share-pct">0.43%</span><div class="share-bar"><div class="share-fill aum" style="width:43%"></div></div></div></td>
+          <td class="r val-dim">$0.22B</td>
+          <td class="r val-bold">$0.11B</td>
+          <td class="r group-end"><div class="share-bar-wrap"><span class="share-pct">0.50%</span><div class="share-bar"><div class="share-fill inflow" style="width:50%"></div></div></div></td>
+          <td class="r val-dim">$0.08B</td>
+          <td class="r val-bold">$0.04B</td>
+          <td class="r"><div class="share-bar-wrap"><span class="share-pct">0.50%</span><div class="share-bar"><div class="share-fill netflow" style="width:50%"></div></div></div></td>
+        </tr>
+        <tr class="sub-row">
+          <td class="group-end"><div class="sub-label"><span class="sub-dot"></span>Muni National Interm</div></td>
+          <td class="r val-dim">$1.9B</td>
+          <td class="r val-bold">$0.7B</td>
+          <td class="r group-end"><div class="share-bar-wrap"><span class="share-pct">0.37%</span><div class="share-bar"><div class="share-fill aum" style="width:37%"></div></div></div></td>
+          <td class="r val-dim">$0.16B</td>
+          <td class="r val-bold">$0.07B</td>
+          <td class="r group-end"><div class="share-bar-wrap"><span class="share-pct">0.44%</span><div class="share-bar"><div class="share-fill inflow" style="width:44%"></div></div></div></td>
+          <td class="r val-dim">$0.05B</td>
+          <td class="r val-bold">$0.02B</td>
+          <td class="r"><div class="share-bar-wrap"><span class="share-pct">0.40%</span><div class="share-bar"><div class="share-fill netflow" style="width:40%"></div></div></div></td>
+        </tr>
+
+        <!-- UMA ND / SMA -->
+        <tr class="veh-row">
+          <td class="group-end"><span class="veh-label"><span class="v-badge v-sma">SMA</span> Separately Managed Acct</span></td>
+          <td class="r val-dim">$8.6B</td>
+          <td class="r val-bold">$3.5B</td>
+          <td class="r group-end"><span class="share-pct">2.31%</span></td>
+          <td class="r val-dim">$0.69B</td>
+          <td class="r val-bold">$0.28B</td>
+          <td class="r group-end"><span class="share-pct">0.41%</span></td>
+          <td class="r val-dim">$0.23B</td>
+          <td class="r val-bold">$0.10B</td>
+          <td class="r"><span class="share-pct">0.43%</span></td>
+        </tr>
+        <tr class="sub-row">
+          <td class="group-end"><div class="sub-label"><span class="sub-dot"></span>Large Growth</div></td>
+          <td class="r val-dim">$4.0B</td>
+          <td class="r val-bold">$1.6B</td>
+          <td class="r group-end"><div class="share-bar-wrap"><span class="share-pct">0.40%</span><div class="share-bar"><div class="share-fill aum" style="width:40%"></div></div></div></td>
+          <td class="r val-dim">$0.32B</td>
+          <td class="r val-bold">$0.13B</td>
+          <td class="r group-end"><div class="share-bar-wrap"><span class="share-pct">0.41%</span><div class="share-bar"><div class="share-fill inflow" style="width:41%"></div></div></div></td>
+          <td class="r val-dim">$0.11B</td>
+          <td class="r val-bold">$0.05B</td>
+          <td class="r"><div class="share-bar-wrap"><span class="share-pct">0.45%</span><div class="share-bar"><div class="share-fill netflow" style="width:45%"></div></div></div></td>
+        </tr>
+        <tr class="sub-row">
+          <td class="group-end"><div class="sub-label"><span class="sub-dot"></span>Large Value</div></td>
+          <td class="r val-dim">$2.8B</td>
+          <td class="r val-bold">$1.1B</td>
+          <td class="r group-end"><div class="share-bar-wrap"><span class="share-pct">0.39%</span><div class="share-bar"><div class="share-fill aum" style="width:39%"></div></div></div></td>
+          <td class="r val-dim">$0.22B</td>
+          <td class="r val-bold">$0.09B</td>
+          <td class="r group-end"><div class="share-bar-wrap"><span class="share-pct">0.41%</span><div class="share-bar"><div class="share-fill inflow" style="width:41%"></div></div></div></td>
+          <td class="r val-dim">$0.07B</td>
+          <td class="r val-bold">$0.03B</td>
+          <td class="r"><div class="share-bar-wrap"><span class="share-pct">0.43%</span><div class="share-bar"><div class="share-fill netflow" style="width:43%"></div></div></div></td>
+        </tr>
+        <tr class="sub-row">
+          <td class="group-end"><div class="sub-label"><span class="sub-dot"></span>Muni National Interm</div></td>
+          <td class="r val-dim">$1.8B</td>
+          <td class="r val-bold">$0.8B</td>
+          <td class="r group-end"><div class="share-bar-wrap"><span class="share-pct">0.44%</span><div class="share-bar"><div class="share-fill aum" style="width:44%"></div></div></div></td>
+          <td class="r val-dim">$0.15B</td>
+          <td class="r val-bold">$0.06B</td>
+          <td class="r group-end"><div class="share-bar-wrap"><span class="share-pct">0.40%</span><div class="share-bar"><div class="share-fill inflow" style="width:40%"></div></div></div></td>
+          <td class="r val-dim">$0.05B</td>
+          <td class="r val-bold">$0.02B</td>
+          <td class="r"><div class="share-bar-wrap"><span class="share-pct">0.40%</span><div class="share-bar"><div class="share-fill netflow" style="width:40%"></div></div></div></td>
+        </tr>
+
+        <!-- ══════════ CONSULTING & EVAL ══════════ -->
+        <tr class="plat-row">
+          <td class="group-end">
+            <div class="plat-label">
+              <span class="plat-bar plat-consult"></span>
+              <svg class="caret open" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 3 8 6 4 9"/></svg>
+              Consulting & Evaluation
+            </div>
+          </td>
+          <td class="r val-dim">$19.5B</td>
+          <td class="r val-bold">$8.0B</td>
+          <td class="r group-end"><span class="share-pct">2.41%</span></td>
+          <td class="r val-dim">$1.6B</td>
+          <td class="r val-bold">$0.8B</td>
+          <td class="r group-end"><span class="share-pct">0.45%</span></td>
+          <td class="r val-dim">$0.55B</td>
+          <td class="r val-bold">$0.26B</td>
+          <td class="r"><span class="share-pct">0.47%</span></td>
+        </tr>
+
+        <!-- C&E / MF -->
+        <tr class="veh-row">
+          <td class="group-end"><span class="veh-label"><span class="v-badge v-mf">MF</span> Mutual Fund</span></td>
+          <td class="r val-dim">$9.8B</td>
+          <td class="r val-bold">$4.0B</td>
+          <td class="r group-end"><span class="share-pct">2.43%</span></td>
+          <td class="r val-dim">$0.78B</td>
+          <td class="r val-bold">$0.36B</td>
+          <td class="r group-end"><span class="share-pct">0.46%</span></td>
+          <td class="r val-dim">$0.26B</td>
+          <td class="r val-bold">$0.13B</td>
+          <td class="r"><span class="share-pct">0.50%</span></td>
+        </tr>
+        <tr class="sub-row">
+          <td class="group-end"><div class="sub-label"><span class="sub-dot"></span>Large Growth</div></td>
+          <td class="r val-dim">$4.1B</td>
+          <td class="r val-bold">$1.7B</td>
+          <td class="r group-end"><div class="share-bar-wrap"><span class="share-pct">0.41%</span><div class="share-bar"><div class="share-fill aum" style="width:41%"></div></div></div></td>
+          <td class="r val-dim">$0.33B</td>
+          <td class="r val-bold">$0.16B</td>
+          <td class="r group-end"><div class="share-bar-wrap"><span class="share-pct">0.48%</span><div class="share-bar"><div class="share-fill inflow" style="width:48%"></div></div></div></td>
+          <td class="r val-dim">$0.11B</td>
+          <td class="r val-bold">$0.06B</td>
+          <td class="r"><div class="share-bar-wrap"><span class="share-pct">0.55%</span><div class="share-bar"><div class="share-fill netflow" style="width:55%"></div></div></div></td>
+        </tr>
+        <tr class="sub-row">
+          <td class="group-end"><div class="sub-label"><span class="sub-dot"></span>Intermediate Core Bond</div></td>
+          <td class="r val-dim">$3.4B</td>
+          <td class="r val-bold">$1.4B</td>
+          <td class="r group-end"><div class="share-bar-wrap"><span class="share-pct">0.41%</span><div class="share-bar"><div class="share-fill aum" style="width:41%"></div></div></div></td>
+          <td class="r val-dim">$0.27B</td>
+          <td class="r val-bold">$0.12B</td>
+          <td class="r group-end"><div class="share-bar-wrap"><span class="share-pct">0.44%</span><div class="share-bar"><div class="share-fill inflow" style="width:44%"></div></div></div></td>
+          <td class="r val-dim">$0.09B</td>
+          <td class="r val-bold">$0.04B</td>
+          <td class="r"><div class="share-bar-wrap"><span class="share-pct">0.44%</span><div class="share-bar"><div class="share-fill netflow" style="width:44%"></div></div></div></td>
+        </tr>
+        <tr class="sub-row">
+          <td class="group-end"><div class="sub-label"><span class="sub-dot"></span>Foreign Large Blend</div></td>
+          <td class="r val-dim">$2.3B</td>
+          <td class="r val-bold">$0.9B</td>
+          <td class="r group-end"><div class="share-bar-wrap"><span class="share-pct">0.39%</span><div class="share-bar"><div class="share-fill aum" style="width:39%"></div></div></div></td>
+          <td class="r val-dim">$0.18B</td>
+          <td class="r val-bold">$0.08B</td>
+          <td class="r group-end"><div class="share-bar-wrap"><span class="share-pct">0.44%</span><div class="share-bar"><div class="share-fill inflow" style="width:44%"></div></div></div></td>
+          <td class="r val-dim">$0.06B</td>
+          <td class="r val-bold">$0.03B</td>
+          <td class="r"><div class="share-bar-wrap"><span class="share-pct">0.50%</span><div class="share-bar"><div class="share-fill netflow" style="width:50%"></div></div></div></td>
+        </tr>
+
+        <!-- C&E / ETF -->
+        <tr class="veh-row">
+          <td class="group-end"><span class="veh-label"><span class="v-badge v-etf">ETF</span> Exchange Traded Fund</span></td>
+          <td class="r val-dim">$4.9B</td>
+          <td class="r val-bold">$2.0B</td>
+          <td class="r group-end"><span class="share-pct">2.41%</span></td>
+          <td class="r val-dim">$0.39B</td>
+          <td class="r val-bold">$0.19B</td>
+          <td class="r group-end"><span class="share-pct">0.49%</span></td>
+          <td class="r val-dim">$0.14B</td>
+          <td class="r val-bold">$0.07B</td>
+          <td class="r"><span class="share-pct">0.50%</span></td>
+        </tr>
+        <tr class="sub-row">
+          <td class="group-end"><div class="sub-label"><span class="sub-dot"></span>Large Blend</div></td>
+          <td class="r val-dim">$2.2B</td>
+          <td class="r val-bold">$0.9B</td>
+          <td class="r group-end"><div class="share-bar-wrap"><span class="share-pct">0.41%</span><div class="share-bar"><div class="share-fill aum" style="width:41%"></div></div></div></td>
+          <td class="r val-dim">$0.18B</td>
+          <td class="r val-bold">$0.09B</td>
+          <td class="r group-end"><div class="share-bar-wrap"><span class="share-pct">0.50%</span><div class="share-bar"><div class="share-fill inflow" style="width:50%"></div></div></div></td>
+          <td class="r val-dim">$0.06B</td>
+          <td class="r val-bold">$0.03B</td>
+          <td class="r"><div class="share-bar-wrap"><span class="share-pct">0.50%</span><div class="share-bar"><div class="share-fill netflow" style="width:50%"></div></div></div></td>
+        </tr>
+        <tr class="sub-row">
+          <td class="group-end"><div class="sub-label"><span class="sub-dot"></span>Foreign Large Blend</div></td>
+          <td class="r val-dim">$1.6B</td>
+          <td class="r val-bold">$0.7B</td>
+          <td class="r group-end"><div class="share-bar-wrap"><span class="share-pct">0.44%</span><div class="share-bar"><div class="share-fill aum" style="width:44%"></div></div></div></td>
+          <td class="r val-dim">$0.13B</td>
+          <td class="r val-bold">$0.06B</td>
+          <td class="r group-end"><div class="share-bar-wrap"><span class="share-pct">0.46%</span><div class="share-bar"><div class="share-fill inflow" style="width:46%"></div></div></div></td>
+          <td class="r val-dim">$0.04B</td>
+          <td class="r val-bold">$0.02B</td>
+          <td class="r"><div class="share-bar-wrap"><span class="share-pct">0.50%</span><div class="share-bar"><div class="share-fill netflow" style="width:50%"></div></div></div></td>
+        </tr>
+        <tr class="sub-row">
+          <td class="group-end"><div class="sub-label"><span class="sub-dot"></span>Short Government</div></td>
+          <td class="r val-dim">$1.1B</td>
+          <td class="r val-bold">$0.4B</td>
+          <td class="r group-end"><div class="share-bar-wrap"><span class="share-pct">0.36%</span><div class="share-bar"><div class="share-fill aum" style="width:36%"></div></div></div></td>
+          <td class="r val-dim">$0.08B</td>
+          <td class="r val-bold">$0.04B</td>
+          <td class="r group-end"><div class="share-bar-wrap"><span class="share-pct">0.50%</span><div class="share-bar"><div class="share-fill inflow" style="width:50%"></div></div></div></td>
+          <td class="r val-dim">$0.04B</td>
+          <td class="r val-bold">$0.02B</td>
+          <td class="r"><div class="share-bar-wrap"><span class="share-pct">0.50%</span><div class="share-bar"><div class="share-fill netflow" style="width:50%"></div></div></div></td>
+        </tr>
+
+        <!-- C&E / SMA -->
+        <tr class="veh-row">
+          <td class="group-end"><span class="veh-label"><span class="v-badge v-sma">SMA</span> Separately Managed Acct</span></td>
+          <td class="r val-dim">$4.8B</td>
+          <td class="r val-bold">$2.0B</td>
+          <td class="r group-end"><span class="share-pct">2.38%</span></td>
+          <td class="r val-dim">$0.39B</td>
+          <td class="r val-bold">$0.17B</td>
+          <td class="r group-end"><span class="share-pct">0.44%</span></td>
+          <td class="r val-dim">$0.14B</td>
+          <td class="r val-bold">$0.06B</td>
+          <td class="r"><span class="share-pct">0.43%</span></td>
+        </tr>
+        <tr class="sub-row">
+          <td class="group-end"><div class="sub-label"><span class="sub-dot"></span>Large Growth</div></td>
+          <td class="r val-dim">$2.2B</td>
+          <td class="r val-bold">$0.9B</td>
+          <td class="r group-end"><div class="share-bar-wrap"><span class="share-pct">0.41%</span><div class="share-bar"><div class="share-fill aum" style="width:41%"></div></div></div></td>
+          <td class="r val-dim">$0.18B</td>
+          <td class="r val-bold">$0.08B</td>
+          <td class="r group-end"><div class="share-bar-wrap"><span class="share-pct">0.44%</span><div class="share-bar"><div class="share-fill inflow" style="width:44%"></div></div></div></td>
+          <td class="r val-dim">$0.06B</td>
+          <td class="r val-bold">$0.03B</td>
+          <td class="r"><div class="share-bar-wrap"><span class="share-pct">0.50%</span><div class="share-bar"><div class="share-fill netflow" style="width:50%"></div></div></div></td>
+        </tr>
+        <tr class="sub-row">
+          <td class="group-end"><div class="sub-label"><span class="sub-dot"></span>Large Value</div></td>
+          <td class="r val-dim">$1.6B</td>
+          <td class="r val-bold">$0.7B</td>
+          <td class="r group-end"><div class="share-bar-wrap"><span class="share-pct">0.44%</span><div class="share-bar"><div class="share-fill aum" style="width:44%"></div></div></div></td>
+          <td class="r val-dim">$0.13B</td>
+          <td class="r val-bold">$0.06B</td>
+          <td class="r group-end"><div class="share-bar-wrap"><span class="share-pct">0.46%</span><div class="share-bar"><div class="share-fill inflow" style="width:46%"></div></div></div></td>
+          <td class="r val-dim">$0.05B</td>
+          <td class="r val-bold">$0.02B</td>
+          <td class="r"><div class="share-bar-wrap"><span class="share-pct">0.40%</span><div class="share-bar"><div class="share-fill netflow" style="width:40%"></div></div></div></td>
+        </tr>
+        <tr class="sub-row">
+          <td class="group-end"><div class="sub-label"><span class="sub-dot"></span>Intermediate Core Bond</div></td>
+          <td class="r val-dim">$1.0B</td>
+          <td class="r val-bold">$0.4B</td>
+          <td class="r group-end"><div class="share-bar-wrap"><span class="share-pct">0.40%</span><div class="share-bar"><div class="share-fill aum" style="width:40%"></div></div></div></td>
+          <td class="r val-dim">$0.08B</td>
+          <td class="r val-bold">$0.03B</td>
+          <td class="r group-end"><div class="share-bar-wrap"><span class="share-pct">0.38%</span><div class="share-bar"><div class="share-fill inflow" style="width:38%"></div></div></div></td>
+          <td class="r val-dim">$0.03B</td>
+          <td class="r val-bold">$0.01B</td>
+          <td class="r"><div class="share-bar-wrap"><span class="share-pct">0.33%</span><div class="share-bar"><div class="share-fill netflow" style="width:33%"></div></div></div></td>
+        </tr>
+
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ─── FOOTER ─── -->
+  <div class="panel-footer">
+    <div class="legend-dots">
+      <div class="legend-item"><span class="legend-dot ld-aum"></span>AUM</div>
+      <div class="legend-item"><span class="legend-dot ld-inflow"></span>Inflow</div>
+      <div class="legend-item"><span class="legend-dot ld-netflow"></span>Net Flow</div>
+    </div>
+    <span>All figures in USD · Data as of Apr 24, 2026</span>
+  </div>
+
+</div>
+</body>
+</html>
