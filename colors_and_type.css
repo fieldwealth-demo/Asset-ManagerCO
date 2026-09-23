@@ -1,0 +1,336 @@
+/* ==========================================================================
+   Field Shadcn — Colors & Type Foundations
+   --------------------------------------------------------------------------
+   A faithful recreation of the shadcn/ui token surface, extended with the
+   Field brand accents. Two modes (.light, .dark — default is .light on html
+   or <body>). All tokens are exposed as CSS vars so semantic utilities can
+   switch wholesale.
+   ========================================================================== */
+
+/* -------- Webfonts --------------------------------------------------------- */
+/* Primary: Geist (display + body) & Inter (UI). Monos: Geist Mono + JetBrains
+   Mono. We load from Google Fonts / vercel CDN — flagged to user as a
+   substitution if local TTFs are preferred. */
+
+/* Inter — brand-provided TTFs in fonts/. The Inter family is shipped as three
+   optical-size variants (18pt / 24pt / 28pt). We load 18pt as the default
+   "Inter" family (body + UI, 14–16px) and 28pt as "Inter Display" for larger
+   type (≥ 24px headings & display). Full weight range 100–900, italics too. */
+
+@font-face { font-family: "Inter"; font-style: normal; font-weight: 100; src: url("fonts/Inter_18pt-Thin.ttf") format("truetype"); font-display: swap; }
+@font-face { font-family: "Inter"; font-style: italic; font-weight: 100; src: url("fonts/Inter_18pt-ThinItalic.ttf") format("truetype"); font-display: swap; }
+@font-face { font-family: "Inter"; font-style: normal; font-weight: 200; src: url("fonts/Inter_18pt-ExtraLight.ttf") format("truetype"); font-display: swap; }
+@font-face { font-family: "Inter"; font-style: italic; font-weight: 200; src: url("fonts/Inter_18pt-ExtraLightItalic.ttf") format("truetype"); font-display: swap; }
+@font-face { font-family: "Inter"; font-style: normal; font-weight: 300; src: url("fonts/Inter_18pt-Light.ttf") format("truetype"); font-display: swap; }
+@font-face { font-family: "Inter"; font-style: italic; font-weight: 300; src: url("fonts/Inter_18pt-LightItalic.ttf") format("truetype"); font-display: swap; }
+@font-face { font-family: "Inter"; font-style: normal; font-weight: 400; src: url("fonts/Inter_18pt-Regular.ttf") format("truetype"); font-display: swap; }
+@font-face { font-family: "Inter"; font-style: italic; font-weight: 400; src: url("fonts/Inter_18pt-Italic.ttf") format("truetype"); font-display: swap; }
+@font-face { font-family: "Inter"; font-style: normal; font-weight: 500; src: url("fonts/Inter_18pt-Medium.ttf") format("truetype"); font-display: swap; }
+@font-face { font-family: "Inter"; font-style: italic; font-weight: 500; src: url("fonts/Inter_18pt-MediumItalic.ttf") format("truetype"); font-display: swap; }
+@font-face { font-family: "Inter"; font-style: normal; font-weight: 600; src: url("fonts/Inter_18pt-SemiBold.ttf") format("truetype"); font-display: swap; }
+@font-face { font-family: "Inter"; font-style: italic; font-weight: 600; src: url("fonts/Inter_18pt-SemiBoldItalic.ttf") format("truetype"); font-display: swap; }
+@font-face { font-family: "Inter"; font-style: normal; font-weight: 700; src: url("fonts/Inter_18pt-Bold.ttf") format("truetype"); font-display: swap; }
+@font-face { font-family: "Inter"; font-style: italic; font-weight: 700; src: url("fonts/Inter_18pt-BoldItalic.ttf") format("truetype"); font-display: swap; }
+@font-face { font-family: "Inter"; font-style: normal; font-weight: 800; src: url("fonts/Inter_18pt-ExtraBold.ttf") format("truetype"); font-display: swap; }
+@font-face { font-family: "Inter"; font-style: italic; font-weight: 800; src: url("fonts/Inter_18pt-ExtraBoldItalic.ttf") format("truetype"); font-display: swap; }
+@font-face { font-family: "Inter"; font-style: normal; font-weight: 900; src: url("fonts/Inter_18pt-Black.ttf") format("truetype"); font-display: swap; }
+@font-face { font-family: "Inter"; font-style: italic; font-weight: 900; src: url("fonts/Inter_18pt-BlackItalic.ttf") format("truetype"); font-display: swap; }
+
+/* Inter Display — 28pt optical for headlines ≥ 24px */
+@font-face { font-family: "Inter Display"; font-style: normal; font-weight: 400; src: url("fonts/Inter_28pt-Regular.ttf") format("truetype"); font-display: swap; }
+@font-face { font-family: "Inter Display"; font-style: normal; font-weight: 500; src: url("fonts/Inter_28pt-Medium.ttf") format("truetype"); font-display: swap; }
+@font-face { font-family: "Inter Display"; font-style: normal; font-weight: 600; src: url("fonts/Inter_28pt-SemiBold.ttf") format("truetype"); font-display: swap; }
+@font-face { font-family: "Inter Display"; font-style: normal; font-weight: 700; src: url("fonts/Inter_28pt-Bold.ttf") format("truetype"); font-display: swap; }
+@font-face { font-family: "Inter Display"; font-style: normal; font-weight: 800; src: url("fonts/Inter_28pt-ExtraBold.ttf") format("truetype"); font-display: swap; }
+@font-face { font-family: "Inter Display"; font-style: normal; font-weight: 900; src: url("fonts/Inter_28pt-Black.ttf") format("truetype"); font-display: swap; }
+
+/* Geist + Geist Mono still from Google Fonts (no local TTFs provided for them). */
+@import url("https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap");
+
+/* ==========================================================================
+   Tokens — LIGHT (default)
+   ========================================================================== */
+:root,
+.light {
+  /* Brand ------------------------------------------------------------------ */
+  /* Bumped to a more vibrant emerald (Tailwind emerald-500) for the */
+  /* Asset Manager application. Still reads as Field green but pops on */
+  /* the dark navy surface. */
+  --brand-primary:        rgb(16, 185, 129);       /* emerald-500 — vibrant */
+  --brand-primary-ink:    rgb(249, 250, 251);
+  --brand-primary-soft:   rgba(16, 185, 129, 0.12);
+  --brand-primary-ring:   rgba(16, 185, 129, 0.35);
+  --brand-primary-dark:   rgb(4, 120, 87);         /* emerald-700 — pressed */
+  --brand-primary-bright: rgb(52, 211, 153);       /* emerald-400 — on-dark text/accents */
+  --brand-lime:           rgb(173, 250, 29);       /* marketing pill */
+
+  /* Surfaces -------------------------------------------------------------- */
+  --bg:            rgb(255, 255, 255);
+  --bg-muted:      rgb(249, 250, 251);
+  --bg-subtle:     rgb(245, 245, 245);
+  --bg-elevated:   rgb(255, 255, 255);
+  --bg-inverse:    rgb(10, 10, 10);
+
+  /* Foreground (text) ----------------------------------------------------- */
+  --fg:            rgb(10, 10, 10);
+  --fg-muted:      rgb(115, 115, 115);
+  --fg-subtle:     rgb(163, 163, 163);
+  --fg-inverse:    rgb(249, 250, 251);
+
+  /* Borders & separators -------------------------------------------------- */
+  --border:            rgb(229, 229, 229);
+  --border-strong:     rgb(212, 212, 212);
+  --ring:              rgba(5, 122, 85, 0.30);
+
+  /* Semantic colors (light) ---------------------------------------------- */
+  --success:           rgb(16, 185, 129);
+  --success-soft:      rgb(236, 253, 245);
+  --info:              rgb(0, 144, 255);
+  --info-soft:         rgb(239, 246, 255);
+  --warning:           rgb(202, 138, 4);
+  --warning-soft:      rgb(254, 249, 195);
+  --danger:            rgb(220, 38, 38);
+  --danger-soft:       rgb(254, 226, 226);
+
+  /* Chart palette — vibrant, high-saturation for dark dashboards -------- */
+  --chart-1:           rgb( 16, 185, 129);   /* emerald  */
+  --chart-2:           rgb( 59, 130, 246);   /* blue-500 */
+  --chart-3:           rgb(139,  92, 246);   /* violet-500 */
+  --chart-4:           rgb( 20, 184, 166);   /* teal-500 */
+  --chart-5:           rgb(249, 115,  22);   /* orange-500 */
+  --chart-6:           rgb( 14, 165, 233);   /* sky-500 */
+  --chart-7:           rgb(248, 113, 113);   /* red-400  */
+  --chart-8:           rgb(234, 179,   8);   /* amber-500 */
+
+  /* Shadow tokens -------------------------------------------------------- */
+  --shadow-xs:   0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-sm:   0 1px 2px 0 rgba(0, 0, 0, 0.10);
+  --shadow-md:   0 4px 6px -1px rgba(0, 0, 0, 0.10), 0 2px 4px -2px rgba(0, 0, 0, 0.10);
+  --shadow-lg:   0 10px 15px -3px rgba(0, 0, 0, 0.10), 0 4px 6px -4px rgba(0, 0, 0, 0.10);
+  --shadow-xl:   0 20px 25px -5px rgba(0, 0, 0, 0.10), 0 8px 10px -6px rgba(0, 0, 0, 0.10);
+
+  /* Typography base ------------------------------------------------------ */
+  --font-display: "Inter Display", "Geist", "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-body:    "Inter", "Geist", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-ui:      "Inter", "Geist", ui-sans-serif, system-ui, sans-serif;
+  --font-mono:    "Geist Mono", "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+
+  /* Radius scale (matches shadcn) ---------------------------------------- */
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 10px;
+  --radius-xl: 12px;
+  --radius-2xl: 16px;
+  --radius-3xl: 24px;
+  --radius-pill: 9999px;
+
+  /* Spacing scale (4px base) --------------------------------------------- */
+  --space-0: 0;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-14: 56px;
+  --space-16: 64px;
+}
+
+/* ==========================================================================
+   Tokens — DARK
+   ----------------------------------------------------------------------------
+   The Figma file leans HEAVILY on dark — every component card uses rgb(17,24,39)
+   with rgb(75,85,99) borders. That is the canonical dark surface for Field.
+   ========================================================================== */
+.dark {
+  --bg:            rgb(10, 10, 10);           /* page */
+  --bg-muted:      rgb(17, 24, 39);           /* cards */
+  --bg-subtle:     rgba(255, 255, 255, 0.05); /* nested surfaces */
+  --bg-elevated:   rgb(23, 23, 23);
+  --bg-inverse:    rgb(249, 250, 251);
+
+  --fg:            rgb(249, 250, 251);
+  --fg-muted:      rgb(163, 163, 163);
+  --fg-subtle:     rgb(115, 115, 115);
+  --fg-inverse:    rgb(10, 10, 10);
+
+  --border:            rgb(75, 85, 99);
+  --border-strong:     rgb(107, 114, 128);
+  --ring:              rgba(5, 122, 85, 0.40);
+
+  --success:           rgb(16, 185, 129);
+  --success-soft:      rgba(16, 185, 129, 0.15);
+  --success-bright:    rgb(52, 211, 153);    /* for body text on dark */
+  --info:              rgb(94, 177, 239);
+  --info-soft:         rgba(0, 144, 255, 0.15);
+  --warning:           rgb(234, 179, 8);
+  --warning-soft:      rgba(234, 179, 8, 0.15);
+  --danger:            rgb(248, 113, 113);
+  --danger-soft:       rgba(220, 38, 38, 0.15);
+
+  --shadow-xs:   0 1px 2px 0 rgba(0, 0, 0, 0.30);
+  --shadow-sm:   0 1px 2px 0 rgba(0, 0, 0, 0.40);
+  --shadow-md:   0 4px 6px -1px rgba(0, 0, 0, 0.40), 0 2px 4px -2px rgba(0, 0, 0, 0.40);
+  --shadow-lg:   0 10px 15px -3px rgba(0, 0, 0, 0.50), 0 4px 6px -4px rgba(0, 0, 0, 0.30);
+  --shadow-xl:   0 20px 25px -5px rgba(0, 0, 0, 0.50), 0 8px 10px -6px rgba(0, 0, 0, 0.40);
+
+  /* Glass / gradient surface tokens --------------------------------------
+     The app background is a subtle navy with a diagonal emerald bloom.
+     Cards layer a very low-opacity white + backdrop blur on top, so the
+     bloom reads through every tile as atmospheric light. */
+  --gray-600:             rgb(75, 85, 99);        /* Tailwind gray-600 — card border */
+  --gray-800:             rgb(31, 41, 55);        /* Tailwind gray-800 — sidebar, topbar */
+  --gray-900:             rgb(17, 24, 39);        /* Tailwind gray-900 */
+  --gray-950:             rgb(11, 21, 36);        /* app base (deep navy) */
+
+  --app-bg-base:          rgb(11, 21, 36);
+  --app-bg-image:
+    /* Soft diagonal emerald bloom — UR to LL, very desaturated */
+    radial-gradient(ellipse 70% 90% at 72% 20%, rgba(12, 90, 82, 0.28) 0%, rgba(10, 70, 70, 0.14) 28%, transparent 55%),
+    radial-gradient(ellipse 65% 85% at 28% 75%, rgba(10, 70, 70, 0.12) 0%, transparent 55%),
+    linear-gradient(135deg, rgb(10, 20, 34) 0%, rgb(11, 22, 36) 50%, rgb(9, 18, 30) 100%);
+
+  --glass-bg:             rgba(255, 255, 255, 0.05);
+  --glass-bg-strong:      rgba(255, 255, 255, 0.08);
+  --glass-border:         rgb(75, 85, 99);        /* gray-600 */
+  --glass-border-strong:  rgb(107, 114, 128);
+  --glass-blur:           12px;
+  --glass-shadow:         0 1px 0 0 rgba(255,255,255,0.04) inset, 0 8px 24px -8px rgba(0,0,0,0.45);
+
+  /* Asset allocation palette -----------------------------------------------
+     Canonical category → color mapping for donuts/pie/bars that show the
+     portfolio breakdown. All charts (AUM, Holdings, Cash Flow, Revenue by
+     Service, etc.) should reference these tokens so the same category
+     always reads as the same color across the product.
+
+     Stroke/fill tokens are rendered at 50% opacity per the chart style
+     spec (soft, readable over dark glass). Dot tokens (used in legends)
+     are 100%-opacity versions of the same hue so legend dots pop against
+     the translucent arc/bar they represent. */
+  /* Allocation palette — saturated jewel tones at 0.7 alpha so fills still
+     read distinctly on the dark glass surface. Each category has a matching
+     full-opacity -dot token below for legends / markers / borders. */
+  --alloc-equities:      rgba( 16, 185, 129, 0.70);  /* emerald */
+  --alloc-fixed-income:  rgba( 59, 130, 246, 0.70);  /* blue    */
+  --alloc-alternatives:  rgba(139,  92, 246, 0.70);  /* violet  */
+  --alloc-private:       rgba(249, 115,  22, 0.70);  /* orange  */
+  --alloc-real-estate:   rgba(239,  68,  68, 0.70);  /* red     */
+  --alloc-cash:          rgba( 20, 184, 166, 0.70);  /* teal    */
+  --alloc-hedge:         rgba(234, 179,   8, 0.70);  /* amber   */
+  --alloc-other:         rgba( 14, 165, 233, 0.70);  /* sky     */
+
+  /* Chart stroke (slice/bar outline). All category charts render a 1px
+     outline in the full-opacity dot color on top of the 50%-opacity fill
+     so slices read as distinct shapes rather than bleeding into one
+     another (see reference: pastel fill + crisp colored border). */
+  --chart-stroke-width:   1px;
+
+  /* Chart labels — axis ticks, legend labels, value labels on bar/line
+     charts. The design-system rule is: all chart labels render at text-sm
+     (12 / 16 / 400) in Inter, color fg-muted. Chart numerics inherit the
+     same size but flip to tabular-nums + fg so values align and pop.
+
+     HARD CAP: chart labels MAX at 12px — they must NEVER scale up with the
+     chart container. Inside SVGs with a viewBox, <text> font-size scales
+     with the viewport, which breaks this rule. Render bar/line chart
+     labels as HTML overlays positioned over the SVG (see ChartLabel in
+     AdvisorTiles.jsx), or use `font-size` in CSS px on a non-scaled SVG.
+     Use `vector-effect: non-scaling-stroke` on chart strokes so line
+     weights don't thicken either. */
+  --chart-label-size:      12px;
+  --chart-label-size-max:  12px;   /* explicit cap — do not exceed */
+  --chart-label-line:      16px;
+  --chart-label-weight:    400;
+  --chart-label-color:     var(--fg-muted);
+  --chart-value-color:     var(--fg);
+
+  /* Tile sizing — dashboard tiles have a floor so charts, lists, and
+     stat rows always have room to breathe even when the grid row gets
+     compressed. Set on the Tile root via min-height. */
+  --tile-min-height:       440px;
+
+  --alloc-equities-dot:     rgb( 16, 185, 129);
+  --alloc-fixed-income-dot: rgb( 59, 130, 246);
+  --alloc-alternatives-dot: rgb(139,  92, 246);
+  --alloc-private-dot:      rgb(249, 115,  22);
+  --alloc-real-estate-dot:  rgb(239,  68,  68);
+  --alloc-cash-dot:         rgb( 20, 184, 166);
+  --alloc-hedge-dot:        rgb(234, 179,   8);
+  --alloc-other-dot:        rgb( 14, 165, 233);
+}
+
+/* Convenience: the canonical app surface. Apply to <body> or a full-viewport
+   wrapper for any Field screen. */
+.app-surface {
+  background-color: var(--app-bg-base);
+  background-image: var(--app-bg-image);
+  background-attachment: fixed;
+  color: var(--fg);
+}
+
+/* Glass card — apply to any card/tile. */
+.glass {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(var(--glass-blur)) saturate(140%);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(140%);
+  box-shadow: var(--glass-shadow);
+}
+
+/* ==========================================================================
+   Semantic TYPOGRAPHY — utility classes
+   --------------------------------------------------------------------------
+   shadcn's display / section headings use Geist Bold at 36/40. Inline UI
+   metadata lives at Inter 14/20 medium. These are exposed both as classes
+   AND as cascading tag defaults for convenience.
+   ========================================================================== */
+
+/* Display — landing / cover headlines */
+.display-2xl { font-family: var(--font-display); font-weight: 700; font-size: 72px;  line-height: 1.02; letter-spacing: -0.04em; color: var(--fg); }
+.display-xl  { font-family: var(--font-display); font-weight: 700; font-size: 60px;  line-height: 1.04; letter-spacing: -0.03em; color: var(--fg); }
+.display-lg  { font-family: var(--font-display); font-weight: 700; font-size: 48px;  line-height: 1.08; letter-spacing: -0.02em; color: var(--fg); }
+
+/* Component card heading — the "Button" / "Card" / "Badge" title used everywhere */
+.h1, h1     { font-family: var(--font-display); font-weight: 700; font-size: 36px; line-height: 40px; letter-spacing: -0.01em; color: var(--fg); }
+.h2, h2     { font-family: var(--font-display); font-weight: 700; font-size: 30px; line-height: 36px; letter-spacing: -0.01em; color: var(--fg); }
+.h3, h3     { font-family: var(--font-display); font-weight: 700; font-size: 24px; line-height: 32px; color: var(--fg); }
+.h4, h4     { font-family: var(--font-display); font-weight: 600; font-size: 20px; line-height: 28px; color: var(--fg); }
+.h5, h5     { font-family: var(--font-ui);      font-weight: 600; font-size: 16px; line-height: 24px; color: var(--fg); }
+.h6, h6     { font-family: var(--font-ui);      font-weight: 600; font-size: 14px; line-height: 20px; color: var(--fg); }
+
+/* Card title — Inter 24 bold @ 100% (the auth card pattern) */
+.card-title    { font-family: var(--font-ui); font-weight: 700; font-size: 24px; line-height: 1; color: var(--fg); }
+.card-desc     { font-family: var(--font-ui); font-weight: 400; font-size: 14px; line-height: 1.4; color: var(--fg-muted); }
+
+/* Body — 16/24 is the workhorse across long-form copy */
+.body-lg, p { font-family: var(--font-body); font-weight: 400; font-size: 16px; line-height: 24px; color: var(--fg-muted); }
+.body       { font-family: var(--font-body); font-weight: 400; font-size: 14px; line-height: 20px; color: var(--fg); }
+.body-sm    { font-family: var(--font-body); font-weight: 400; font-size: 12px; line-height: 16px; color: var(--fg-muted); }
+
+/* UI — Inter, used on buttons / inputs / menus */
+.label        { font-family: var(--font-ui); font-weight: 500; font-size: 14px; line-height: 20px; color: var(--fg); }
+.label-sm     { font-family: var(--font-ui); font-weight: 500; font-size: 12px; line-height: 16px; color: var(--fg); }
+.caption      { font-family: var(--font-ui); font-weight: 400; font-size: 12px; line-height: 16px; color: var(--fg-muted); }
+
+/* Code / mono */
+.code, code, kbd { font-family: var(--font-mono); font-weight: 400; font-size: 12px; line-height: 1.4; color: var(--fg); }
+
+/* Utility text roles */
+.muted   { color: var(--fg-muted); }
+.subtle  { color: var(--fg-subtle); }
+.inverse { color: var(--fg-inverse); }
+
+/* Base document defaults */
+html, body {
+  font-family: var(--font-body);
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--fg);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}

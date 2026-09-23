@@ -1,0 +1,34 @@
+/* Self-hosted Pro overrides — paths relative to the HTML file. */
+@font-face {
+  font-family: 'Font Awesome 6 Pro';
+  font-style: normal;
+  font-weight: 900;
+  font-display: block;
+  src: url('fonts/FontAwesome6Pro-Solid.otf') format('opentype');
+}
+@font-face {
+  font-family: 'Font Awesome 6 Pro';
+  font-style: normal;
+  font-weight: 400;
+  font-display: block;
+  src: url('fonts/FontAwesome6Pro-Regular.otf') format('opentype');
+}
+@font-face {
+  font-family: 'Font Awesome 6 Pro';
+  font-style: normal;
+  font-weight: 100;
+  font-display: block;
+  src: url('fonts/FontAwesome6Pro-Thin.otf') format('opentype');
+}
+.fa, .fas, .fa-solid,
+.far, .fa-regular,
+.fat, .fa-thin,
+.fal, .fa-light {
+  font-family: 'Font Awesome 6 Pro' !important;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+.fas, .fa-solid   { font-weight: 900 !important; }
+.far, .fa-regular { font-weight: 400 !important; }
+.fat, .fa-thin    { font-weight: 100 !important; }
+.fal, .fa-light   { font-weight: 300 !important; }

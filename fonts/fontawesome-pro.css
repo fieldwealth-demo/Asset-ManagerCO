@@ -1,0 +1,47 @@
+/* Font Awesome 6 Pro — self-hosted from /fonts/.
+   Loads Solid (900), Regular (400), and Thin (100) weights. Provides the
+   standard FA class selectors (.fa-solid / .fa-regular / .fas / .far) so
+   existing Font Awesome 6 class strings render Pro glyphs instead of Free.
+   Uses a single shared glyph base rule (::before content from inline HTML
+   classes like `fa-chevron-right` is driven by Font Awesome's CSS table —
+   to keep things lightweight we rely on the CDN's core-class CSS for the
+   icon NAME -> unicode mapping and override only font-family here. */
+
+/* Font faces -------------------------------------------------------- */
+@font-face {
+  font-family: 'Font Awesome 6 Pro';
+  font-style: normal;
+  font-weight: 900;
+  font-display: block;
+  src: url('fonts/FontAwesome6Pro-Solid.otf') format('opentype');
+}
+@font-face {
+  font-family: 'Font Awesome 6 Pro';
+  font-style: normal;
+  font-weight: 400;
+  font-display: block;
+  src: url('fonts/FontAwesome6Pro-Regular.otf') format('opentype');
+}
+@font-face {
+  font-family: 'Font Awesome 6 Pro';
+  font-style: normal;
+  font-weight: 100;
+  font-display: block;
+  src: url('fonts/FontAwesome6Pro-Thin.otf') format('opentype');
+}
+
+/* Override: force all Font Awesome class strings to use the Pro face.
+   Higher specificity + !important so they beat the CDN Free rules. */
+.fa,
+.fas, .fa-solid,
+.far, .fa-regular,
+.fat, .fa-thin,
+.fal, .fa-light {
+  font-family: 'Font Awesome 6 Pro' !important;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+.fas, .fa-solid  { font-weight: 900 !important; }
+.far, .fa-regular { font-weight: 400 !important; }
+.fat, .fa-thin   { font-weight: 100 !important; }
+.fal, .fa-light  { font-weight: 300 !important; } /* substitutes to thin face if not loaded */
