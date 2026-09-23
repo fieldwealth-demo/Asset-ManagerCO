@@ -1,0 +1,175 @@
+<!doctype html>
+<html class="dark" lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Asset Manager Portal</title>
+  <link rel="stylesheet" href="colors_and_type.css" />
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+  <link rel="stylesheet" href="fontawesome-pro-local.css" />
+  <script src="https://unpkg.com/highcharts@11.4.8/highcharts.js"></script>
+  <script src="https://unpkg.com/highcharts@11.4.8/highcharts-more.js"></script>
+  <style>
+    html, body { margin:0; padding:0; color: rgb(249,250,251); min-height:100vh; font-family: Inter, sans-serif; }
+    body {
+      background-color: rgb(11,21,36);
+      background-image:
+        radial-gradient(ellipse 60% 80% at 75% 10%, rgba(12, 90, 82, 0.30) 0%, rgba(10, 70, 70, 0.12) 28%, transparent 55%),
+        radial-gradient(ellipse 60% 80% at 20% 85%, rgba(10, 70, 70, 0.10) 0%, transparent 55%),
+        linear-gradient(135deg, rgb(10, 20, 34) 0%, rgb(11, 22, 36) 50%, rgb(9, 18, 30) 100%);
+      background-attachment: fixed;
+    }
+    * { font-family: Inter, sans-serif; }
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(75,85,99,0.5); border-radius: 9999px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(107,114,128,0.7); }
+  </style>
+</head>
+<body>
+  <template id="__bundler_thumbnail" data-bg-color="#0b1524">
+    <svg viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="amp-thumb-grad" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#0c5a52" />
+          <stop offset="100%" stop-color="#0a4646" />
+        </linearGradient>
+      </defs>
+      <rect x="180" y="200" width="840" height="400" rx="32" fill="url(#amp-thumb-grad)" opacity="0.85" />
+      <rect x="240" y="280" width="180" height="14" rx="7" fill="#f9fafb" opacity="0.9" />
+      <rect x="240" y="320" width="120" height="10" rx="5" fill="#f9fafb" opacity="0.5" />
+      <polyline points="240,520 360,460 480,490 600,400 720,430 840,360 960,380"
+                fill="none" stroke="#34d399" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" />
+      <circle cx="960" cy="380" r="10" fill="#34d399" />
+    </svg>
+  </template>
+  <div id="root"></div>
+  <script type="text/babel" src="lib/faCls.jsx"></script>
+  <script type="text/babel" src="lib/HC.jsx"></script>
+  <script type="text/babel" src="shell.jsx"></script>
+  <script type="text/babel" src="drawers.jsx"></script>
+  <script type="text/babel" src="aiflow.jsx"></script>
+  <script type="text/babel" src="home.jsx"></script>
+  <script type="text/babel" src="management.jsx"></script>
+  <script type="text/babel" src="opportunity.jsx"></script>
+  <script type="text/babel" src="clientdetail.jsx"></script>
+  <script type="text/babel" src="advantage.jsx"></script>
+  <script type="text/babel">
+    function App() {
+      const [active, setActive] = React.useState(() => {
+        try { return localStorage.getItem('amp_active') || 'home'; } catch(e) { return 'home'; }
+      });
+      React.useEffect(() => {
+        try { localStorage.setItem('amp_active', active); } catch(e) {}
+      }, [active]);
+
+      const [filterOpen, setFilterOpen] = React.useState(false);
+      const [filters, setFilters] = React.useState(DEFAULT_FILTERS);
+      const filterActive = filters.regions.length + filters.channels.length + filters.vehicles.length + filters.advantage.length > 0 || filters.aumMax < 200;
+      const [clientDetail, setClientDetail] = React.useState(null); // CLIENT_ROW or null
+      const [pptOpen, setPptOpen] = React.useState(false);
+
+      // Doe Wealth client row used by AI flow shortcut to client profile
+      const POLK_ROW = { type:'Teams', name:'The Doe Wealth Group', adv:'Strong', advDot:'rgb(52,211,153)', opp:'$142.5M', yours:'$28.4M', share:'19.9%', iOpp:'$18.2M', iYours:'$4.8M', iShare:'26.4%', nOpp:'$8.4M', nYours:'$2.1M', nShare:'25.0%', ca:'$22.4M', perf:'$14.2M', fee:'$8.2M', totInflow:'$3.1M', netFlow:'+$1.4M' };
+
+      const handleAIAction = (action) => {
+        if (action === 'viewPolkProfile') {
+          setClientDetail(POLK_ROW);
+          setActive('opportunity');
+        } else if (action === 'createMaterial') {
+          setPptOpen(true);
+        } else if (action === 'scheduleMeeting') {
+          // no-op for prototype: could open a calendar drawer
+        }
+      };
+
+      const DATE = (() => {
+        const d = new Date();
+        const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+        const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+        const n = d.getDate();
+        const suf = (n%10===1&&n!==11)?'st':(n%10===2&&n!==12)?'nd':(n%10===3&&n!==13)?'rd':'th';
+        return `${days[d.getDay()]} ${months[d.getMonth()]} ${n}${suf} ${d.getFullYear()}`;
+      })();
+
+      return (
+        <div style={{ display:'flex', minHeight:'100vh', background:'transparent' }} data-screen-label={
+          active === 'home' ? '01 Home' :
+          active === 'management' ? '02 Management' :
+          active === 'opportunity' ? '03 Opportunity' :
+          active === 'advantage' ? '04 Competitive Advantage' : active
+        }>
+          <AppSidebar active={active} onSelect={setActive} />
+          <div style={{ flex:1, marginLeft:56, display:'flex', flexDirection:'column', minWidth:0 }}>
+            {active === 'home' && (
+              <>
+                <TopBar title="" dateStr={DATE} period="Year to date" />
+                <HomePage onNav={setActive} onAIAction={handleAIAction} />
+              </>
+            )}
+            {active === 'management' && (
+              <>
+                <TopBar title="Management Dashboard" dateStr={DATE} activeSelections={[]} period="Q3 2025" showExport showFilter onClearAll={()=>{}}
+                  onFilterClick={() => setFilterOpen(true)} filterActive={filterActive} />
+                <main style={{ flex:1 }}><ManagementPage /></main>
+              </>
+            )}
+            {active === 'opportunity' && (
+              <>
+                <TopBar
+                  title={"Opportunity Dashboard"} dateStr={DATE}
+                  activeSelections={[
+                    { label:'Northeast', icon:'location-dot' },
+                  ]}
+                  period="Q3 2025" showExport showFilter
+                  onClearAll={()=>{}}
+                  onFilterClick={() => setFilterOpen(true)} filterActive={filterActive}
+                />
+                <main style={{ flex:1 }}>
+                  <OpportunityPage onViewClient={(row) => setClientDetail(row)} />
+                  <ClientDetailPage clientRow={clientDetail} onBack={() => setClientDetail(null)} />
+                </main>
+              </>
+            )}
+            {active === 'advantage' && (
+              <>
+                <TopBar
+                  title="Competitive Advantage" dateStr={DATE}
+                  activeSelections={[]}
+                  period="Q3 2025" showExport showFilter
+                  onClearAll={()=>{}}
+                  onFilterClick={() => setFilterOpen(true)} filterActive={filterActive}
+                />
+                <main style={{ flex:1 }}><AdvantagePage /></main>
+              </>
+            )}
+            {!['home','management','opportunity','advantage'].includes(active) && (
+              <>
+                <TopBar title={active.charAt(0).toUpperCase() + active.slice(1)} dateStr={DATE} />
+                <div style={{ padding: 40, color:'rgb(163,163,163)' }}>
+                  <h2 style={{ color:'rgb(249,250,251)' }}>Coming soon</h2>
+                  <p>This screen is not part of the prototype.</p>
+                </div>
+              </>
+            )}
+          </div>
+          {active !== 'home' && <AIFab onClick={() => setActive('home')} />}
+          <PPTPreviewModal open={pptOpen} onClose={() => setPptOpen(false)} />
+          <FilterDrawer
+            open={filterOpen}
+            onClose={() => setFilterOpen(false)}
+            filters={filters}
+            onChange={setFilters}
+            onApply={() => setFilterOpen(false)}
+            onReset={() => setFilters(DEFAULT_FILTERS)}
+          />
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>
