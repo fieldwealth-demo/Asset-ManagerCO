@@ -1,0 +1,458 @@
+<!doctype html>
+<html class="dark" lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Asset Manager Portal</title>
+  <link rel="stylesheet" href="colors_and_type.css" />
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+  <script src="https://kit.fontawesome.com/a08997c4a1.js" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/highcharts@11.4.8/highcharts.js"></script>
+  <script src="https://unpkg.com/highcharts@11.4.8/highcharts-more.js"></script>
+  <script src="https://unpkg.com/highcharts@11.4.8/modules/map.js"></script>
+  <script src="https://unpkg.com/proj4@2.9.0/dist/proj4.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/topojson-client@3/dist/topojson-client.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/d3-array@3/dist/d3-array.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/d3-geo@3/dist/d3-geo.min.js"></script>
+  <style>
+    html, body { margin:0; padding:0; color: rgb(249,250,251); min-height:100vh; font-family: Inter, sans-serif; }
+    body {
+      background-color: rgb(11,21,36);
+      background-image:
+        radial-gradient(ellipse 60% 80% at 75% 10%, rgba(12, 90, 82, 0.30) 0%, rgba(10, 70, 70, 0.12) 28%, transparent 55%),
+        radial-gradient(ellipse 60% 80% at 20% 85%, rgba(10, 70, 70, 0.10) 0%, transparent 55%),
+        linear-gradient(135deg, rgb(10, 20, 34) 0%, rgb(11, 22, 36) 50%, rgb(9, 18, 30) 100%);
+      background-attachment: fixed;
+    }
+    * { font-family: Inter, sans-serif; }
+    @keyframes sbTipIn { from { opacity: 0; transform: translateY(-50%) translateX(-4px); } to { opacity: 1; transform: translateY(-50%) translateX(0); } }
+    @keyframes sbFlyoutIn { from { opacity: 0; transform: translateX(-4px); } to { opacity: 1; transform: translateX(0); } }
+    @keyframes obSpin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    .dp-dropzone:hover { border-color: rgb(16,185,129) !important; background: rgba(16,185,129,0.05) !important; }
+    .dp-row:hover { background: rgba(255,255,255,0.03); }
+    @media (max-width: 1240px) { .tb-search { display: none !important; } }
+    @media (max-width: 1000px) { .tb-date { display: none !important; } }
+    ::-webkit-scrollbar { width: 12px; height: 12px; }
+    ::-webkit-scrollbar-track { background: rgba(255,255,255,0.04); border-radius: 9999px; }
+    ::-webkit-scrollbar-thumb { background: rgba(148,163,184,0.75); border-radius: 9999px; border: 3px solid transparent; background-clip: padding-box; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(203,213,225,0.95); background-clip: padding-box; border: 3px solid transparent; }
+    ::-webkit-scrollbar-corner { background: transparent; }
+    * { scrollbar-color: rgba(148,163,184,0.75) rgba(255,255,255,0.04); scrollbar-width: thin; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="text/babel" src="lib/faCls.jsx"></script>
+  <script type="text/babel" src="lib/HC.jsx"></script>
+  <script type="text/babel" src="sidebar.jsx"></script>
+  <script type="text/babel" src="shell.jsx"></script>
+  <script type="text/babel" src="drawers.jsx"></script>
+  <script type="text/babel" src="export-panel.jsx"></script>
+  <script type="text/babel" src="aiflow.jsx"></script>
+  <script type="text/babel" src="ai-assistant-panel.jsx"></script>
+  <script type="text/babel" src="am-feed.jsx"></script>
+  <script type="text/babel" src="home.jsx"></script>
+  <script type="text/babel" src="dims.jsx"></script>
+  <script type="text/babel" src="management.jsx"></script>
+  <script type="text/babel" src="opportunity.jsx"></script>
+  <script type="text/babel" src="opportunity-extras.jsx"></script>
+  <script type="text/babel" src="clientdetail.jsx"></script>
+  <script type="text/babel" src="client-analytics.jsx"></script>
+  <script type="text/babel" src="advantage.jsx"></script>
+  <script type="text/babel" src="distribution-data.jsx"></script>
+  <script type="text/babel" src="distribution.jsx"></script>
+  <script type="text/babel" src="distribution-share.jsx"></script>
+  <script type="text/babel" src="lvl-data.jsx"></script>
+  <script type="text/babel" src="lvl-ui.jsx"></script>
+  <script type="text/babel" src="lvl-dimtile.jsx"></script>
+  <script type="text/babel" src="lvl-detail.jsx"></script>
+  <script type="text/babel" src="level2.jsx"></script>
+  <script type="text/babel" src="level3.jsx"></script>
+  <script type="text/babel" src="lead-data.jsx"></script>
+  <script type="text/babel" src="lead-parts.jsx"></script>
+  <script type="text/babel" src="leadership.jsx"></script>
+  <script type="text/babel" src="datapacks-data.jsx"></script>
+  <script type="text/babel" src="datapacks.jsx"></script>
+  <script type="text/babel" src="tilestudio/DataModel.jsx"></script>
+  <script type="text/babel" src="tilestudio/Chart.jsx"></script>
+  <script type="text/babel" src="tilestudio/TileViz.jsx"></script>
+  <script type="text/babel" src="tilestudio/TileAI.jsx"></script>
+  <script type="text/babel" src="tilestudio/TileStudio.jsx"></script>
+  <script type="text/babel" src="tilestudio/TilePreview.jsx"></script>
+  <script type="text/babel" src="custom-reports.jsx"></script>
+  <script type="text/babel">
+    function App() {
+      const [active, setActive] = React.useState(() => {
+        try { return localStorage.getItem('amp_active') || 'home'; } catch(e) { return 'home'; }
+      });
+      React.useEffect(() => {
+        try { localStorage.setItem('amp_active', active); } catch(e) {}
+      }, [active]);
+
+      const [sbWidth, setSbWidth] = React.useState(56);
+
+      // Subscription level. Level 1 is the data-pack foundation the existing
+      // dashboards run on; 2 adds sales + CRM, 3 adds segmentation and
+      // propensity. The switcher gates which views the nav offers.
+      const [level, setLevel] = React.useState(() => {
+        try { return Number(localStorage.getItem('amp_level')) || 3; } catch(e) { return 3; }
+      });
+      React.useEffect(() => { try { localStorage.setItem('amp_level', String(level)); } catch(e) {} }, [level]);
+
+      const SECTIONS = [
+        null,
+        { id: 'l1', label: 'Level 1 · Distribution Intel' },
+        { id: 'l2', label: 'Level 2 · Sales & CRM' },
+        { id: 'l3', label: 'Level 3 · Predictive' },
+      ];
+      const ALL_NAV = [
+        { id: 'home', label: 'Ask Field', icon: 'sparkles' },
+        { id: 'management', label: 'Management', icon: 'chart-column', section: 'l1' },
+        { id: 'opportunity', label: 'Opportunity', icon: 'bullseye', section: 'l1' },
+        { id: 'advantage', label: 'Competitive Advantage', icon: 'trophy', section: 'l1' },
+        { id: 'reports', label: 'Custom Reports', icon: 'table-columns', section: 'l1' },
+        { id: 'l2sales', label: 'Sales & Activity', icon: 'handshake', section: 'l2' },
+        { id: 'lead', label: 'Sales Leadership', icon: 'people-group', section: 'l2' },
+        { id: 'l3intel', label: 'Segmentation & Signals', icon: 'wave-pulse', section: 'l3' },
+      ];
+      const SECTION_LEVEL = { l1: 1, l2: 2, l3: 3 };
+      const NAV = ALL_NAV.filter(it => !it.section || SECTION_LEVEL[it.section] <= level);
+      const VISIBLE_SECTIONS = SECTIONS.filter(s => !s || SECTION_LEVEL[s.id] <= level);
+      React.useEffect(() => {
+        if (!NAV.some(it => it.id === active) && ['l2sales','l3intel','lead'].includes(active)) setActive('home');
+      }, [level]);
+      React.useEffect(() => { if (active === 'distribution') setActive('opportunity'); }, [active]);
+      const NAV_FOOTER = [
+        { id: 'settings', label: 'Settings', icon: 'gear' },
+        { id: 'datapacks', label: 'Data Packs', icon: 'database' },
+        { id: 'help', label: 'Help & support', icon: 'circle-question' },
+      ];
+
+      const [filterOpen, setFilterOpen] = React.useState(false);
+      const [aiOpen, setAiOpen] = React.useState(false);
+      const [filters, setFilters] = React.useState(DEFAULT_FILTERS);
+      const FILTER_ARRAY_KEYS = ['regions','channels','vehicles','advantage','salespeople','categories','focus','firms','offices','teams','advisors'];
+      const filterCount = FILTER_ARRAY_KEYS.reduce((n,k) => n + ((filters[k] || []).length), 0);
+      const filterActive = filterCount > 0 || filters.aumMax < 200;
+      const [exportOpen, setExportOpen] = React.useState(false);
+      const [clientDetail, setClientDetail] = React.useState(null); // CLIENT_ROW or null
+      const [pptOpen, setPptOpen] = React.useState(false);
+      const [periodMgmt, setPeriodMgmt] = React.useState('YTD');
+      const [periodOpp, setPeriodOpp] = React.useState('YTD');
+      const [periodAdv, setPeriodAdv] = React.useState('YTD');
+      const [periodDist, setPeriodDist] = React.useState('YTD');
+      const [oppSelections, setOppSelections] = React.useState([]);
+      const [advSelections, setAdvSelections] = React.useState([]);
+      const [mgmtSelections, setMgmtSelections] = React.useState([]);
+      const clearAdvSelections = React.useCallback(() => {
+        advSelections.forEach(s => s.onRemove && s.onRemove());
+      }, [advSelections]);
+      const [distSelections, setDistSelections] = React.useState([]);
+      const [lvlSelections, setLvlSelections] = React.useState([]);
+      const [periodLvl2, setPeriodLvl2] = React.useState('YTD');
+      const [periodLvl3, setPeriodLvl3] = React.useState('YTD');
+      // AUM / Inflows / Net Flows is one choice across both Level 2 and Level 3.
+      const [lvlMeasure, setLvlMeasure] = React.useState('Inflows');
+      // Level 2 + Level 3 share one characteristic-filter state so moving
+      // between the two views keeps the same slice of the territory.
+      const [lvlFilters, setLvlFilters] = React.useState(LV_FILTER_DEFAULT);
+      const [lvlFilterOpen, setLvlFilterOpen] = React.useState(false);
+      const [leadSelections, setLeadSelections] = React.useState([]);
+      const [periodLead, setPeriodLead] = React.useState('YTD');
+      const [leadRole, setLeadRole] = React.useState('ext');
+      const clearLvlSelections = React.useCallback(() => {
+        setLvlFilters({ ...LV_FILTER_DEFAULT });
+        lvlSelections.forEach(s => s.onRemove && s.onRemove());
+      }, [lvlSelections]);
+      const clearMgmtSelections = React.useCallback(() => {
+        mgmtSelections.forEach(s => s.onRemove && s.onRemove());
+      }, [mgmtSelections]);
+      const clearOppSelections = React.useCallback(() => {
+        oppSelections.forEach(s => s.onRemove && s.onRemove());
+      }, [oppSelections]);
+      const clearDistSelections = React.useCallback(() => {
+        distSelections.forEach(s => s.onRemove && s.onRemove());
+      }, [distSelections]);
+
+      // Doe Wealth client row used by AI flow shortcut to client profile
+      const POLK_ROW = { type:'Teams', name:'The Doe Wealth Group', adv:'Strong', advDot:'rgb(52,211,153)', opp:'$142.5M', yours:'$28.4M', share:'19.9%', iOpp:'$18.2M', iYours:'$4.8M', iShare:'26.4%', nOpp:'$8.4M', nYours:'$2.1M', nShare:'25.0%', ca:'$22.4M', perf:'$14.2M', fee:'$8.2M', totInflow:'$3.1M', netFlow:'+$1.4M' };
+
+      // Build a ClientDetailPage-compatible row from an AI list client (TOP_5_CLIENTS shape).
+      // The detail page derives inflow / netflow from these so we synthesize plausible values.
+      const rowFromAIClient = (c) => {
+        if (!c) return POLK_ROW;
+        if (c.name === POLK_ROW.name) return POLK_ROW;
+        // Scale inflow ≈ 13% of opp, netflow ≈ 6% of opp (matching Doe ratios).
+        const parseM = (s) => {
+          const n = parseFloat(String(s||'').replace(/[^0-9.+-]/g,'')) || 0;
+          return /B/i.test(s||'') ? n*1000 : n;
+        };
+        const oppM = parseM(c.opp), yrsM = parseM(c.yours);
+        const fmt = (v) => v >= 100 ? `$${v.toFixed(0)}M` : `$${v.toFixed(1)}M`;
+        return {
+          type: c.type === 'FA' ? 'FA' : c.type === 'BA' ? 'BA' : 'Teams',
+          name: c.name, firm: c.firm,
+          adv: c.advantage, advDot: c.advantageDot,
+          opp: c.opp, yours: c.yours, share: c.share,
+          iOpp: fmt(oppM*0.128), iYours: fmt(yrsM*0.169), iShare:'26.4%',
+          nOpp: '+' + fmt(oppM*0.059), nYours:'+' + fmt(yrsM*0.074), nShare:'25.0%',
+          ca:'$0M', perf:'$0M', fee:'$0M', totInflow:'$0M', netFlow:'+$0M',
+        };
+      };
+
+      const handleAIAction = (action) => {
+        // action may be a string (legacy home-page calls) or an object {id, ...}
+        const id = typeof action === 'string' ? action : action && action.id;
+        if (id === 'viewPolkProfile') {
+          setClientDetail(POLK_ROW);
+        } else if (id === 'openClient') {
+          setClientDetail(rowFromAIClient(action.client));
+        } else if (id === 'createMaterial') {
+          setPptOpen(true);
+        } else if (id === 'openManagement') {
+          setActive('management');
+        } else if (id === 'scheduleMeeting') {
+          // no-op for prototype: could open a calendar drawer
+        }
+      };
+
+      const DATE = (() => {
+        const d = new Date();
+        const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+        const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+        const n = d.getDate();
+        const suf = (n%10===1&&n!==11)?'st':(n%10===2&&n!==12)?'nd':(n%10===3&&n!==13)?'rd':'th';
+        return `${days[d.getDay()]} ${months[d.getMonth()]} ${n}${suf} ${d.getFullYear()}`;
+      })();
+
+      return (
+        <div style={{ display:'flex', height:'100vh', overflow:'hidden', background:'transparent' }} data-screen-label={
+          active === 'home' ? '01 Home' :
+          active === 'management' ? '02 Management' :
+          active === 'opportunity' ? '03 Opportunity' :
+          active === 'advantage' ? '04 Competitive Advantage' :
+          active === 'reports' ? '06 Custom Reports' :
+          active === 'datapacks' ? '07 Data Packs' :
+          active === 'l2sales' ? '08 Level 2 Sales & Activity' :
+          active === 'l3intel' ? '09 Level 3 Segmentation & Signals' :
+          active === 'lead' ? '10 Sales Leadership' : active
+        }>
+          <Sidebar
+            items={NAV}
+            sections={VISIBLE_SECTIONS}
+            footerItems={NAV_FOOTER}
+            user={{ name: 'Morgan Vance', role: 'Distribution Lead' }}
+            active={active}
+            onSelect={setActive}
+            brand="FIELD"
+            signOutHref="https://claude.ai/design/p/019dd4c5-78f0-71ea-8229-0ec671ae00aa?file=Demo%20Landing%20Page.html&present=1"
+            signOutLabel="Sign out"
+            persistKey="amp_sb_expanded"
+            persistAccordionKey="amp_sb_accordion"
+            onWidthChange={setSbWidth}
+          />
+          <div style={{ flex:1, marginLeft: sbWidth + (sbWidth > 100 ? 24 : 0), display:'flex', flexDirection:'column', minWidth:0, transition:'margin-left 220ms cubic-bezier(0.22, 0.61, 0.36, 1)' }}>
+            {active === 'home' && (
+              <>
+                <TopBar title="Ask Field" dateStr={DATE} showSearch={false} levelSwitch={<LvLevelSwitch level={level} onChange={setLevel} />} />
+                <HomePage onNav={setActive} onAIAction={handleAIAction} />
+              </>
+            )}
+            {active === 'management' && (
+              <>
+                <TopBar title="Management Dashboard" dateStr={DATE} activeSelections={mgmtSelections} period={periodMgmt} onPeriod={setPeriodMgmt} showExport showFilter onClearAll={clearMgmtSelections}
+                  onExportClick={() => setExportOpen(true)}
+                  onFilterClick={() => setFilterOpen(true)} filterActive={filterActive} onAiClick={() => setAiOpen(true)} />
+                <main style={{ flex:1, display:'flex', flexDirection:'column', minHeight:0, overflow:'auto' }}><ManagementPage filters={filters} onSelectionsChange={setMgmtSelections} /></main>
+              </>
+            )}
+            {active === 'opportunity' && (
+              <>
+                <TopBar
+                  title={"Opportunity Dashboard"} dateStr={DATE}
+                  activeSelections={oppSelections}
+                  period={periodOpp} onPeriod={setPeriodOpp} showExport showFilter
+                  onClearAll={clearOppSelections}
+                  onExportClick={() => setExportOpen(true)}
+                  onFilterClick={() => setFilterOpen(true)} filterActive={filterActive}
+                  onAiClick={() => setAiOpen(true)}
+                />
+                <main style={{ flex:1, minHeight:0, overflow:'auto' }}>
+                  <OpportunityPage
+                    onViewClient={(row) => setClientDetail(row)}
+                    onSelectionsChange={setOppSelections}
+                    filters={filters}
+                    setFilters={setFilters}
+                  />
+                </main>
+              </>
+            )}
+            {active === 'advantage' && (
+              <>
+                <TopBar
+                  title="Competitive Advantage" dateStr={DATE}
+                  activeSelections={advSelections}
+                  period={periodAdv} onPeriod={setPeriodAdv} showExport showFilter
+                  onClearAll={clearAdvSelections}
+                  onExportClick={() => setExportOpen(true)}
+                  onFilterClick={() => setFilterOpen(true)} filterActive={filterActive}
+                  onAiClick={() => setAiOpen(true)}
+                />
+                <main style={{ flex:1, minHeight:0, overflow:'auto' }}><AdvantagePage onSelectionsChange={setAdvSelections} onViewClient={(row) => setClientDetail(row)} /></main>
+              </>
+            )}
+            {active === 'distribution' && (
+              <>
+                <TopBar
+                  title="Distribution Intelligence" dateStr={DATE}
+                  activeSelections={distSelections}
+                  period={periodDist} onPeriod={setPeriodDist} showExport showFilter
+                  onClearAll={clearDistSelections}
+                  onExportClick={() => setExportOpen(true)}
+                  onFilterClick={() => setFilterOpen(true)} filterActive={filterActive}
+                  onAiClick={() => setAiOpen(true)}
+                />
+                <main style={{ flex:1, minHeight:0, overflow:'auto' }}><DistributionPage onSelectionsChange={setDistSelections} onViewClient={(row) => setClientDetail(row)} /></main>
+              </>
+            )}
+            {active === 'l2sales' && (
+              <>
+                <TopBar
+                  title="Sales & Activity"
+                  badge={<LvLevelBadge n={2} />}
+                  secondRow
+                  levelSwitch={<LvLevelSwitch level={level} onChange={setLevel} />}
+                  measureToggle={<TabPills options={['AUM', 'Inflows', 'Net Flows']} value={lvlMeasure} onChange={setLvlMeasure} />}
+                  activeSelections={lvlSelections}
+                  period={periodLvl2} onPeriod={setPeriodLvl2} showExport showFilter
+                  filterActive={lvCount(lvlFilters) > 0}
+                  onFilterClick={() => setLvlFilterOpen(true)}
+                  onClearAll={clearLvlSelections}
+                  onExportClick={() => setExportOpen(true)}
+                  onAiClick={() => setAiOpen(true)}
+                />
+                <main style={{ flex:1, minHeight:0, overflow:'auto' }}>
+                  <Level2Page filters={lvlFilters} setFilters={setLvlFilters} period={periodLvl2} measure={lvlMeasure}
+                    onSelectionsChange={setLvlSelections}
+                    onViewClient={(row) => setClientDetail(row)} />
+                </main>
+              </>
+            )}
+            {active === 'l3intel' && (
+              <>
+                <TopBar
+                  title="Segmentation & Signals"
+                  badge={<LvLevelBadge n={3} />}
+                  secondRow
+                  levelSwitch={<LvLevelSwitch level={level} onChange={setLevel} />}
+                  measureToggle={<TabPills options={['AUM', 'Inflows', 'Net Flows']} value={lvlMeasure} onChange={setLvlMeasure} />}
+                  activeSelections={lvlSelections}
+                  period={periodLvl3} onPeriod={setPeriodLvl3} showExport showFilter
+                  filterActive={lvCount(lvlFilters) > 0}
+                  onFilterClick={() => setLvlFilterOpen(true)}
+                  onClearAll={clearLvlSelections}
+                  onExportClick={() => setExportOpen(true)}
+                  onAiClick={() => setAiOpen(true)}
+                />
+                <main style={{ flex:1, minHeight:0, overflow:'auto' }}>
+                  <Level3Page filters={lvlFilters} setFilters={setLvlFilters} period={periodLvl3} measure={lvlMeasure}
+                    onSelectionsChange={setLvlSelections}
+                    onViewClient={(row) => setClientDetail(row)} />
+                </main>
+              </>
+            )}
+            {active === 'lead' && (
+              <>
+                <TopBar
+                  title="Sales Leadership"
+                  badge={<LvLevelBadge n={level >= 3 ? '2 + 3' : 2} />}
+                  secondRow
+                  levelSwitch={<LvLevelSwitch level={level} onChange={setLevel} />}
+                  measureToggle={<div style={{ display:'flex', gap:8, alignItems:'center' }}>
+                    <TabPills options={['Externals','Internals','Specialists']} value={ML_ROLE_LABEL[leadRole]} onChange={v => setLeadRole(ML_ROLE_KEYS.find(k => ML_ROLE_LABEL[k] === v))} />
+                    <TabPills options={['AUM', 'Inflows', 'Net Flows']} value={lvlMeasure} onChange={setLvlMeasure} />
+                  </div>}
+                  activeSelections={leadSelections}
+                  period={periodLead} onPeriod={setPeriodLead} showExport
+                  onClearAll={() => leadSelections.forEach(s => s.onRemove && s.onRemove())}
+                  onExportClick={() => setExportOpen(true)}
+                  onAiClick={() => setAiOpen(true)}
+                />
+                <main style={{ flex:1, minHeight:0, overflow:'auto' }}>
+                  <LeadershipPage level={level} measure={lvlMeasure} period={periodLead} role={leadRole} onSelectionsChange={setLeadSelections} />
+                </main>
+              </>
+            )}
+            {active === 'distribution' && (
+              <>
+                <TopBar title="Distribution Intelligence" dateStr={DATE} />
+                <main style={{ flex:1, minHeight:0, overflow:'auto' }} />
+              </>
+            )}
+            {active === 'reports' && (
+              <>
+                <TopBar title="Custom Reports" dateStr={DATE} onAiClick={() => setAiOpen(true)} />
+                <main style={{ flex:1, minHeight:0, overflow:'auto', display:'flex', flexDirection:'column' }}><CustomReportsPage /></main>
+              </>
+            )}
+
+            {active === 'datapacks' && (
+              <>
+                <TopBar title="Data Packs" dateStr={DATE} />
+                <main style={{ flex:1, minHeight:0, overflow:'auto' }}><DataPacksPage /></main>
+              </>
+            )}
+            {!['home','management','opportunity','advantage','distribution','datapacks','reports','l2sales','l3intel','lead'].includes(active) && (
+              <>
+                <TopBar title={active.charAt(0).toUpperCase() + active.slice(1)} dateStr={DATE} />
+                <div style={{ padding: 40, color:'rgb(163,163,163)' }}>
+                  <h2 style={{ color:'rgb(249,250,251)' }}>Coming soon</h2>
+                  <p>This screen is not part of the prototype.</p>
+                </div>
+              </>
+            )}
+          </div>
+          <ClientDetailPage clientRow={clientDetail} onBack={() => setClientDetail(null)} />
+          <AIAssistantPanel
+            open={aiOpen}
+            onClose={() => setAiOpen(false)}
+            onAction={handleAIAction}
+          />
+          <PPTPreviewModal open={pptOpen} onClose={() => setPptOpen(false)} />
+          <FilterDrawer
+            open={filterOpen}
+            onClose={() => setFilterOpen(false)}
+            filters={filters}
+            onChange={setFilters}
+            onApply={() => setFilterOpen(false)}
+            onReset={() => setFilters(DEFAULT_FILTERS)}
+          />
+          <FilterDrawer
+            open={lvlFilterOpen}
+            onClose={() => setLvlFilterOpen(false)}
+            filters={lvlFilters}
+            defaults={LV_FILTER_DEFAULT}
+            arrayKeys={LV_FILTER_KEYS.filter(k => Array.isArray(LV_FILTER_DEFAULT[k]))}
+            chipLabel={lvChipLabel}
+            renderSections={({ local, toggle, setMany }) => (
+              <LvDrawerSections local={local} toggle={toggle} setMany={setMany} level={active === 'l3intel' ? 3 : 2} />
+            )}
+            onChange={setLvlFilters}
+            onApply={() => setLvlFilterOpen(false)}
+            onReset={() => setLvlFilters({ ...LV_FILTER_DEFAULT })}
+          />
+          <ExportPanel
+            open={exportOpen}
+            onClose={() => setExportOpen(false)}
+            view={active}
+            period={active === 'management' ? periodMgmt : active === 'opportunity' ? periodOpp : active === 'advantage' ? periodAdv : periodDist}
+          />
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>
