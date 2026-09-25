@@ -28,6 +28,19 @@ function L2BookTable({ rows, measure, period, roles, selected, onToggle, onViewC
   const M = LV_MEASURES[measure];
   const pk = L2_PERIOD_KEY(period);
   const pkShort = L2_PERIOD_SHORT(pk);
+  const wrapRef = React.useRef(null);
+  const [wrapW, setWrapW] = React.useState(0);
+  React.useEffect(() => {
+    if (!wrapRef.current || !window.ResizeObserver) return;
+    const ro = new ResizeObserver(() => wrapRef.current && setWrapW(wrapRef.current.clientWidth));
+    ro.observe(wrapRef.current);
+    setWrapW(wrapRef.current.clientWidth);
+    return () => ro.disconnect();
+  }, []);
+  // Wide tiles give share, trend and last-touch days their own columns;
+  // narrower tiles stack them under the figure they qualify.
+  const wide = wrapW >= 1040;
+  const subS = { fontSize: 10, fontWeight: 400, color: 'rgb(176,182,192)', marginTop: 2 };
 
   const val = (r, k) => {
     const a = lvActivity(r, roles);
@@ -46,24 +59,22 @@ function L2BookTable({ rows, measure, period, roles, selected, onToggle, onViewC
   });
 
   return (
-    <div style={{ overflowX: 'auto', overflowY: 'auto', maxHeight: 560 }}>
+    <div ref={wrapRef} style={{ overflowX: 'auto', overflowY: 'auto', maxHeight: 560 }}>
       <table style={{ width: '100%', borderCollapse: 'collapse', tableLayout: 'auto' }}>
         <thead>
           <tr>
             {th('Adv', 'adv', false, { padding: '11px 4px 10px 12px', width: '1%' })}
-            {th('FA / Team', 'name', false, { padding: '11px 10px 10px 6px', width: '1%' })}
+            {th('FA / Team', 'name', false, { padding: '11px 10px 10px 6px' })}
             {th('Mkt opp.', 'opp', true, colTh)}
-            {th('Yours', 'yours', true, colTh)}
-            {th('Share', 'share', true, { ...colTh, paddingRight: GAP })}
-            {th('Total comp adv.', 'ca', true, { ...advTh, paddingLeft: GAP })}
-            {th('Perf adv.', 'perf', true, advTh)}
-            {th('Fee adv.', 'fee', true, { ...advTh, paddingRight: GAP })}
+            {th(wide ? 'Yours' : 'Yours / share', 'yours', true, { ...colTh, paddingRight: wide ? 6 : GAP })}
+            {wide && th('Share', 'share', true, { ...colTh, paddingRight: GAP })}
+            {th('Comp adv. perf · fee', 'ca', true, { ...advTh, paddingLeft: GAP, paddingRight: GAP })}
             {th('Producer cat.', 'cat', false, { ...colTh, textAlign: 'left', paddingLeft: GAP })}
-            {th(lvActualLabel(measure, pkShort), 'sales', true, colTh)}
-            {th('Trend', 'trend', true, colTh)}
+            {th(wide ? lvActualLabel(measure, pkShort) : `${lvActualLabel(measure, pkShort)} / trend`, 'sales', true, colTh)}
+            {wide && th('Trend', 'trend', true, colTh)}
             {th('# Prod', 'prods', true, { ...colTh, paddingRight: GAP })}
-            {th('Act', 'acts', true, { ...colTh, paddingLeft: GAP })}
-            {th('Days', 'days', true, { ...colTh, paddingRight: GAP })}
+            {th(wide ? 'Act' : 'Act / days', 'acts', true, { ...colTh, paddingLeft: GAP, paddingRight: wide ? 6 : GAP })}
+            {wide && th('Days', 'days', true, { ...colTh, paddingRight: GAP })}
             {lvThPlain('Engagement', false, { ...colTh, textAlign: 'left' })}
             {lvThPlain('', true, { padding: '11px 10px 10px 4px', width: '1%' })}
           </tr>
@@ -74,38 +85,47 @@ function L2BookTable({ rows, measure, period, roles, selected, onToggle, onViewC
             const neg = r[M.yours] < 0;
             const a = lvActivity(r, roles);
             const act = lvActual(r, measure, pk);
+            const star = measure !== 'AUM' && r.gapKind !== 'aligned' && act > 0 && (
+              <i className="fa-solid fa-asterisk" title={r.gapKind === 'uncovered'
+                ? 'Includes sales in vehicles the data packs do not cover'
+                : 'Ahead of the pack feed — your sales data is more recent'}
+                style={{ fontSize: 6, marginLeft: 3, verticalAlign: 'top', color: 'rgb(96,165,250)' }} />
+            );
+            const days = <span style={{ color: lvDaysColor(a.days), fontWeight: 600 }}>{a.days == null ? '—' : `${a.days}d`}</span>;
             return (
               <tr key={r.id} onClick={() => onToggle(r.name)} className="dp-row"
                 style={{ cursor: 'pointer', background: on ? 'rgba(16,185,129,0.09)' : 'transparent' }}>
                 <td style={{ ...lvTd, padding: '9px 4px 9px 12px', width: 26 }}>
                   <LvAdvDot grade={r.compAdv} row={r} />
                 </td>
-                <td style={{ ...lvTd, padding: '9px 10px 9px 6px', maxWidth: 190, width: '1%' }}>
+                <td style={{ ...lvTd, padding: '9px 10px 9px 6px', maxWidth: wide ? 240 : 190 }}>
                   <div style={{ minWidth: 0 }}>
                     <div style={{ fontWeight: 500, fontSize: 12, color: 'rgb(249,250,251)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{r.name}</div>
                     <div style={{ fontSize: 10, color: 'rgb(107,114,128)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{r.firm} · {r.city}</div>
                   </div>
                 </td>
                 <td style={colTd}>{M.fmt(r[M.opp])}</td>
-                <td style={{ ...colTd, color: neg ? 'rgb(248,113,113)' : 'rgb(52,211,153)', fontWeight: 600 }}>{M.fmt(r[M.yours])}</td>
-                <td style={{ ...colTd, paddingRight: GAP }}>{lvFmtPct(Math.abs(r[M.share]))}</td>
-                <td style={{ ...advTd, padding: '9px 6px', paddingLeft: GAP, fontWeight: 600, color: 'rgb(219,234,254)' }}>{M.fmt(r[M.perf] + r[M.fee])}</td>
-                <td style={{ ...advTd, padding: '9px 6px' }}>{M.fmt(r[M.perf])}</td>
-                <td style={{ ...advTd, padding: '9px 6px', paddingRight: GAP }}>{M.fmt(r[M.fee])}</td>
+                <td style={{ ...colTd, paddingRight: wide ? 6 : GAP }}>
+                  <div style={{ color: neg ? 'rgb(248,113,113)' : 'rgb(52,211,153)', fontWeight: 600 }}>{M.fmt(r[M.yours])}</div>
+                  {!wide && <div style={subS}>{lvFmtPct(Math.abs(r[M.share]))}</div>}
+                </td>
+                {wide && <td style={{ ...colTd, paddingRight: GAP }}>{lvFmtPct(Math.abs(r[M.share]))}</td>}
+                <td style={{ ...advTd, padding: '9px 6px', paddingLeft: GAP, paddingRight: GAP }}>
+                  <div style={{ fontWeight: 600, color: 'rgb(219,234,254)' }}>{M.fmt(r[M.perf] + r[M.fee])}</div>
+                  <div style={subS}>{M.fmt(r[M.perf])} · {M.fmt(r[M.fee])}</div>
+                </td>
                 <td style={{ ...lvTd, padding: '9px 6px', paddingLeft: GAP, width: '1%' }}><LvProdCatTag cat={r.prodCat} /></td>
                 <td style={{ ...colTd, color: act < 0 ? 'rgb(248,113,113)' : act ? 'rgb(249,250,251)' : 'rgb(107,114,128)', fontWeight: 600 }}>
-                  {lvFmtKs(act, measure)}
-                  {measure !== 'AUM' && r.gapKind !== 'aligned' && act > 0 && (
-                    <i className="fa-solid fa-asterisk" title={r.gapKind === 'uncovered'
-                      ? 'Includes sales in vehicles the data packs do not cover'
-                      : 'Ahead of the pack feed — your sales data is more recent'}
-                      style={{ fontSize: 6, marginLeft: 3, verticalAlign: 'top', color: 'rgb(96,165,250)' }} />
-                  )}
+                  {lvFmtKs(act, measure)}{star}
+                  {!wide && <div style={{ marginTop: 2 }}><LvTrend value={r.salesTrend} compact /></div>}
                 </td>
-                <td style={colTd}><LvTrend value={r.salesTrend} compact /></td>
+                {wide && <td style={colTd}><div style={{ display: 'flex', justifyContent: 'flex-end' }}><LvTrend value={r.salesTrend} compact /></div></td>}
                 <td style={{ ...colTd, paddingRight: GAP }}>{r.products || '—'}</td>
-                <td style={{ ...colTd, paddingLeft: GAP }}>{a.r12}</td>
-                <td style={{ ...colTd, paddingRight: GAP, color: lvDaysColor(a.days), fontWeight: 600 }}>{a.days == null ? '—' : `${a.days}d`}</td>
+                <td style={{ ...colTd, paddingLeft: GAP, paddingRight: wide ? 6 : GAP }}>
+                  <div>{a.r12}</div>
+                  {!wide && <div style={subS}>{days}</div>}
+                </td>
+                {wide && <td style={{ ...colTd, paddingRight: GAP }}>{days}</td>}
                 <td style={{ ...lvTd, padding: '9px 6px', width: '1%' }}><LvEngIcons keys={r.engagement} max={3} /></td>
                 <td style={{ ...tightTd, padding: '7px 10px 7px 4px' }}><LvEyeButton onClick={() => onViewClient(lvClientRow(r))} /></td>
               </tr>
@@ -141,8 +161,8 @@ function L2ActivitySales({ rows, roles, period, onSelect }) {
     }));
     return {
       chart: { type: 'scatter', height: 300, animation: false },
-      xAxis: { title: { text: 'Activities, rolling 12', style: { color: 'rgb(107,114,128)', fontSize: '10px' } }, gridLineWidth: 1 },
-      yAxis: { title: { text: `Actual sales, ${pk} ($M)`, style: { color: 'rgb(107,114,128)', fontSize: '10px' } } },
+      xAxis: { title: { text: 'Activities, rolling 12', style: { color: 'rgb(200,205,213)', fontSize: '10.5px' } }, gridLineWidth: 1 },
+      yAxis: { title: { text: `Actual sales, ${pk} ($M)`, style: { color: 'rgb(200,205,213)', fontSize: '10.5px' } } },
       legend: { enabled: true, align: 'center', verticalAlign: 'bottom' },
       tooltip: {
         formatter: function () {
@@ -205,8 +225,8 @@ function L2ProductionTrend({ rows, roles }) {
   const options = React.useMemo(() => ({
     chart: { type: 'column', height: 280, animation: false },
     xAxis: { categories: months, tickmarkPlacement: 'on' },
-    yAxis: { allowDecimals: false, title: { text: 'FA/Teams', style: { color: 'rgb(107,114,128)', fontSize: '10px' } } },
-    legend: { enabled: true, align: 'center', verticalAlign: 'bottom', maxHeight: 52 },
+    yAxis: { allowDecimals: false, title: { text: 'FA/Teams', style: { color: 'rgb(200,205,213)', fontSize: '10.5px' } } },
+    legend: { enabled: true, align: 'center', verticalAlign: 'bottom' },
     tooltip: { shared: false, valueSuffix: ' FA/Teams' },
     plotOptions: { series: { animation: false, stacking: 'normal' }, column: { pointPadding: 0.04, groupPadding: 0.1, borderWidth: 0 } },
     series,
@@ -279,6 +299,7 @@ function L2NameSearch({ value, onChange }) {
 
 /* ---------- page ---------- */
 
+const LV_TERR_FA = 7050;
 function Level2Page({ onSelectionsChange, onViewClient, filters, setFilters, period, measure }) {
   const [query, setQuery] = React.useState('');
   const [selected, setSelected] = React.useState([]);
@@ -315,6 +336,10 @@ function Level2Page({ onSelectionsChange, onViewClient, filters, setFilters, per
   const coveredN = view.filter(r => lvActivity(r, filters.roles).r12 > 0).length;
   const priorSales = sum(r => r.prior12K) * (pk === 'Rolling 12' ? 1 : pk === 'YTD' ? 0.72 : pk === 'QTD' ? 0.25 : 0.083);
   const salesDelta = priorSales ? ((salesTot - priorSales) / priorSales) * 100 : 0;
+  // Sales goal is set for the whole territory, so it reads the full book
+  // whatever filters are on.
+  const TG = lvTerritoryGoal(pk);
+  const goal = TG.goal, goalAct = TG.act, goalPct = TG.pct;
 
   return (
     <div style={{ padding: 20, display: 'flex', flexDirection: 'column', gap: 16 }}>
@@ -325,18 +350,22 @@ function Level2Page({ onSelectionsChange, onViewClient, filters, setFilters, per
         { label: 'Mkt opp.', value: M.fmt(opp) },
         { label: 'Yours', value: M.fmt(yours), strong: true },
         { label: 'Mkt share', value: opp ? lvFmtPct(yours / opp) : '—' },
-        { label: 'FA/Teams', value: view.length.toLocaleString() },
+        { label: 'Focus FA/Teams', value: view.length.toLocaleString(), sub: `of ${LV_TERR_FA.toLocaleString()} in territory` },
         { label: lvActualLabel(measure, pkShort), value: lvFmtKs(salesTot, measure), sub: measure === 'Inflows' ? `${salesDelta >= 0 ? '↑' : '↓'} ${Math.abs(salesDelta).toFixed(0)}% vs prior` : undefined },
+        { label: `${pkShort} sales goal`, value: lvFmtKs(goal, 'Inflows'), sub: `Annual ${lvFmtKs(TG.annual, 'Inflows')}${pk === 'Rolling 12' ? '' : ` · ${Math.round(TG.frac * 100)}% of year`}` },
+        { label: '% to goal', value: `${Math.round(goalPct * 100)}%`, strong: goalPct >= 1, sub: `${lvFmtKs(goalAct, 'Inflows')} sold · all products` },
         { label: measure === 'AUM' ? 'Holding' : 'Selling', value: sellingN.toLocaleString(), sub: `${view.length ? Math.round((sellingN / view.length) * 100) : 0}% of territory` },
         { label: 'Activities', value: actsTot.toLocaleString(), sub: `${(actsTot / Math.max(view.length, 1)).toFixed(1)} avg` },
         { label: 'Covered', value: coveredN.toLocaleString(), sub: `${view.length ? Math.round((coveredN / view.length) * 100) : 0}% of territory` },
       ]} />
 
-      <LvDimTileRow storageKey="amp_l2dims" dims={LV_DIMS_L2}
-        defaults={['firm', 'vehicle', 'product', 'prodCat', 'prodBand', 'productBand']}
-        rows={rows} highlight={selected.length ? view : null} measure={measure} period={period}
-        filters={filters} setFilters={setFilters} />
-
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, alignItems: 'stretch', containerType: 'inline-size' }}>
+        <style>{'.l2-rail{position:relative}.l2-rail-in{position:absolute;inset:0}@container (max-width: 1180px){.l2-rail{flex-basis:100%!important}.l2-rail-in{position:static!important}.l2-rail-in .l3-sig-list{max-height:200px!important}}'}</style>
+        <div className="l2-rail" style={{ flex: '1 0 250px', maxWidth: '100%', minWidth: 0 }}>
+          <div className="l2-rail-in">
+            <LvDimRail rows={rows} measure={measure} period={period} filters={filters} setFilters={setFilters} />
+          </div>
+        </div>
       <Tile
         title={`${LV_TERRITORY} Territory`}
         subtitle={`${LV_WHOLESALER} · opportunity and competitive advantage from the unified data packs, production and activity from your own systems`}
@@ -352,10 +381,12 @@ function Level2Page({ onSelectionsChange, onViewClient, filters, setFilters, per
             )}
           </div>
         }
-        pad={0} style={{ minWidth: 0 }}>
+        pad={0} style={{ flex: '999 1 600px', minWidth: 0 }}>
         <L2BookTable rows={gridRows} measure={measure} period={period} roles={filters.roles} selected={selected}
           onToggle={toggleSel} onViewClient={onViewClient} onAdvFilter={v => tog('compAdv', v)} />
       </Tile>
+      </div>
+
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(460px,1fr))', gap: 16 }}>
         <Tile title="Activity against sales"
@@ -369,6 +400,11 @@ function Level2Page({ onSelectionsChange, onViewClient, filters, setFilters, per
           <L2ProductionTrend rows={rows} roles={filters.roles} />
         </Tile>
       </div>
+
+      <LvDimTileRow storageKey="amp_l2dims" dims={LV_DIMS_L2}
+        defaults={['firm', 'vehicle', 'product', 'prodCat', 'prodBand', 'productBand']}
+        rows={rows} highlight={selected.length ? view : null} measure={measure} period={period}
+        filters={filters} setFilters={setFilters} />
     </div>
   );
 }

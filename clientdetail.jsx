@@ -180,6 +180,7 @@ function ClientDetailPage({ clientRow, onBack }) {
         <div style={{ gridColumn:'span 2', minWidth:0, display:'flex' }}><TeamMembersCard d={d} /></div>
         <OtherAdvisorsCard d={d} />
       </div>
+      {(() => { const lr = clientRow.lvRow || (window.LV_ROWS || []).find(x => x.name === clientRow.name); let lv = 3; try { lv = Number(localStorage.getItem('amp_level')) || 3; } catch (e) {} return lr && lv >= 3 ? <NbaCard row={lr} /> : null; })()}
       {clientRow.lvRow && <ActualSalesCard row={clientRow.lvRow} />}
       <KpiRowCards d={d} />
       <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:16 }}>
@@ -255,7 +256,7 @@ function DetailHeader({ d }) {
             <i className="fa-solid fa-building" style={{ color:'rgb(96,165,250)', fontSize:14, marginTop:3 }} />
             <div style={{ flex:1 }}>
               <div style={{ fontFamily:'Inter', fontSize:11.5, fontWeight:600, color:'rgb(229,231,235)' }}>{d.address.label}</div>
-              <div style={{ fontFamily:'Inter', fontSize:10.5, color:'rgb(107,114,128)', textTransform:'uppercase', letterSpacing:0.6 }}>{d.address.kind}</div>
+              <div style={{ fontFamily:'Inter', fontSize:10.5, color:'rgb(200,205,213)', textTransform:'uppercase', letterSpacing:0.6 }}>{d.address.kind}</div>
             </div>
             <div style={{ textAlign:'right' }}>
               <div style={{ fontFamily:'Inter', fontSize:11, color:'rgb(209,213,219)' }}>{d.address.line1}</div>
@@ -397,7 +398,7 @@ function OtherAdvisorsCard({ d }) {
   );
 }
 
-const otherTh = { padding:'6px 8px 8px', textAlign:'right', fontFamily:'Inter', fontSize:9.5, fontWeight:600, color:'rgb(107,114,128)', textTransform:'uppercase', letterSpacing:0.6 };
+const otherTh = { padding:'6px 8px 8px', textAlign:'right', fontFamily:'Inter', fontSize:9.5, fontWeight:600, color:'rgb(200,205,213)', textTransform:'uppercase', letterSpacing:0.6 };
 const otherTd = { padding:'10px 8px', textAlign:'right', color:'rgb(163,163,163)', fontVariantNumeric:'tabular-nums', fontSize:11.5 };
 
 /* ===================================================== */
@@ -440,7 +441,7 @@ function KpiBigCard({ label, labelColor, headline, priorDelta, priorPositive, op
 function KpiSubStat({ label, value, color, bold }) {
   return (
     <div>
-      <div style={{ fontFamily:'Inter', fontSize:9.5, fontWeight:600, color:'rgb(107,114,128)', textTransform:'uppercase', letterSpacing:0.8 }}>{label}</div>
+      <div style={{ fontFamily:'Inter', fontSize:9.5, fontWeight:600, color:'rgb(200,205,213)', textTransform:'uppercase', letterSpacing:0.8 }}>{label}</div>
       <div style={{
         marginTop:4,
         fontFamily:'Inter', fontSize:18, fontWeight: bold ? 700 : 500,
@@ -777,7 +778,7 @@ const advBtnStyle = {
   border:'1px solid rgba(75,85,99,0.5)', borderRadius:6,
   color:'rgb(209,213,219)', fontFamily:'Inter', fontSize:11, cursor:'pointer',
 };
-const caTh  = { padding:'10px 10px', textAlign:'left',  fontFamily:'Inter', fontSize:9.5, fontWeight:600, color:'rgb(107,114,128)', textTransform:'uppercase', letterSpacing:0.6, whiteSpace:'nowrap' };
+const caTh  = { padding:'10px 10px', textAlign:'left',  fontFamily:'Inter', fontSize:9.5, fontWeight:600, color:'rgb(200,205,213)', textTransform:'uppercase', letterSpacing:0.6, whiteSpace:'nowrap' };
 const caThR = { ...caTh, textAlign:'right' };
 const caTd  = { padding:'12px 10px', color:'rgb(229,231,235)', fontVariantNumeric:'tabular-nums', whiteSpace:'nowrap' };
 const caTdR = { padding:'12px 10px', textAlign:'right', color:'rgb(163,163,163)', fontVariantNumeric:'tabular-nums', whiteSpace:'nowrap' };
@@ -932,9 +933,9 @@ function MoneyInMotionCard({ d }) {
   );
 }
 
-const mmTh = { padding:'10px 14px', textAlign:'left', fontFamily:'Inter', fontSize:9.5, fontWeight:600, color:'rgb(107,114,128)', textTransform:'uppercase', letterSpacing:0.6 };
+const mmTh = { padding:'10px 14px', textAlign:'left', fontFamily:'Inter', fontSize:9.5, fontWeight:600, color:'rgb(200,205,213)', textTransform:'uppercase', letterSpacing:0.6 };
 const mmThR = { ...mmTh, textAlign:'right' };
-const mmThSub = { padding:'8px 14px', textAlign:'left', fontFamily:'Inter', fontSize:9, fontWeight:600, color:'rgb(107,114,128)', textTransform:'uppercase', letterSpacing:0.6 };
+const mmThSub = { padding:'8px 14px', textAlign:'left', fontFamily:'Inter', fontSize:9, fontWeight:600, color:'rgb(200,205,213)', textTransform:'uppercase', letterSpacing:0.6 };
 const mmThSubR = { ...mmThSub, textAlign:'right' };
 const mmTd = { padding:'12px 14px', color:'rgb(229,231,235)' };
 const mmTdR = { padding:'12px 14px', textAlign:'right', color:'rgb(163,163,163)', fontVariantNumeric:'tabular-nums' };

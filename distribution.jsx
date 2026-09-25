@@ -188,7 +188,7 @@ function DistTerritoryMap({ sigType, selectedTerr, onTerrClick, height = 432 }) 
       {/* Bubble size legend */}
       <div style={{ position:'absolute', right:14, bottom:12, zIndex:2, padding:'8px 12px',
         background:'rgba(13,20,32,0.78)', border:'1px solid rgba(75,85,99,0.4)', borderRadius:8, backdropFilter:'blur(6px)' }}>
-        <div style={{ fontFamily:'Inter', fontSize:9.5, fontWeight:600, color:'rgb(107,114,128)', textTransform:'uppercase', letterSpacing:0.5, marginBottom:5 }}>Bubble = est. opp AUM</div>
+        <div style={{ fontFamily:'Inter', fontSize:9.5, fontWeight:600, color:'rgb(200,205,213)', textTransform:'uppercase', letterSpacing:0.5, marginBottom:5 }}>Bubble = est. opp AUM</div>
         <div style={{ display:'flex', alignItems:'flex-end', gap:12 }}>
           {[[7,'$20M'],[11,'$50M'],[16,'$100M']].map(([r,lbl],i) => (
             <div key={i} style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:3 }}>
@@ -363,12 +363,12 @@ function DistPracticeTable({ practices, sigType, selectedTerr, onViewClient }) {
             <tr>
               {th('Practice','name')}
               {th('Territory','terr')}
-              <th style={{ textAlign:'left', padding:'11px 16px 10px', fontFamily:'Inter', fontSize:10, fontWeight:500, color:'rgb(107,114,128)', letterSpacing:0.5, textTransform:'uppercase', position:'sticky', top:0, background:'rgba(17,24,39,0.96)', backdropFilter:'blur(6px)', zIndex:5, borderBottom:'1px solid rgba(75,85,99,0.35)' }}>Signal Types</th>
+              <th style={{ textAlign:'left', padding:'11px 16px 10px', fontFamily:'Inter', fontSize:10, fontWeight:500, color:'rgb(200,205,213)', letterSpacing:0.5, textTransform:'uppercase', position:'sticky', top:0, background:'rgba(17,24,39,0.96)', backdropFilter:'blur(6px)', zIndex:5, borderBottom:'1px solid rgba(75,85,99,0.35)' }}>Signal Types</th>
               {th('Signals','sigs',true)}
               {th('Est. Opp AUM','opp',true)}
               {th('Score','score',true)}
               <th style={{ width:24, position:'sticky', top:0, background:'rgba(17,24,39,0.96)', zIndex:5, borderBottom:'1px solid rgba(75,85,99,0.35)' }}></th>
-              <th style={{ width:64, textAlign:'right', padding:'11px 16px 10px', fontFamily:'Inter', fontSize:10, fontWeight:500, color:'rgb(107,114,128)', letterSpacing:0.5, textTransform:'uppercase', position:'sticky', top:0, background:'rgba(17,24,39,0.96)', backdropFilter:'blur(6px)', zIndex:5, borderBottom:'1px solid rgba(75,85,99,0.35)' }}>Details</th>
+              <th style={{ width:64, textAlign:'right', padding:'11px 16px 10px', fontFamily:'Inter', fontSize:10, fontWeight:500, color:'rgb(200,205,213)', letterSpacing:0.5, textTransform:'uppercase', position:'sticky', top:0, background:'rgba(17,24,39,0.96)', backdropFilter:'blur(6px)', zIndex:5, borderBottom:'1px solid rgba(75,85,99,0.35)' }}>Details</th>
             </tr>
           </thead>
           <tbody>
@@ -429,7 +429,7 @@ function DistPracticeTable({ practices, sigType, selectedTerr, onViewClient }) {
                         <div style={{ display:'flex', flexDirection:'column', gap:8, padding:'14px 16px' }}>
                           {p.firmLink && (
                             <div style={{ display:'flex', alignItems:'center', gap:14, flexWrap:'wrap', background:'rgba(255,255,255,0.03)', border:'1px solid rgba(75,85,99,0.4)', borderRadius:8, padding:'10px 14px' }}>
-                              <span style={{ fontFamily:'Inter', fontSize:9.5, fontWeight:700, letterSpacing:0.5, textTransform:'uppercase', color:'rgb(107,114,128)' }}>From firm dashboard</span>
+                              <span style={{ fontFamily:'Inter', fontSize:9.5, fontWeight:700, letterSpacing:0.5, textTransform:'uppercase', color:'rgb(200,205,213)' }}>From firm dashboard</span>
                               {[['Firm', p.firmLink.firm],['Channel', p.firmLink.channel],['Advantage', p.firmLink.advantage],['Total opp', p.firmLink.totalOpp],['Your book', p.firmLink.yourBook],['Share', p.firmLink.share]].map(([k,v]) => (
                                 <span key={k} style={{ fontFamily:'Inter', fontSize:11, color:'rgb(163,163,163)' }}>{k}: <strong style={{ color: k==='Total opp' ? 'rgb(52,211,153)' : 'rgb(249,250,251)', fontWeight:700 }}>{v}</strong></span>
                               ))}
@@ -448,7 +448,7 @@ function DistPracticeTable({ practices, sigType, selectedTerr, onViewClient }) {
                                 </div>
                                 <div style={{ fontFamily:'Inter', fontSize:12, lineHeight:1.5, color:'rgb(229,231,235)', marginBottom:8 }} dangerouslySetInnerHTML={{ __html: s.desc.replace(/<strong>/g,'<strong style="color:rgb(52,211,153);font-weight:700">') }} />
                                 <div style={{ fontFamily:'Inter', fontSize:11, color:'rgb(163,163,163)', lineHeight:1.6, padding:'8px 11px', background:'rgba(255,255,255,0.025)', borderLeft:'2px solid rgba(75,85,99,0.6)', borderRadius:'0 6px 6px 0', marginBottom:8 }}>
-                                  <div style={{ fontSize:9, fontWeight:700, textTransform:'uppercase', letterSpacing:0.5, color:'rgb(107,114,128)', marginBottom:3 }}>How it's calculated</div>
+                                  <div style={{ fontSize:9, fontWeight:700, textTransform:'uppercase', letterSpacing:0.5, color:'rgb(200,205,213)', marginBottom:3 }}>How it's calculated</div>
                                   {DIST_CALC[s.type]}
                                 </div>
                                 <div style={{ display:'flex', gap:24 }}>
@@ -502,7 +502,7 @@ function DistKpi({ label, value, sub, color, icon }) {
   return (
     <Tile pad={16} style={{ minHeight:0 }}>
       <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:12 }}>
-        <div style={{ fontFamily:'Inter', fontSize:10, fontWeight:600, color:'rgb(107,114,128)', textTransform:'uppercase', letterSpacing:0.6 }}>{label}</div>
+        <div style={{ fontFamily:'Inter', fontSize:10, fontWeight:600, color:'rgb(200,205,213)', textTransform:'uppercase', letterSpacing:0.6 }}>{label}</div>
         <span style={{ width:28, height:28, borderRadius:8, flexShrink:0, display:'flex', alignItems:'center', justifyContent:'center', background:soft, border:`1px solid ${ring}` }}>
           <i className={`fa-solid fa-${icon}`} style={{ fontSize:12, color: color || 'rgb(163,163,163)' }} />
         </span>

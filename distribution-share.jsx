@@ -49,7 +49,7 @@ function DistShareModal({ practice: p, sigs, onClose, onSent }) {
   };
   const toggle = (arr, set, v) => set(arr.indexOf(v) === -1 ? arr.concat([v]) : arr.filter(x => x !== v));
 
-  const label = { fontFamily:'Inter', fontSize:9.5, fontWeight:700, letterSpacing:0.6, textTransform:'uppercase', color:'rgb(107,114,128)', marginBottom:8 };
+  const label = { fontFamily:'Inter', fontSize:9.5, fontWeight:700, letterSpacing:0.6, textTransform:'uppercase', color:'rgb(200,205,213)', marginBottom:8 };
 
   return (
     <>
@@ -91,7 +91,7 @@ function DistShareModal({ practice: p, sigs, onClose, onSent }) {
                 <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:10 }}>
                   {[['Total opportunity', link.totalOpp, 'rgb(52,211,153)'], ['Your book', link.yourBook, 'rgb(249,250,251)'], ['Share of wallet', link.share, 'rgb(249,250,251)']].map(([k, v, c]) => (
                     <div key={k} style={{ background:'rgba(255,255,255,0.03)', border:'1px solid rgba(75,85,99,0.45)', borderRadius:9, padding:'10px 12px' }}>
-                      <div style={{ fontFamily:'Inter', fontSize:9.5, fontWeight:600, letterSpacing:0.5, textTransform:'uppercase', color:'rgb(107,114,128)' }}>{k}</div>
+                      <div style={{ fontFamily:'Inter', fontSize:9.5, fontWeight:600, letterSpacing:0.5, textTransform:'uppercase', color:'rgb(200,205,213)' }}>{k}</div>
                       <div style={{ fontFamily:'Inter Display, Inter', fontSize:17, fontWeight:700, color:c, marginTop:4, fontVariantNumeric:'tabular-nums' }}>{v}</div>
                     </div>
                   ))}

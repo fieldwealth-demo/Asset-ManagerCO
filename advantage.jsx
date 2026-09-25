@@ -91,7 +91,7 @@ function advClientRow(r) {
   };
 }
 
-function AdvantagePage({ onSelectionsChange, onViewClient }) {
+function AdvantagePage({ onSelectionsChange, onViewClient, focus }) {
   const [sel, setSel] = React.useState({ clients: [], cats: [], rows: [] });
   const toggleIn = (key, val) => setSel(prev => ({
     ...prev,
@@ -104,7 +104,15 @@ function AdvantagePage({ onSelectionsChange, onViewClient }) {
   // sharing it.
   const onWideRowClick = (r) => toggleIn('rows', `${r.name}|${r.cat}`);
 
-  const kpis = advKpis(sel);
+  // Focus strategies only: categories narrow to the focus strategies (kept to
+  // the user's own picks where they overlap), and every tile reads from that.
+  const focusCats = React.useMemo(() => Object.keys(CLIENTS_BY_CAT).filter(isFocusCat), [focus]);
+  const selEff = React.useMemo(() => {
+    if (!focus) return sel;
+    const inter = sel.cats.filter(c => focusCats.includes(c));
+    return { ...sel, cats: inter.length ? inter : focusCats };
+  }, [sel, focus, focusCats]);
+  const kpis = advKpis(selEff);
 
   // Report selections up to the top bar so they sit beside the page header and
   // nothing on the page shifts.
@@ -128,10 +136,10 @@ function AdvantagePage({ onSelectionsChange, onViewClient }) {
       {/* Top row: Team/FA view + asset class treemap */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
         <Tile title="Team / FA" subtitle="All Teams / FAs by AUM · click rows to multi-select" right={<TabPillsLocal />} pad={0} style={{ minHeight: 260 }}>
-          <ClientAdvTable sel={sel} onRowClick={onClientClick} onViewClient={onViewClient} />
+          <ClientAdvTable sel={selEff} onRowClick={onClientClick} onViewClient={onViewClient} />
         </Tile>
         <Tile title="Asset Class by AUM" subtitle="Breakdown by category" right={<TabPillsLocal />} style={{ minHeight: 260 }}>
-          <LargeTreemap sel={sel} onCellClick={onCatClick} />
+          <LargeTreemap sel={selEff} onCellClick={onCatClick} />
         </Tile>
       </div>
 
@@ -142,12 +150,12 @@ function AdvantagePage({ onSelectionsChange, onViewClient }) {
           <TabPills options={['Classes','Holds']} value={'Classes'} onChange={()=>{}} />
         </div>
       } pad={0} style={{ minHeight: 240 }}>
-        <WideAdvTable sel={sel} onRowClick={onWideRowClick} onViewClient={onViewClient} />
+        <WideAdvTable sel={selEff} onRowClick={onWideRowClick} onViewClient={onViewClient} />
       </Tile>
 
       {/* Competitive Positioning Analysis - bubble chart */}
       <Tile title="Competitive Positioning Analysis" style={{ minHeight: 420 }}>
-        <BubbleChartSection sel={sel} onClientClick={onClientClick} />
+        <BubbleChartSection sel={selEff} onClientClick={onClientClick} />
       </Tile>
 
       {/* Rolling Performance */}
@@ -171,7 +179,7 @@ function TabPillsLocal() {
 function AdvKpi({ label, value, sub }) {
   return (
     <Tile pad={14}>
-      <div style={{ fontFamily:'Inter', fontSize: 10, color:'rgb(107,114,128)', textTransform:'uppercase', letterSpacing:0.5, marginBottom: 8 }}>{label}</div>
+      <div style={{ fontFamily:'Inter', fontSize: 10, color:'rgb(200,205,213)', textTransform:'uppercase', letterSpacing:0.5, marginBottom: 8 }}>{label}</div>
       <div style={{ fontFamily:'Inter Display, Inter', fontWeight:700, fontSize: 22, color:'rgb(249,250,251)', fontVariantNumeric:'tabular-nums' }}>{value}</div>
       <div style={{ fontFamily:'Inter', fontSize: 10.5, color:'rgb(52,211,153)', marginTop: 4 }}>{sub}</div>
     </Tile>
@@ -197,7 +205,7 @@ const CLIENTS_BY_CAT = {
 // Shared table style constants (each Babel script has its own scope)
 const tableStyle = { width:'100%', borderCollapse:'collapse', fontFamily:'Inter', fontSize:12 };
 const thTr = {};
-const th = { textAlign:'left', fontSize:10, fontWeight:500, color:'rgb(107,114,128)', letterSpacing:0.5, textTransform:'uppercase', padding:'10px 16px 8px' };
+const th = { textAlign:'left', fontSize:10, fontWeight:500, color:'rgb(200,205,213)', letterSpacing:0.5, textTransform:'uppercase', padding:'10px 16px 8px' };
 const thN = { ...th, textAlign:'right' };
 const tdTr = { borderTop: '1px solid rgba(75,85,99,0.2)' };
 const tdCell = { padding:'10px 16px', color:'rgb(209,213,219)' };

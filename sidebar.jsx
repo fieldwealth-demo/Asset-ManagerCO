@@ -386,9 +386,19 @@ function SBItem({ item, expanded, isActive, activeChildId, isAccordionOpen, onTo
         {expanded && (
           <span style={{
             flex:1, fontFamily:'Inter', fontSize:12.5, fontWeight: showActive ? 600 : 500,
-            color: showActive ? SB_ACCENT : SB_INK,
+            color: showActive ? SB_ACCENT : SB_INK, opacity: item.locked && !showActive ? 0.55 : 1,
             whiteSpace:'nowrap', textAlign:'left',
           }}>{item.label}</span>
+        )}
+
+        {expanded && item.locked && (
+          <span title={`Available with ${item.locked}`} style={{
+            display:'inline-flex', alignItems:'center', gap:4, height:18, padding:'0 6px', borderRadius:5,
+            border:'1px solid rgba(107,114,128,0.5)', color:'rgb(156,163,175)', fontFamily:'Inter', fontSize:9.5, fontWeight:700, letterSpacing:0.3,
+          }}><i className="fa-solid fa-lock" style={{ fontSize:8 }} />{item.locked}</span>
+        )}
+        {!expanded && item.locked && (
+          <i className="fa-solid fa-lock" style={{ position:'absolute', bottom:3, right:3, fontSize:7, color:'rgb(156,163,175)' }} />
         )}
 
         {expanded && item.badge && (

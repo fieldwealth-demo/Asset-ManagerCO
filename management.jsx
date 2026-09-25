@@ -323,7 +323,7 @@ function kpisFor(xf) {
   ];
 }
 
-function ManagementPage({ filters, onSelectionsChange }) {
+function ManagementPage({ filters, onSelectionsChange, focus }) {
   // Per-tile metric state (Chris: each tile is independent unless changed globally)
   const [metricTrend,   setMetricTrend]   = React.useState('AUM');
   const [metricChannel, setMetricChannel] = React.useState('AUM');
@@ -339,7 +339,15 @@ function ManagementPage({ filters, onSelectionsChange }) {
   // Multi-select cross-filter, merged with the global filter panel.
   const [sel, setSel] = React.useState(emptyXf());
   const panelXf = React.useMemo(() => xfFromFilters(filters), [filters]);
-  const xf = React.useMemo(() => mergeXf(panelXf, sel), [panelXf, sel]);
+  const xfBase = React.useMemo(() => mergeXf(panelXf, sel), [panelXf, sel]);
+  // Focus strategies only: the category cross-filter is narrowed to the focus
+  // categories, so every total, chart and grid rescales to them.
+  const focusCatNames = React.useMemo(() => CAT_ROWS.map(r => r.name).filter(isFocusCat), [focus]);
+  const xf = React.useMemo(() => {
+    if (!focus) return xfBase;
+    const inter = (xfBase.cats || []).filter(c => focusCatNames.includes(c));
+    return { ...xfBase, cats: inter.length ? inter : focusCatNames };
+  }, [xfBase, focus, focusCatNames]);
   const [drawerRow, setDrawerRow] = React.useState(null);
   const [vehicleOverlay, setVehicleOverlay] = React.useState(null);
   const [firmOverlay, setFirmOverlay] = React.useState(null);
@@ -353,12 +361,12 @@ function ManagementPage({ filters, onSelectionsChange }) {
   // (selected ones checked) and at its own values — its selection is what
   // narrows the OTHER grids, which rescale to the resulting target totals.
   const rowsFor = React.useCallback((dim) => {
-    const all = dimRows(dim);
+    const all = focus && dim === 'cats' ? dimRows(dim).filter(r => focusCatNames.includes(r.name)) : dimRows(dim);
     if (!hasFilter) return all;
     const visible = all.filter(r => (vis[dim] || []).includes(r.name));
     if ((xf[dim] || []).length > 0) return visible;
     return scaleRowsForVis(visible, visible.map(r => r.name), target.mkt, target.yours);
-  }, [hasFilter, vis, xf, target.mkt, target.yours]);
+  }, [hasFilter, vis, xf, target.mkt, target.yours, focus, focusCatNames]);
 
   const toggleSel = (dim, key) => {
     setSel(prev => {
@@ -377,7 +385,7 @@ function ManagementPage({ filters, onSelectionsChange }) {
     if (!onSelectionsChange) return;
     const out = [];
     XF_DIMS.forEach(dim => {
-      (xf[dim] || []).forEach(key => {
+      (xfBase[dim] || []).forEach(key => {
         const own = (sel[dim] || []).includes(key);
         out.push({
           key: `${dim}:${key}`, label: key, icon: DIM_ICON[dim],
@@ -386,7 +394,7 @@ function ManagementPage({ filters, onSelectionsChange }) {
       });
     });
     onSelectionsChange(out);
-  }, [xf, sel, onSelectionsChange]);
+  }, [xfBase, sel, onSelectionsChange]);
 
   const drillFor = (dim, r) => {
     if (dim === 'firms') { setFirmOverlay(r); return; }
@@ -487,7 +495,7 @@ function ClickableVehicleLegend({ xf, onToggle }) {
   const anySelected = sel.length > 0;
   return (
     <div style={{ display:'inline-flex', alignItems:'center', gap:8 }}>
-      <span style={{ fontFamily:'Inter', fontSize:10.5, fontWeight:600, color:'rgb(163,163,163)', textTransform:'uppercase', letterSpacing:0.4 }}>
+      <span style={{ fontFamily:'Inter', fontSize:10.5, fontWeight:600, color:'rgb(200,205,213)', textTransform:'uppercase', letterSpacing:0.4 }}>
         Vehicle
       </span>
       <div style={{ display:'inline-flex', gap:4, alignItems:'center' }}>
@@ -554,7 +562,7 @@ function KpiTile({ title, mkt, yours, mktSub, mktYoY, yoursYoY, shareYoY }) {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0,1fr))', gap: 'clamp(6px,0.9vw,12px)' }}>
         {items.map((it, i) => (
           <div key={i} style={{ minWidth: 0, borderLeft: i>0 ? '1px solid rgba(75,85,99,0.3)' : 'none', paddingLeft: i>0 ? 'clamp(6px,0.9vw,12px)' : 0 }}>
-            <div style={{ fontFamily: 'Inter', fontSize: 10, color: 'rgb(107,114,128)', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 4 }}>{it.label}</div>
+            <div style={{ fontFamily: 'Inter', fontSize: 10, color: 'rgb(200,205,213)', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 4 }}>{it.label}</div>
             <div style={{ fontFamily: 'Inter Display, Inter', fontWeight: 700, fontSize: 'clamp(16px,1.35vw,20px)', color: 'rgb(249,250,251)', fontVariantNumeric: 'tabular-nums' }}>{it.value}</div>
             <div style={{ fontFamily: 'Inter', fontSize: 10.5, color: yoyColor(it.sub), marginTop: 2 }}>{it.sub}</div>
           </div>
@@ -997,7 +1005,7 @@ function TableHeader({ dim, onDimChange, count, tab, setTab }) {
 
 const tableStyle = { width:'100%', borderCollapse:'collapse', fontFamily:'Inter', fontSize:12 };
 const thTr = { };
-const th  = { textAlign:'left', fontSize:10, fontWeight:500, color:'rgb(107,114,128)', letterSpacing:0.5, textTransform:'uppercase', padding:'10px 16px 8px' };
+const th  = { textAlign:'left', fontSize:10, fontWeight:500, color:'rgb(200,205,213)', letterSpacing:0.5, textTransform:'uppercase', padding:'10px 16px 8px' };
 const thN = { ...th, textAlign:'right' };
 const tdCell = { padding:'8px 14px', color:'rgb(209,213,219)' };
 const tdN = { padding:'8px 14px', textAlign:'right', color:'rgb(163,163,163)', fontVariantNumeric:'tabular-nums' };

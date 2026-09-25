@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<title>Strategic Account Brief</title>
+<style>
+@font-face{font-family:Inter;src:url("../fonts/Inter_18pt-Regular.ttf");font-weight:400}
+@font-face{font-family:Inter;src:url("../fonts/Inter_18pt-Medium.ttf");font-weight:500}
+@font-face{font-family:Inter;src:url("../fonts/Inter_18pt-SemiBold.ttf");font-weight:600}
+@font-face{font-family:Inter;src:url("../fonts/Inter_18pt-Bold.ttf");font-weight:700}
+body{margin:0;background:#0B1220;font-family:Inter,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif}
+a{color:#31C48D;text-decoration:none}a:hover{color:#0E9F6E}
+.em{width:640px;box-sizing:border-box;background:#111928;color:#fff;line-height:1.5;padding:40px 32px;display:flex;flex-direction:column;gap:32px}
+.row{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.lbl{font-size:12px;font-weight:600;color:#9CA3AF;text-transform:uppercase;letter-spacing:.06em}
+.mut{color:#9CA3AF}.sm{font-size:12px}.md{font-size:14px}
+.card{background:rgba(255,255,255,.051);border:1px solid #4B5563;border-radius:12px}
+.kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.kpi{padding:16px;display:flex;flex-direction:column;gap:6px}
+.kv{font-size:24px;font-weight:700;line-height:1.1}
+.sec{display:flex;flex-direction:column;gap:16px}
+.sec h2{margin:0;font-size:20px;font-weight:700}
+.sec>p{margin:-10px 0 0;font-size:14px;color:#9CA3AF}
+.item{padding:16px;display:flex;flex-direction:column;gap:8px;border-bottom:1px solid #374151}
+.item:last-child{border-bottom:0}
+.nm{font-size:16px;font-weight:700}
+.dot{flex-shrink:0;width:10px;height:10px;border-radius:9999px;margin-top:7px}
+.pill{flex-shrink:0;font-size:12px;font-weight:700;border-radius:9999px;padding:2px 10px;white-space:nowrap}
+.pg{color:#31C48D;background:rgba(49,196,141,.15);border:1px solid rgba(49,196,141,.5)}
+.pa{color:#E3A008;background:rgba(227,160,8,.15);border:1px solid rgba(227,160,8,.5)}
+.pr{color:#F98080;background:rgba(249,128,128,.12);border:1px solid rgba(249,128,128,.45)}
+.pb{color:#76A9FA;background:rgba(118,169,250,.12);border:1px solid rgba(118,169,250,.45)}
+.tag{font-size:12px;color:#D1D5DB;border:1px solid #4B5563;border-radius:4px;padding:1px 7px;white-space:nowrap}
+.tags{display:flex;flex-wrap:wrap;gap:6px}
+.rk{flex-shrink:0;width:28px;height:28px;border-radius:9999px;background:#0E9F6E;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.day{display:grid;grid-template-columns:92px minmax(0,1fr);gap:16px;padding:16px;border-bottom:1px solid #374151}
+.day:last-child{border-bottom:0}
+.mtg{display:flex;flex-direction:column;gap:4px}
+.mtg+.mtg{margin-top:12px;padding-top:12px;border-top:1px dashed #374151}
+.lead{font-size:14px;color:#E5E7EB}
+.lead b{color:#31C48D;font-weight:600}
+.add{background:rgba(14,159,110,.08);border:1px dashed rgba(49,196,141,.55);border-radius:8px;padding:10px 12px;margin-top:12px;display:flex;flex-direction:column;gap:2px}
+.btn{display:block;text-align:center;background:#0E9F6E;color:#fff;font-weight:600;font-size:15px;border-radius:8px;padding:12px}
+.btn:hover{background:#057A55;color:#fff}
+.bar{height:8px;border-radius:9999px;background:#374151;overflow:hidden}.bar>i{display:block;height:8px;border-radius:9999px;background:#0E9F6E}
+.tbl{display:grid;gap:0}.tr{display:grid;grid-template-columns:minmax(0,1.6fr) 44px minmax(0,1fr) 52px;gap:12px;align-items:center;padding:10px 16px;border-bottom:1px solid #374151;font-size:14px}.tr:last-child{border-bottom:0}.th{font-size:11px;font-weight:600;color:#9CA3AF;text-transform:uppercase;letter-spacing:.06em}
+.pr2{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr) 56px 48px;gap:12px;align-items:center;padding:10px 16px;border-bottom:1px solid #374151;font-size:14px}.pr2:last-child{border-bottom:0}
+.part{font-size:12px;font-weight:700;color:#31C48D;text-transform:uppercase;letter-spacing:.1em;border-top:1px solid #374151;padding-top:24px}
+.num{font-variant-numeric:tabular-nums;text-align:right}</style>
+<style>:root.embed{color-scheme:dark;background:transparent}.embed body{background:transparent}.embed .em{width:auto;max-width:880px;margin:0 auto;padding:32px;background:#111928;border:1px solid rgba(75,85,99,.5);border-radius:12px}.embed .em>.row:first-child,.embed .em>.btn,.embed .em>.row:last-child{display:none}</style>
+<style>.tt{display:grid;grid-template-columns:minmax(0,1.7fr) 78px 64px 58px 58px;gap:10px;align-items:center;padding:10px 16px;border-bottom:1px solid #374151;font-size:14px}.tt:last-child{border-bottom:0}.tt>span:not(:first-child){text-align:right;font-variant-numeric:tabular-nums}.rl{font-size:11px;color:#9CA3AF;display:block}.up{color:#31C48D}.dn{color:#F98080}.am{color:#E3A008}</style>
+</head>
+<body>
+<div class="em">
+<div class="row"><div style="display:flex;align-items:center;gap:8px"><div style="width:28px;height:28px;border-radius:6px;background:#0E9F6E;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16px">F</div><div style="font-size:18px;font-weight:700;letter-spacing:-.01em">Field</div></div><div class="lbl" style="letter-spacing:.08em">Strategic Account Brief · Tue, Sep 22</div></div>
+<div style="display:flex;flex-direction:column;gap:8px">
+<h1 style="margin:0;font-size:30px;font-weight:700;letter-spacing:-.02em;line-height:1.2">Contoso Wealth</h1>
+<p style="margin:0;font-size:16px;color:#9CA3AF">Sales at Contoso Wealth are <span style="color:#31C48D;font-weight:600">$48.6M MTD, up 9% on last year</span>. West and Northeast are carrying the firm. <span style="color:#E3A008;font-weight:600">Southeast is down 14%</span>, and $7.4M of AUM at the firm now carries a Retention Risk signal.</p>
+<div class="sm" style="color:#31C48D;font-weight:600">Strategic account · 5 regions · 412 FA/Teams · 18 salespeople covering</div>
+</div>
+<div class="kpis">
+<div class="card kpi" data-go="lead:firm:Contoso Wealth" data-label="Sales MTD"><div class="lbl">Sales MTD</div><div class="kv" style="color:#31C48D">$48.6M</div><div class="sm mut">Up 9% on last year · 12% of national</div></div>
+<div class="card kpi" data-go="lead:activity" data-label="Meetings this week"><div class="lbl">Meetings this week</div><div class="kv">26</div><div class="sm mut">19 external · 7 internal-booked</div></div>
+<div class="card kpi" data-go="signals" data-label="Open signals"><div class="lbl">Open signals</div><div class="kv">341</div><div class="sm mut">$590M expected · 22 new overnight</div></div>
+</div>
+<div class="sec" data-sec="overnight">
+<h2>What changed overnight</h2>
+<div class="card">
+<div class="item" data-go="sales:yesterday" data-label="$3.9M in sales yesterday at Contoso Wealth" style="flex-direction:row;gap:14px"><span class="dot" style="background:#31C48D"></span><div><div class="ttl" style="font-size:16px;font-weight:600">$3.9M in sales yesterday across 7 FA/Teams</div><div class="md mut">Largest was Keystone Wealth ($780K, Private Credit Fund II) in the Northeast. 5 of the 7 followed a meeting in the last 30 days.</div></div></div>
+<div class="item" data-go="signal:Retention Risk" data-label="Retention Risk at Contoso Wealth" style="flex-direction:row;gap:14px"><span class="dot" style="background:#F98080"></span><div><div class="ttl" style="font-size:16px;font-weight:600">Retention Risk firmed on 6 Contoso FA/Teams</div><div class="md mut">$7.4M of AUM exposed, mostly Core Plus in Southeast offices. Riley Hayes owns 4 of the 6 relationships.</div></div></div>
+<div class="item" data-go="lead:cat:Private Credit" data-label="Private Credit at Contoso Wealth" style="flex-direction:row;gap:14px"><span class="dot" style="background:#A78BFA"></span><div><div class="ttl" style="font-size:16px;font-weight:600">Private Credit Fund II cleared the firm's platform review</div><div class="md mut">Now approved for all Contoso advisors. 58 FA/Teams hold a competitor private credit product today.</div></div></div>
+</div>
+</div>
+<div class="sec" data-sec="regions">
+<h2>By region · MTD</h2>
+<div class="card">
+<div class="tt th"><span>Region</span><span>Sales</span><span>vs LY</span><span>Mtgs wk</span><span>Signals</span></div>
+<div class="tt"><span><span data-go="lead:region:West" data-label="West" style="font-weight:600">West</span><span class="rl">Skyler Grant · lead external</span></span><span>$14.2M</span><span class="up">+18%</span><span>8</span><span>84</span></div>
+<div class="tt"><span><span data-go="lead:region:Northeast" data-label="Northeast" style="font-weight:600">Northeast</span><span class="rl">Morgan Vance · lead external</span></span><span>$12.9M</span><span class="up">+15%</span><span>7</span><span>77</span></div>
+<div class="tt"><span><span data-go="lead:region:Midwest" data-label="Midwest" style="font-weight:600">Midwest</span><span class="rl">Quinn Parker · lead external</span></span><span>$8.1M</span><span class="">+4%</span><span>4</span><span>62</span></div>
+<div class="tt"><span><span data-go="lead:region:Southeast" data-label="Southeast" style="font-weight:600">Southeast</span><span class="rl">Riley Hayes · lead external</span></span><span>$7.6M</span><span class="dn">−14%</span><span>3</span><span>71</span></div>
+<div class="tt"><span><span data-go="lead:region:Southwest" data-label="Southwest" style="font-weight:600">Southwest</span><span class="rl">Reese Morgan · lead external</span></span><span>$5.8M</span><span class="">+2%</span><span>4</span><span>47</span></div>
+</div>
+</div>
+<div class="sec" data-sec="teams">
+<h2>Top FA/Teams at the firm</h2>
+<p>Largest opportunity where you are under-represented.</p>
+<div class="card">
+<div class="item"><div class="row" style="align-items:flex-start"><div><div class="nm">Summit Advisory</div><div class="md mut">Northeast · Morgan Vance · Segment A</div></div><span class="pill pg">$22M opp.</span></div><div class="lead">Holds $1.1M with you against $22M in the category. <b>Upsell</b> signal at 84 confidence.</div></div>
+<div class="item"><div class="row" style="align-items:flex-start"><div><div class="nm">Harbor Point Advisors</div><div class="md mut">West · Skyler Grant · Segment A</div></div><span class="pill pg">$18M opp.</span></div><div class="lead">New producer in August on Core Equity ETF. <b>Cross-sell</b> into Large Growth is open.</div></div>
+<div class="item"><div class="row" style="align-items:flex-start"><div><div class="nm">Blue Line Wealth</div><div class="md mut">Southeast · Riley Hayes · Segment A</div></div><span class="pill pr">Risk · $3.1M</span></div><div class="lead">Two months of Core Plus redemptions. No external meeting in 5 months.</div></div>
+</div>
+</div>
+<div class="sec" data-sec="signals">
+<h2>Open signals at the firm</h2>
+<div class="card">
+<div class="tr th"><span>Signal</span><span class="num">N</span><span>Top region</span><span class="num">Opp.</span></div>
+<div class="tr"><span data-go="signal:Upsell" data-label="Upsell">Upsell</span><span class="num">96</span><span>Northeast</span><span class="num">$182M</span></div>
+<div class="tr"><span data-go="signal:Performance Advantage" data-label="Performance Advantage">Performance Advantage</span><span class="num">71</span><span>West</span><span class="num">$146M</span></div>
+<div class="tr"><span data-go="signal:Cross-sell" data-label="Cross-sell">Cross-sell</span><span class="num">64</span><span>West</span><span class="num">$121M</span></div>
+<div class="tr"><span data-go="signal:Retention Risk" data-label="Retention Risk">Retention Risk</span><span class="num">38</span><span>Southeast</span><span class="num">$74M</span></div>
+</div>
+</div>
+<div class="sec" data-sec="act">
+<h2>Act on today</h2>
+<div class="card">
+<div class="item"><div class="row" style="align-items:flex-start"><div><div class="nm" data-go="lead:region:Southeast">Review Southeast coverage at Contoso Wealth</div><div class="md mut">Riley Hayes · Lee Ortega</div></div><span class="pill pb">This week</span></div><div class="lead">Book meetings with the 6 Retention Risk FA/Teams before month-end redemptions settle.</div></div>
+<div class="item"><div class="row" style="align-items:flex-start"><div><div class="nm" data-go="lead:cat:Private Credit">Launch Private Credit Fund II at Contoso</div><div class="md mut">Specialists · all regions</div></div><span class="pill pg">$58M</span></div><div class="lead">Share the platform approval with the 58 FA/Teams holding a competitor product, starting with Segment A.</div></div>
+<div class="item"><div class="row" style="align-items:flex-start"><div><div class="nm" data-go="lead:person:Skyler Grant">Ask Skyler Grant to host the Contoso home-office call</div><div class="md mut">Quarterly partner review · Oct 8</div></div><span class="pill pb">Prep</span></div><div class="lead">West is the firm's fastest-growing region with you. Bring the Large Growth performance story.</div></div>
+</div>
+</div>
+<a href="#" class="btn">Open Sales Leadership</a>
+<div class="md mut" style="border-top:1px solid #374151;padding-top:16px"><b style="color:#E5E7EB">How this was built:</b> sales and CRM activity at this firm for every salesperson covering it, plus signals refreshed nightly from monthly data-pack holdings and flows. Firm results are shown against last year; sales goals are set by territory, not by firm.</div>
+<div class="row sm mut"><span>Field · fieldwealth.ai</span><span style="display:flex;gap:16px"><a href="#" style="color:#9CA3AF">Preferences</a><a href="#" style="color:#9CA3AF">Unsubscribe</a></span></div>
+</div>
+<script src="brief-links.js"></script>
+<script>(function(){var p=new URLSearchParams(location.search);(p.get('hide')||'').split(',').filter(Boolean).forEach(function(k){document.querySelectorAll('[data-sec="'+k+'"]').forEach(function(e){e.style.display='none'})});if(p.get('embed'))document.documentElement.className+=' embed';})();</script>
+</body></html>

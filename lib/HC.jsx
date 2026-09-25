@@ -16,7 +16,8 @@
     title: { text: '' },
     credits: { enabled: false },
     legend: {
-      itemStyle: { color: 'rgb(229,231,235)', fontWeight: '500', fontSize: '11px' },
+      itemStyle: { color: 'rgb(229,231,235)', fontWeight: '500', fontSize: '10.5px' },
+      symbolHeight: 8, symbolWidth: 8, symbolRadius: 2, itemDistance: 12, itemMarginTop: 0, itemMarginBottom: 0, padding: 2, margin: 6,
       itemHoverStyle: { color: 'rgb(249,250,251)' },
       itemHiddenStyle: { color: 'rgb(107,114,128)' },
     },
@@ -24,15 +25,15 @@
       lineColor: 'rgba(75,85,99,0.5)',
       tickColor: 'rgba(75,85,99,0.5)',
       gridLineColor: 'rgba(75,85,99,0.25)',
-      labels: { style: { color: 'rgb(163,163,163)', fontSize: '11px' } },
+      labels: { style: { color: 'rgb(209,213,219)', fontSize: '11px' } },
     },
     yAxis: {
       gridLineColor: 'rgba(75,85,99,0.25)',
       gridLineDashStyle: 'Dash',
       lineColor: 'transparent',
       tickColor: 'transparent',
-      labels: { style: { color: 'rgb(163,163,163)', fontSize: '11px' } },
-      title: { text: null },
+      labels: { style: { color: 'rgb(209,213,219)', fontSize: '11px' } },
+      title: { text: null, style: { color: 'rgb(200,205,213)' } },
     },
     tooltip: {
       backgroundColor: 'rgb(17,24,39)',

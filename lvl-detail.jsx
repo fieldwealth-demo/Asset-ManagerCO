@@ -2,6 +2,49 @@
    they actually bought, by product and vehicle, with a five-year flow trend.
    Sits between the team card and the opportunity KPIs. */
 
+/* Level 3 addition: the signals open on this FA/Team, ranked by confidence.
+   The top one is the next best action; the rest are the other applicable NBAs. */
+function NbaCard({ row }) {
+  const sigs = ((row && row.signals) || []).slice().sort((a, b) => b.confidence - a.confidence);
+  if (!sigs.length) return null;
+  const tot = sigs.reduce((a, s) => a + s.oppMax, 0);
+  const rgba = (c, a) => c.replace('rgb', 'rgba').replace(')', `,${a})`);
+  return (
+    <div style={{ background: 'rgba(255,255,255,0.035)', border: '1px solid rgba(167,139,250,0.35)', borderRadius: 12, padding: '14px 18px 16px', display: 'flex', flexDirection: 'column', gap: 12 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+        <span style={{ fontFamily: 'Inter', fontSize: 14, fontWeight: 600, color: 'rgb(249,250,251)' }}>Next best actions</span>
+        <MlL3Tag />
+        {row.segment && row.segment !== 'N' && <LvSegBadge seg={row.segment} size={18} />}
+        <span style={{ flex: 1 }} />
+        <span style={{ fontFamily: 'Inter', fontSize: 11.5, color: 'rgb(163,163,163)' }}>{sigs.length} applicable · {distFmtM(tot)} signal opp. · ranked by confidence</span>
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px,1fr))', gap: 10 }}>
+        {sigs.map((s, i) => {
+          const m = LV_SIG_META[s.type] || { color: 'rgb(167,139,250)', icon: 'bolt' };
+          return (
+            <div key={i} style={{ padding: '11px 13px', borderRadius: 9, background: i === 0 ? rgba(m.color, 0.07) : 'rgba(255,255,255,0.03)', border: `1px solid ${rgba(m.color, i === 0 ? 0.6 : 0.28)}`, display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, color: m.color, fontFamily: 'Inter', fontSize: 12, fontWeight: 700 }}>
+                  <i className={`fa-solid fa-${m.icon}`} style={{ fontSize: 10 }} />{lvNbaLabel(s)}
+                </span>
+                {i === 0 && <span style={{ padding: '1px 6px', borderRadius: 4, background: 'rgba(16,185,129,0.16)', border: '1px solid rgba(16,185,129,0.45)', color: 'rgb(52,211,153)', fontFamily: 'Inter', fontSize: 9, fontWeight: 700, letterSpacing: 0.3 }}>NEXT BEST</span>}
+                <span style={{ flex: 1 }} />
+                <span style={{ fontFamily: 'Inter', fontSize: 10.5, color: 'rgb(140,148,160)' }}>{s.type}{s.when ? ` · ${s.when}` : ''}</span>
+              </div>
+              {s.desc && <div style={{ fontFamily: 'Inter', fontSize: 12, lineHeight: 1.55, color: 'rgb(229,231,235)' }} dangerouslySetInnerHTML={{ __html: s.desc }} />}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 18, flexWrap: 'wrap', fontFamily: 'Inter', fontSize: 11 }}>
+                <span style={{ color: 'rgb(163,163,163)' }}>Signal opp. <b style={{ color: 'rgb(52,211,153)' }}>{distFmtM(s.oppMax)}</b></span>
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, color: 'rgb(163,163,163)' }}>Confidence <LvConfBar value={s.confidence} width={36} /></span>
+                {s.product && <span style={{ color: 'rgb(163,163,163)' }}>Product <b style={{ color: 'rgb(229,231,235)', fontWeight: 600 }}>{s.product}</b></span>}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 function ActualSalesCard({ row }) {
   const [grain, setGrain] = React.useState('Product');
   const [flow, setFlow] = React.useState('Inflows');
@@ -126,7 +169,7 @@ function ActualSalesCard({ row }) {
         </table>
       </div>
       <div style={{ padding: '10px 16px 8px', borderTop: '1px solid rgba(75,85,99,0.25)' }}>
-        <div style={{ fontFamily: 'Inter', fontSize: 9.5, fontWeight: 600, color: 'rgb(107,114,128)', textTransform: 'uppercase', letterSpacing: 0.6, marginBottom: 2 }}>
+        <div style={{ fontFamily: 'Inter', fontSize: 9.5, fontWeight: 600, color: 'rgb(200,205,213)', textTransform: 'uppercase', letterSpacing: 0.6, marginBottom: 2 }}>
           {flow} · rolling 12 by month, by {grain.toLowerCase()}
         </div>
         <HC options={options} style={{ height: 180 }} />
@@ -135,7 +178,7 @@ function ActualSalesCard({ row }) {
   );
 }
 
-const asTh  = { padding: '9px 10px 7px', textAlign: 'left', fontFamily: 'Inter', fontSize: 9, fontWeight: 600, color: 'rgb(107,114,128)', textTransform: 'uppercase', letterSpacing: 0.5, whiteSpace: 'nowrap', position: 'sticky', top: 0, background: 'rgb(16,26,42)', zIndex: 2 };
+const asTh  = { padding: '9px 10px 7px', textAlign: 'left', fontFamily: 'Inter', fontSize: 9, fontWeight: 600, color: 'rgb(200,205,213)', textTransform: 'uppercase', letterSpacing: 0.5, whiteSpace: 'nowrap', position: 'sticky', top: 0, background: 'rgb(16,26,42)', zIndex: 2 };
 const asThR = { ...asTh, textAlign: 'right' };
 const asTd  = { padding: '7px 10px', color: 'rgb(229,231,235)', whiteSpace: 'nowrap', borderBottom: '1px solid rgba(75,85,99,0.14)' };
 const asTdR = { ...asTd, textAlign: 'right', color: 'rgb(163,163,163)', fontVariantNumeric: 'tabular-nums' };

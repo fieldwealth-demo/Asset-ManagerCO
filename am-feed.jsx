@@ -128,12 +128,12 @@ const MF_ITEMS = [
     action:'Open Competitive Advantage', go:'advantage' },
 
   { kind:'territory', id:'terr-ny', when:'Yesterday', initials:'NY',
-    who:'Sales & Activity · NY metro', eyebrow:'Coverage gap',
+    who:'Territory Analytics · NY metro', eyebrow:'Coverage gap',
     title:'12 top producers in NY metro have no meeting logged this quarter',
     body:'Together they hold $310M in categories you compete in. Three sit inside an hour of a rep already travelling to the city next week.',
     stats:[{ k:'Producers', v:'12' }, { k:'Addressable AUM', v:'$310M' }, { k:'Reps in market', v:'3' }],
     meta:['Level 2','NY metro','RIA + Wirehouse','No touch 90d+'],
-    action:'Open Sales & Activity', go:'l2sales' },
+    action:'Open Territory Analytics', go:'l2sales' },
 
   { kind:'flow', id:'mkt-share', when:'Today', initials:'M★',
     who:'Morningstar · Category flows', eyebrow:'Market context',
@@ -165,12 +165,12 @@ const MF_ITEMS = [
     action:'Open Competitive Advantage', go:'advantage' },
 
   { kind:'territory', id:'l2-gap', when:'2d ago', initials:'R12',
-    who:'Sales & Activity · Northeast territory', eyebrow:'Coverage against production',
+    who:'Territory Analytics · Northeast territory', eyebrow:'Coverage against production',
     title:'Segment A absorbs a third of your coverage and 80% of the signal opportunity',
     body:'27 FA/Teams in Segment A took 226 of 680 logged activities in the rolling 12. The 54 in Segment C took 265 for $2.4M of actual sales.',
     stats:[{ k:'R12 actual', v:'$363M' }, { k:'Market share', v:'2.1%' }, { k:'Acts per FA', v:'5.7' }],
     meta:['Level 2','Northeast territory','Rolling 12'],
-    action:'Open Sales & Activity', go:'l2sales' },
+    action:'Open Territory Analytics', go:'l2sales' },
 
   { kind:'advantage', id:'l3-nba', when:'This morning', initials:'NBA',
     who:'Segmentation & Signals · Next best action', eyebrow:'Model refresh',
@@ -381,7 +381,7 @@ function AMHomeFeed({ onAsk, onNav, width = 620 }) {
   return (
     <section style={{ width: '100%', maxWidth: width, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 14 }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', padding: '0 2px 2px' }}>
-        <div style={{ fontFamily: 'Inter', fontSize: 10, fontWeight: 600, color: 'rgb(107,114,128)', letterSpacing: 0.8, textTransform: 'uppercase' }}>Top next best actions</div>
+        <div style={{ fontFamily: 'Inter', fontSize: 10, fontWeight: 600, color: 'rgb(200,205,213)', letterSpacing: 0.8, textTransform: 'uppercase' }}>Top next best actions</div>
         <div style={{ flex: 1 }} />
         {[['all', 'All'], ['A', 'Segment A'], ['B', 'Segment B'], ['C', 'Segment C']].map(([id, label]) => (
           <MfFilter key={id} label={label} active={seg === id} onClick={() => { setSeg(id); setLimit(5); }} />

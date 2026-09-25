@@ -18,7 +18,7 @@ function vehicleMultiplier(vehicleFilter) {
   return vehicleFilter.reduce((s, v) => s + (VEH_MIX[v] || 0), 0);
 }
 
-function OpportunityPage({ onViewClient, onSelectionsChange, filters, setFilters }) {
+function OpportunityPage({ onViewClient, onSelectionsChange, filters, setFilters, focus }) {
   // Multi-select: any number of Teams/FAs can be picked at once.
   const [selectedClients, setSelectedClients] = React.useState([]);
   const toggleClient = React.useCallback((name) => {
@@ -123,15 +123,21 @@ function OpportunityPage({ onViewClient, onSelectionsChange, filters, setFilters
     : (cityClientNames
         ? Array.from(new Set([...cityClientNames].flatMap(n => CLIENT_CAT_USAGE[n] || [])))
         : null);
+  // Focus strategies only narrows every category-driven figure to the focus
+  // categories (intersected with anything the user has picked).
+  const focusCatList = ALL_CATS.map(c => c.name).filter(n => isFocusCat(n));
+  const pickFocus = (list) => { const x = list.filter(c => isFocusCat(c)); return x.length ? x : focusCatList; };
+  const catEff = focus ? pickFocus(catSelected) : catSelected;
+  const clientCatsEff = focus ? (clientCats ? clientCats.filter(c => isFocusCat(c)) : focusCatList) : clientCats;
   const activeCatsSet = React.useMemo(() => {
-    if (clientCats) return new Set(clientCats);
-    if (catSelected.length > 0) return new Set(catSelected);
+    if (clientCatsEff) return new Set(clientCatsEff);
+    if (catEff.length > 0) return new Set(catEff);
     return new Set(ALL_CATS.map(c => c.name));
-  }, [clientCats, catSelected]);
+  }, [clientCatsEff && clientCatsEff.join('|'), catEff.join('|')]);
 
   // AUM header KPI — also feeds the Territory Heat Map summary so the tile's
   // "Mkt Opp" / "Mkt Share" always match the header and move together on selection.
-  const aumKpiItems = kpiForMetric('aum', selectedClients, catSelected, vehicleSel, selectedCity);
+  const aumKpiItems = kpiForMetric('aum', selectedClients, catEff, vehicleSel, selectedCity);
   const aumSummaryOpp = (aumKpiItems.find(i => i.label === 'Mkt Opp') || {}).value;
   const aumSummaryShare = (aumKpiItems.find(i => i.label === 'Mkt Share') || {}).value;
 
@@ -139,8 +145,8 @@ function OpportunityPage({ onViewClient, onSelectionsChange, filters, setFilters
     <div style={{ padding: 20, display: 'flex', flexDirection: 'column', gap: 16 }}>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px,1fr))', gap: 16 }}>
         <TripKpi title="AUM" items={aumKpiItems} />
-        <TripKpi title="Inflows" items={kpiForMetric('inflow', selectedClients, catSelected, vehicleSel, selectedCity)} />
-        <TripKpi title="Net Flows" items={kpiForMetric('netflow', selectedClients, catSelected, vehicleSel, selectedCity)} />
+        <TripKpi title="Inflows" items={kpiForMetric('inflow', selectedClients, catEff, vehicleSel, selectedCity)} />
+        <TripKpi title="Net Flows" items={kpiForMetric('netflow', selectedClients, catEff, vehicleSel, selectedCity)} />
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) minmax(0,1fr)', gap: 16 }}>
@@ -159,7 +165,7 @@ function OpportunityPage({ onViewClient, onSelectionsChange, filters, setFilters
             selectedClients={selectedClients}
             advFilter={advFilter}
             onAdvFilter={toggleAdv}
-            filterCats={catSelected}
+            filterCats={catEff}
             vehicleFilter={vehicleSel}
             cityClients={cityClientNames}
             selectedCity={selectedCity}
@@ -185,7 +191,7 @@ function OpportunityPage({ onViewClient, onSelectionsChange, filters, setFilters
             dim={dimCat}
             selectedClient={selectedClient}
             selectedCats={catSelected}
-            clientCats={clientCats}
+            clientCats={clientCatsEff}
             vehicleFilter={vehicleSel}
             onToggle={toggleCats}
             onToggleVehicle={toggleVehicle}
@@ -202,7 +208,7 @@ function OpportunityPage({ onViewClient, onSelectionsChange, filters, setFilters
           channels={filters?.channels || []}
           advantage={filters?.advantage || []}
           regions={filters?.regions || []}
-          catSelected={catSelected}
+          catSelected={catEff}
           selectedClient={selectedClient}
           onViewClient={onViewClient}
           selectedCity={selectedCity}
@@ -448,7 +454,7 @@ function TripKpi({ title, items }) {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0,1fr))', gap: 'clamp(6px,0.9vw,12px)' }}>
         {items.map((it, i) => (
           <div key={i} style={{ minWidth: 0, borderLeft: i>0 ? '1px solid rgba(75,85,99,0.3)' : 'none', paddingLeft: i>0 ? 'clamp(6px,0.9vw,12px)' : 0 }}>
-            <div style={{ fontFamily: 'Inter', fontSize: 10, color: 'rgb(107,114,128)', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 4 }}>{it.label}</div>
+            <div style={{ fontFamily: 'Inter', fontSize: 10, color: 'rgb(200,205,213)', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 4 }}>{it.label}</div>
             <div style={{ fontFamily: 'Inter Display, Inter', fontWeight: 700, fontSize: 'clamp(16px,1.35vw,20px)', color: 'rgb(249,250,251)', fontVariantNumeric: 'tabular-nums' }}>{it.value}</div>
             <div style={{ fontFamily: 'Inter', fontSize: 10.5, color: /↑/.test(String(it.sub||'')) ? 'rgb(52,211,153)' : /↓/.test(String(it.sub||'')) ? 'rgb(248,113,113)' : 'rgb(163,163,163)', marginTop: 2 }}>{it.sub}</div>
           </div>
@@ -1080,7 +1086,7 @@ function scaleVal(s, mult) {  if (mult === 1) return s;
 const oTable   = { width:'100%', tableLayout:'fixed', borderCollapse:'collapse', fontFamily:'Inter', fontSize:11.5 };
 const oTh      = { textAlign:'left', fontSize:10, fontWeight:500, color:'rgb(163,163,163)', textTransform:'none', letterSpacing:0.3, padding:'8px 12px 6px', borderBottom:'1px solid rgba(75,85,99,0.3)' };
 const oThN     = { ...oTh, textAlign:'right', padding:'8px 4px 6px', overflow:'hidden' };
-const groupTh  = { textAlign:'center', fontSize:9.5, fontWeight:600, color:'rgb(107,114,128)', padding:'8px 5px 2px', textTransform:'uppercase', letterSpacing:0.6 };
+const groupTh  = { textAlign:'center', fontSize:9.5, fontWeight:600, color:'rgb(200,205,213)', padding:'8px 5px 2px', textTransform:'uppercase', letterSpacing:0.6 };
 const oTdCell  = { padding:'9px 8px', color:'rgb(209,213,219)', overflow:'hidden' };
 const oTdN     = { padding:'9px 4px', fontSize:10.5, textAlign:'right', color:'rgb(163,163,163)', fontVariantNumeric:'tabular-nums', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' };
 const oTdNStrong = { ...oTdN, color:'rgb(52,211,153)', fontWeight:600 };
@@ -1389,7 +1395,7 @@ function TreeCell({ cat, big, small, on, scale, labelOverride, valueField = 'opp
           boxShadow:'0 16px 40px rgba(0,0,0,0.55)', padding:'10px 12px 8px',
         }}>
           <div style={{ fontFamily:'Inter', fontSize:11.5, fontWeight:600, color:'rgb(249,250,251)', marginBottom:2 }}>{cat.name}</div>
-          <div style={{ fontFamily:'Inter', fontSize:9.5, textTransform:'uppercase', letterSpacing:0.5, color:'rgb(107,114,128)', marginBottom:6 }}>Platform status by firm</div>
+          <div style={{ fontFamily:'Inter', fontSize:9.5, textTransform:'uppercase', letterSpacing:0.5, color:'rgb(200,205,213)', marginBottom:6 }}>Platform status by firm</div>
           <div style={{ display:'grid', gridTemplateColumns:'1fr auto', gap:'6px 10px' }}>
             {platformRows.map(r => (
               <React.Fragment key={r.firm}>
@@ -1551,7 +1557,7 @@ function CompAdvOverlay({ row, onClose }) {
             { l:'Total Net Flow', v:row.netFlow, accent:true },
           ].map((k,i) => (
             <div key={i} style={{ padding:'16px 22px', borderRight: i<4 ? '1px solid rgba(75,85,99,0.3)' : 'none' }}>
-              <div style={{ fontFamily:'Inter', fontSize:10, fontWeight:600, color:'rgb(107,114,128)', textTransform:'uppercase', letterSpacing:0.6 }}>{k.l}</div>
+              <div style={{ fontFamily:'Inter', fontSize:10, fontWeight:600, color:'rgb(200,205,213)', textTransform:'uppercase', letterSpacing:0.6 }}>{k.l}</div>
               <div style={{ fontFamily:'Inter Display, Inter', fontWeight:700, fontSize:19, color: k.accent ? 'rgb(52,211,153)' : 'rgb(249,250,251)', fontVariantNumeric:'tabular-nums', marginTop:4 }}>{k.v}</div>
             </div>
           ))}
@@ -1631,7 +1637,7 @@ function CompAdvOverlay({ row, onClose }) {
   );
 }
 
-const caoTh = { textAlign:'left', fontFamily:'Inter', fontSize:10, fontWeight:600, color:'rgb(107,114,128)', textTransform:'uppercase', letterSpacing:0.5, padding:'10px 14px', whiteSpace:'nowrap' };
+const caoTh = { textAlign:'left', fontFamily:'Inter', fontSize:10, fontWeight:600, color:'rgb(200,205,213)', textTransform:'uppercase', letterSpacing:0.5, padding:'10px 14px', whiteSpace:'nowrap' };
 const caoThR = { ...caoTh, textAlign:'right' };
 const caoTd = { padding:'12px 14px', color:'rgb(209,213,219)', fontFamily:'Inter', fontSize:12 };
 const caoTdR = { ...caoTd, textAlign:'right', fontVariantNumeric:'tabular-nums' };
@@ -1812,7 +1818,7 @@ function VehicleBreakdownOverlay({ cat, onClose }) {
               <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:14 }}>
                 {[['Mkt Opp', s.opp], ['Yours', s.yours], ['Mkt Share', s.share]].map(([l, v], j) => (
                   <div key={j}>
-                    <div style={{ fontFamily:'Inter', fontSize:10, color:'rgb(107,114,128)', textTransform:'uppercase', letterSpacing:0.4 }}>{l}</div>
+                    <div style={{ fontFamily:'Inter', fontSize:10, color:'rgb(200,205,213)', textTransform:'uppercase', letterSpacing:0.4 }}>{l}</div>
                     <div style={{ fontFamily:'Inter Display, Inter', fontSize:20, fontWeight:700, color:'rgb(249,250,251)', letterSpacing:-0.4, marginTop:3, fontVariantNumeric:'tabular-nums' }}>{v}</div>
                   </div>
                 ))}
@@ -1893,7 +1899,7 @@ function vbColTh(align, boundary) {
   return {
     padding:'9px 14px', textAlign:align,
     fontFamily:'Inter', fontSize:10, fontWeight:600,
-    color:'rgb(107,114,128)', textTransform:'uppercase', letterSpacing:0.5,
+    color:'rgb(200,205,213)', textTransform:'uppercase', letterSpacing:0.5,
     background:'rgb(11,21,32)', borderBottom:'1px solid rgba(75,85,99,0.3)',
     borderRight: boundary ? '1px solid rgba(75,85,99,0.3)' : 'none',
     whiteSpace:'nowrap',
@@ -2201,7 +2207,7 @@ function FirmBreakdownOverlay({ firm, onClose }) {
               <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:14 }}>
                 {[['Mkt Opp', s.opp], [s.kind === 'AUM' ? 'Yours' : (s.kind === 'INFLOW' ? 'Inflows' : 'Net Flows'), s.yours], ['Mkt Share', s.share]].map(([l, v], j) => (
                   <div key={j}>
-                    <div style={{ fontFamily:'Inter', fontSize:10, color:'rgb(107,114,128)', textTransform:'uppercase', letterSpacing:0.4 }}>{l}</div>
+                    <div style={{ fontFamily:'Inter', fontSize:10, color:'rgb(200,205,213)', textTransform:'uppercase', letterSpacing:0.4 }}>{l}</div>
                     <div style={{ fontFamily:'Inter Display, Inter', fontSize:20, fontWeight:700, color:'rgb(249,250,251)', letterSpacing:-0.4, marginTop:3, fontVariantNumeric:'tabular-nums' }}>{v}</div>
                   </div>
                 ))}
@@ -2350,7 +2356,7 @@ function fbColTh(align, boundary) {
   return {
     padding:'9px 14px', textAlign:align,
     fontFamily:'Inter', fontSize:10, fontWeight:600,
-    color:'rgb(107,114,128)', textTransform:'uppercase', letterSpacing:0.5,
+    color:'rgb(200,205,213)', textTransform:'uppercase', letterSpacing:0.5,
     background:'rgb(11,21,32)', borderBottom:'1px solid rgba(75,85,99,0.3)',
     borderRight: boundary ? '1px solid rgba(75,85,99,0.3)' : 'none',
     whiteSpace:'nowrap', position:'sticky', top:35, zIndex:1,

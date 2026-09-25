@@ -1,6 +1,6 @@
 /* Home — AI assistant greeting screen */
 
-function HomePage({ onNav, onAIAction }) {
+function HomePage({ onNav, onAIAction, subs, onSubscribe, onReadEmail, level }) {
   const [msg, setMsg] = React.useState('');
   const [aiActive, setAIActive] = React.useState(false);
   const [aiPrompt, setAIPrompt] = React.useState('');
@@ -35,13 +35,21 @@ function HomePage({ onNav, onAIAction }) {
     setHistoryOpen(false);
   };
 
+  const [hdrSlot, setHdrSlot] = React.useState(null);
+  React.useEffect(() => { setHdrSlot(document.getElementById('askfield-hdr-slot')); }, []);
+  const histBtn = hdrSlot && (aiActive || history.length > 0) ? ReactDOM.createPortal(
+    <button onClick={() => { if (!aiActive && history[0]) submitPrompt(history[0].text); setHistoryOpen(true); }} style={{ ...pillBtn(historyOpen) }} title="Recent chats">
+      <i className="fa-solid fa-clock-rotate-left" style={{ fontSize:10 }} /> History
+      {history.length > 0 && <span style={{ marginLeft:2, padding:'1px 6px', borderRadius:9999, background:'rgba(16,185,129,0.18)', color:'rgb(52,211,153)', fontFamily:'Inter', fontSize:10, fontWeight:600 }}>{history.length}</span>}
+    </button>, hdrSlot) : null;
+
   // ---- AI active view: content + left history rail (fixed) + sticky bottom composer
   if (aiActive) {
     return (
       <div style={{
         flex: 1, display: 'flex', flexDirection: 'column',
-        position: 'relative',
-      }}>
+        position: 'relative', minHeight: 0, overflowY: 'auto',
+      }} className="af-scroll">
         {historyOpen && (
           <HistorySidePanel
             items={history}
@@ -53,27 +61,16 @@ function HomePage({ onNav, onAIAction }) {
           />
         )}
 
-        {/* Fixed action buttons: History (far left of content area) | New chat (far right) */}
-        {!historyOpen && (
-          <button
-            onClick={() => setHistoryOpen(true)}
-            style={{ ...pillBtn(false), position:'fixed', top:70, left:76, zIndex:22 }}
-            title="Recent chats">
-            <i className="fa-solid fa-clock-rotate-left" style={{ fontSize:10 }} /> History
-            {history.length > 0 && (
-              <span style={{
-                marginLeft:2, padding:'1px 6px', borderRadius:9999,
-                background:'rgba(16,185,129,0.18)', color:'rgb(52,211,153)',
-                fontFamily:'Inter', fontSize:10, fontWeight:600,
-              }}>{history.length}</span>
-            )}
-          </button>
-        )}
+        {/* History sits beside the Ask Field header; New chat is highlighted so
+           it is obvious how to clear the answer and start over. */}
+        {!historyOpen && histBtn}
         <button
           onClick={startNewChat}
-          style={{ ...pillBtn(), position:'fixed', top:70, right:20, zIndex:22 }}
-          title="Start a new chat">
-          <i className="fa-solid fa-pen-to-square" style={{ fontSize:10 }} /> New chat
+          className="af-newchat"
+          style={{ ...pillBtn(true), height: 30, padding: '0 14px', fontSize: 12, fontWeight: 600, background: 'rgb(16,185,129)', border: '1px solid rgb(52,211,153)', color: '#fff', position:'fixed', top:70, right:20, zIndex:22 }}
+          title="Clear this answer and start a new chat">
+          <style>{'@keyframes afPulse{0%{box-shadow:0 0 0 0 rgba(16,185,129,.6)}70%{box-shadow:0 0 0 10px rgba(16,185,129,0)}100%{box-shadow:0 0 0 0 rgba(16,185,129,0)}}.af-newchat{animation:afPulse 1.6s ease-out 3}.af-newchat:hover{background:rgb(5,150,105)!important}'}</style>
+          <i className="fa-solid fa-pen-to-square" style={{ fontSize:11 }} /> New chat
         </button>
 
         {/* Top spacer so the result panel doesn't sit under the fixed buttons */}
@@ -87,6 +84,7 @@ function HomePage({ onNav, onAIAction }) {
           <div style={{ width:'100%', maxWidth:920 }}>
             <AIInsightsPanel
               prompt={aiPrompt}
+              onNav={onNav}
               onClient={(client) => onAIAction && onAIAction({ id:'openClient', client })}
               onViewProfile={() => onAIAction && onAIAction('viewPolkProfile')}
               onCreateMaterial={() => onAIAction && onAIAction('createMaterial')}
@@ -163,7 +161,8 @@ function HomePage({ onNav, onAIAction }) {
       flex: 1, display: 'flex', flexDirection: 'column',
       alignItems: 'center', minHeight: 0, overflowY: 'auto',
       padding: '48px 40px 80px', gap: 28,
-    }}>
+    }} className="af-scroll">
+      {histBtn}
       <h1 style={{
         fontFamily: 'Inter Display, Inter', fontWeight: 500, fontSize: 48,
         color: 'rgb(249,250,251)', margin: 0, letterSpacing: '-0.02em',
@@ -206,52 +205,70 @@ function HomePage({ onNav, onAIAction }) {
         </div>
       </div>
 
-      {/* Suggestions run on two vectors: a curated Field-level set, and the
-         user's own recent questions (seeded until they have asked one). */}
-      <HomeSuggestions history={history} onPick={submitPrompt} />
+      <HomeSuggestions level={level} onPick={submitPrompt} />
     </div>
   );
 }
 
-const HOME_FIELD_SUGGESTIONS = [
-  'What are my top client opportunities in Large Blend?',
-  'Which advisors are likely to buy any of our focus products?',
-  "Who are my top producers I haven't met this quarter?",
-  'Where am I losing share in Intermediate Core-Plus?',
-];
-const HOME_RECENT_SEEDS = [
-  'Show me Segment A FA/Teams with a Strong competitive advantage',
-  'Which firms drove my YTD sales growth?',
-  'Which prospects have no activity in the last 90 days?',
+/* Signal prompts follow what the subscription can deliver: Level 1 is
+   opportunity + competitive advantage from the data packs, Level 2 adds the
+   firm's own sales and CRM activity, Level 3 adds segmentation and the
+   predictive / prescriptive signal models. */
+const HOME_SIGNALS = {
+  1: { note: 'Opportunity and competitive advantage', items: [
+    ['trophy', 'Where do we have a Strong competitive advantage but under 10% share?'],
+    ['bullseye', 'Top 10 FA/Teams by opportunity where our market share is lowest'],
+    ['arrow-trend-up', 'Which categories are taking flows where our funds rank top quartile?'],
+    ['building-columns', 'Which firms hold the most opportunity in our focus categories?'],
+  ] },
+  2: { note: 'Opportunity, plus your sales and CRM activity', items: [
+    ['user-clock', 'Which top-opportunity FA/Teams have had no meeting in 90 days?'],
+    ['arrow-trend-down', 'Which producers slowed their sales this quarter?'],
+    ['video', 'Which webinar attendees have not had a follow-up inside 48 hours?'],
+    ['handshake', 'Where is activity high but sales lift low?'],
+  ] },
+  3: { note: 'Full signals with predictive and prescriptive models', items: [
+    ['phone', 'Who should I call first today, and what should I lead with?'],
+    ['shield-exclamation', 'Where are my Retention Risk signals, and how much AUM is exposed?'],
+    ['wave-pulse', 'Which Segment A prospects are most likely to buy Core Plus?'],
+    ['wand-magic-sparkles', 'Which next best actions are most likely to convert this month?'],
+  ] },
+};
+const HOME_POPULAR = [
+  ['fire', 'What are my top client opportunities in Large Blend?'],
+  ['users', "Who are my top producers I haven't met this quarter?"],
+  ['chart-pie', 'Where am I losing share in Intermediate Core-Plus?'],
+  ['building', 'Which firms drove our YTD sales growth?'],
 ];
 
-function HomeSuggestions({ history, onPick }) {
-  const recent = (history && history.length ? history.map(h => h.text) : HOME_RECENT_SEEDS).slice(0, 4);
-  const group = (title, icon, items) => (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 7, fontFamily: 'Inter', fontSize: 10, fontWeight: 600, color: 'rgb(107,114,128)', letterSpacing: 0.8, textTransform: 'uppercase' }}>
-        <i className={`fa-solid fa-${icon}`} style={{ fontSize: 9 }} />{title}
+function HomeSuggestions({ onPick, level = 3 }) {
+  const sig = HOME_SIGNALS[level] || HOME_SIGNALS[3];
+  const row = (title, icon, note, items, accent) => (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontFamily: 'Inter', fontSize: 10, fontWeight: 600, color: 'rgb(200,205,213)', letterSpacing: 0.8, textTransform: 'uppercase' }}>
+        <i className={`fa-solid fa-${icon}`} style={{ fontSize: 10, color: accent }} />{title}
+        {note && <span style={{ textTransform: 'none', letterSpacing: 0, fontWeight: 400, color: 'rgb(107,114,128)' }}>· {note}</span>}
       </div>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-        {items.map(t => (
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px,1fr))', gap: 8 }}>
+        {items.map(([ic, t]) => (
           <button key={t} onClick={() => onPick(t)} className="home-sugg" style={{
-            display: 'flex', alignItems: 'center', gap: 10, textAlign: 'left',
-            padding: '9px 12px', borderRadius: 9, cursor: 'pointer',
-            background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(75,85,99,0.4)',
-            color: 'rgb(209,213,219)', fontFamily: 'Inter', fontSize: 12.5,
+            display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 10, textAlign: 'left',
+            padding: '12px 13px', borderRadius: 10, cursor: 'pointer', minHeight: 92,
+            background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(75,85,99,0.45)',
+            color: 'rgb(209,213,219)', fontFamily: 'Inter', fontSize: 12.5, lineHeight: 1.4,
           }}>
-            <span style={{ flex: 1 }}>{t}</span>
-            <i className="fa-solid fa-arrow-right" style={{ fontSize: 10, color: 'rgb(107,114,128)' }} />
+            <i className={`fa-solid fa-${ic}`} style={{ fontSize: 12, color: accent }} />
+            <span style={{ textWrap: 'pretty' }}>{t}</span>
           </button>
         ))}
       </div>
     </div>
   );
   return (
-    <div style={{ width: 620, maxWidth: '100%', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px,1fr))', gap: 20 }}>
+    <div style={{ width: 860, maxWidth: '100%', display: 'flex', flexDirection: 'column', gap: 24 }}>
       <style>{`.home-sugg:hover{background:rgba(16,185,129,0.08)!important;border-color:rgba(16,185,129,0.45)!important;color:rgb(249,250,251)!important}`}</style>
-      {group('Suggested by Field', 'wand-magic-sparkles', HOME_FIELD_SUGGESTIONS)}
-      {group(history && history.length ? 'Your recent questions' : 'Popular in your company', 'clock-rotate-left', recent)}
+      {row(`Signals · Level ${level}`, 'satellite-dish', sig.note, sig.items, 'rgb(52,211,153)')}
+      {row('Popular in your company', 'fire', null, HOME_POPULAR, 'rgb(156,163,175)')}
     </div>
   );
 }

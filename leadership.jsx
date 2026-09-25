@@ -9,7 +9,7 @@ const ML_MONTHS = (() => {
     return d.toLocaleString('en-US', { month: 'short' }) + (d.getMonth() === 0 ? ` ${String(d.getFullYear()).slice(2)}` : '');
   });
 })();
-const mlAxisTitle = (t) => ({ text: t, style: { color: 'rgb(107,114,128)', fontSize: '10px' } });
+const mlAxisTitle = (t) => ({ text: t, style: { color: 'rgb(200,205,213)', fontSize: '10.5px' } });
 
 function MlProdTrend({ rows }) {
   const [mode, setMode] = React.useState('band');
@@ -19,23 +19,21 @@ function MlProdTrend({ rows }) {
     const catColor = { Producer: 'rgb(52,211,153)', Dabbler: 'rgb(251,191,36)' };
     const series = keys.map(k => ({
       type: 'column', name: k, yAxis: 0,
-      data: ML_MONTHS.map((_, m) => rows.filter(r => { const v = mlValAt(r, m); return v > 0 && groupOf(v) === k; }).length),
+      data: ML_MONTHS.map((_, m) => rows.reduce((a, r) => { const v = mlValAt(r, m) / (r.count || 1); return v > 0 && groupOf(v) === k ? a + (r.count || 1) : a; }, 0)),
       ...wash(mode === 'band' ? LV_PROD_BAND_COLORS[k] : catColor[k], 0.55),
     }));
-    series.push({ type: 'spline', name: 'Prospects ($0)', yAxis: 1, color: 'rgb(148,163,184)', dashStyle: 'ShortDash', marker: { radius: 2.5 },
-      data: ML_MONTHS.map((_, m) => rows.filter(r => mlValAt(r, m) <= 0).length) });
     return {
       chart: { height: 290, animation: false },
       xAxis: { categories: ML_MONTHS },
-      yAxis: [{ allowDecimals: false, title: mlAxisTitle('Producing FA/Teams') }, { allowDecimals: false, opposite: true, title: mlAxisTitle('Prospects'), gridLineWidth: 0 }],
-      legend: { enabled: true, align: 'center', verticalAlign: 'bottom', maxHeight: 52 },
-      tooltip: { shared: true, valueSuffix: ' FA/Teams' },
+      yAxis: [{ allowDecimals: false, title: mlAxisTitle('Producing FA/Teams') }],
+      legend: { enabled: true, align: 'center', verticalAlign: 'bottom' },
+      tooltip: { shared: false, headerFormat: '<span style="font-size:10.5px;color:rgb(200,205,213)">{point.key}</span><br/>', pointFormat: '<span style="color:{series.borderColor}">●</span> {series.name}: <b>{point.y}</b> FA/Teams' },
       plotOptions: { series: { animation: false }, column: { stacking: 'normal', pointPadding: 0.04, groupPadding: 0.1, borderWidth: 0 } },
       series,
     };
   }, [rows, mode]);
   return (
-    <Tile title="Producer & prospect trend" subtitle="FA/Teams by rolling-12 production, month by month"
+    <Tile title="Producer trend" subtitle="Producing FA/Teams by rolling-12 production, month by month"
       right={<TabPills options={['Thresholds', 'Category']} value={mode === 'band' ? 'Thresholds' : 'Category'} onChange={v => setMode(v === 'Thresholds' ? 'band' : 'cat')} />}>
       <HC options={options} style={{ height: 290 }} />
     </Tile>
@@ -44,27 +42,30 @@ function MlProdTrend({ rows }) {
 
 function MlActTrend({ rows, role }) {
   const options = React.useMemo(() => {
+    const colors = { ext: 'rgb(16,185,129)', int: 'rgb(59,130,246)', spec: 'rgb(168,85,247)' };
     const series = ML_ROLE_KEYS.map(k => ({
-      type: 'column', name: ML_ROLE_LABEL[k], yAxis: 0,
-      data: ML_MONTHS.map((_, m) => rows.reduce((a, r) => a + r.actM[k][m], 0)),
-      ...wash(ML_ROLE_COLOR[k], k === role ? 0.6 : 0.2),
+      type: 'column', name: `${ML_ROLE_LABEL[k]} activities`,
+      data: ML_MONTHS.map((_, m) => Math.round(rows.reduce((a, r) => a + r.actM[k][m], 0))),
+      ...wash(colors[k], k === role ? 0.7 : 0.4),
     }));
-    series.push({ type: 'spline', name: 'Engagement touches', yAxis: 1, color: 'rgb(251,191,36)', marker: { radius: 2.5 },
-      data: ML_MONTHS.map((_, m) => rows.reduce((a, r) => a + r.engM[m], 0)) });
-    series.push({ type: 'spline', name: `FA/Teams touched (${ML_ROLE_LABEL[role].toLowerCase()})`, yAxis: 1, color: ML_ROLE_COLOR[role], dashStyle: 'ShortDash', marker: { radius: 2.5 },
-      data: ML_MONTHS.map((_, m) => rows.filter(r => r.actM[role][m] > 0).length) });
+    // Unique FA/Teams touched by anyone in the month. One FA/Team can get
+    // several activities, so this always sits at or below total activities.
+    series.push({ type: 'spline', name: 'FA/Teams touched', color: 'rgb(249,250,251)', lineWidth: 2, marker: { radius: 2.5, fillColor: 'rgb(249,250,251)' },
+      data: ML_MONTHS.map((_, m) => Math.round(rows.reduce((a, r) => (ML_ROLE_KEYS.some(k => r.actM[k][m] > 0) ? a + (r.focus ? 1 : Math.min(r.touched, ML_ROLE_KEYS.reduce((x, k) => x + r.actM[k][m], 0))) : a), 0))) });
+    series.push({ type: 'spline', name: 'Engagement touches', color: 'rgb(251,191,36)', dashStyle: 'ShortDash', marker: { radius: 2.5, fillColor: 'rgb(251,191,36)' },
+      data: ML_MONTHS.map((_, m) => Math.round(rows.reduce((a, r) => a + r.engM[m], 0))) });
     return {
       chart: { height: 290, animation: false },
       xAxis: { categories: ML_MONTHS },
-      yAxis: [{ allowDecimals: false, title: mlAxisTitle('Activities') }, { allowDecimals: false, opposite: true, title: mlAxisTitle('Touches / FA/Teams'), gridLineWidth: 0 }],
-      legend: { enabled: true, align: 'center', verticalAlign: 'bottom', maxHeight: 52 },
-      tooltip: { shared: true },
-      plotOptions: { series: { animation: false }, column: { stacking: 'normal', pointPadding: 0.04, groupPadding: 0.1, borderWidth: 0 } },
+      yAxis: [{ allowDecimals: false, title: mlAxisTitle('Count per month') }],
+      legend: { enabled: true, align: 'center', verticalAlign: 'bottom' },
+      tooltip: { shared: false, headerFormat: '<span style="font-size:10.5px;color:rgb(200,205,213)">{point.key}</span><br/>', pointFormat: '<span style="color:{series.color}">●</span> {series.name}: <b>{point.y:,.0f}</b>' },
+      plotOptions: { series: { animation: false }, column: { stacking: 'normal', pointPadding: 0.04, groupPadding: 0.1, borderWidth: 1 } },
       series,
     };
   }, [rows, role]);
   return (
-    <Tile title="Activity & engagement trend" subtitle="Monthly activities by role, engagement touches and FA/Teams reached">
+    <Tile title="Activity & engagement trend" subtitle="Monthly activities by role, unique FA/Teams touched and engagement touches · one axis">
       <HC options={options} style={{ height: 290 }} />
     </Tile>
   );
@@ -84,16 +85,16 @@ function MlEffortScatter({ rowsAll, xf, ctx, onPick }) {
       data: people.filter(p => p.regions[0] === rg).map(p => {
         const a = mlSum(base.filter(r => r[ctx.role] === p.name), ctx, xf);
         const on = (!sel.length || sel.includes(p.name)) && (!rsel.length || p.regions.some(x => rsel.includes(x)));
-        return { name: p.name, x: Math.round(mlPct(a.acts, a.n) * 10) / 10, y: Math.round(mlPct(a.yours, a.opp) * 1000) / 10, z: a.opp, g: a.prior ? (a.inflow - a.prior) / a.prior : 0,
+        return { name: p.name, x: Math.round(mlPct(a.acts, a.focusN) * 10) / 10, y: Math.round(mlPct(a.yours, a.opp) * 1000) / 10, z: a.opp, g: a.prior ? (a.inflow - a.prior) / a.prior : 0,
           color: on ? ML_REGION_COLORS[rg].replace('rgb', 'rgba').replace(')', ',0.6)') : 'rgba(120,130,150,0.15)' };
       }),
     })).filter(s => s.data.length);
     return {
       chart: { type: 'bubble', height: 300, animation: false },
-      xAxis: { title: mlAxisTitle('Activities per FA/Team'), gridLineWidth: 1 },
+      xAxis: { title: mlAxisTitle('Activities per focus FA/Team'), gridLineWidth: 1 },
       yAxis: { title: mlAxisTitle('Market share (%)'), labels: { format: '{value}%' } },
       legend: { enabled: true, align: 'center', verticalAlign: 'bottom' },
-      tooltip: { useHTML: true, formatter: function () { const p = this.point; return `<b>${p.name}</b><br/>${p.x} act / FA · ${p.y}% share<br/>Sales ${p.g >= 0 ? '+' : '−'}${Math.abs(p.g * 100).toFixed(0)}% vs prior`; } },
+      tooltip: { useHTML: true, formatter: function () { const p = this.point; return `<b>${p.name}</b><br/>${p.x} act / focus FA · ${p.y}% share<br/>Sales ${p.g >= 0 ? '+' : '−'}${Math.abs(p.g * 100).toFixed(0)}% vs prior`; } },
       plotOptions: { series: { animation: false }, bubble: { minSize: 12, maxSize: 44, cursor: 'pointer', dataLabels: { enabled: true, format: '{point.name}', style: { fontSize: '9px', fontWeight: '500', color: 'rgb(209,213,219)', textOutline: 'none' }, y: -14 },
         point: { events: { click: function () { pickRef.current && pickRef.current(this.name); } } } } },
       series,
@@ -112,23 +113,23 @@ function MlThresholds({ rows, ctx }) {
     const cats = by === 'Region' ? ML_REGIONS.filter(rg => rows.some(r => r.region === rg))
       : ML_PEOPLE.filter(p => p.role === ctx.role && rows.some(r => r[ctx.role] === p.name)).map(p => p.name);
     const inCat = (r, c) => (by === 'Region' ? r.region === c : r[ctx.role] === c);
-    const series = LV_PROD_BANDS.map(b => ({
-      type: 'bar', name: b === '$0' ? 'Prospect ($0)' : b,
-      data: cats.map(c => rows.filter(r => inCat(r, c) && r.prodBand === b).length),
-      ...wash(LV_PROD_BAND_COLORS[b], b === '$0' ? 0.25 : 0.6),
+    const series = LV_PROD_BANDS.filter(b => b !== '$0').map(b => ({
+      type: 'bar', name: b,
+      data: cats.map(c => rows.reduce((a, r) => (inCat(r, c) && r.prodBand === b ? a + (r.count || 1) : a), 0)),
+      ...wash(LV_PROD_BAND_COLORS[b], 0.6),
     })).reverse();
     return {
       chart: { type: 'bar', height: Math.max(240, cats.length * 26 + 90), animation: false },
       xAxis: { categories: cats },
       yAxis: { max: 100, title: { text: null }, labels: { format: '{value}%' } },
       legend: { enabled: true, align: 'center', verticalAlign: 'bottom', reversed: true },
-      tooltip: { pointFormat: '<span style="color:{point.color}">●</span> {series.name}: <b>{point.y}</b> FA/Teams ({point.percentage:.0f}%)<br/>' , shared: true },
+      tooltip: { headerFormat: '<span style="font-size:10.5px;color:rgb(200,205,213)">{point.key}</span><br/>', pointFormat: '<span style="color:{series.borderColor}">●</span> {series.name}: <b>{point.y}</b> FA/Teams ({point.percentage:.0f}% of producers)', shared: false },
       plotOptions: { series: { animation: false, stacking: 'percent', borderWidth: 0 }, bar: { pointPadding: 0.08, groupPadding: 0.08 } },
       series,
     };
   }, [rows, by, ctx.role]);
   return (
-    <Tile title="Production thresholds" subtitle="Share of FA/Teams in each rolling-12 production band"
+    <Tile title="Production thresholds" subtitle="Share of producing FA/Teams in each rolling-12 production band"
       right={<TabPills options={['Region', ML_ROLE_ONE[ctx.role]]} value={by === 'Region' ? 'Region' : ML_ROLE_ONE[ctx.role]} onChange={v => setBy(v === 'Region' ? 'Region' : 'Person')} />}>
       <HC options={options} style={{ height: Math.max(240, (by === 'Region' ? 5 : 16) * 26 + 90) }} />
     </Tile>
@@ -147,14 +148,14 @@ function MlSignalPipeline({ rows, ctx, xf }) {
       xAxis: { categories: bs.map(b => b.label) },
       yAxis: { title: mlAxisTitle('Signal opportunity ($M)'), labels: { format: '${value}M' } },
       legend: { enabled: true, align: 'center', verticalAlign: 'bottom' },
-      tooltip: { shared: true, valuePrefix: '$', valueSuffix: 'M', valueDecimals: 1 },
+      tooltip: { shared: false, headerFormat: '<span style="font-size:10.5px;color:rgb(200,205,213)">{point.key}</span><br/>', pointFormat: '<span style="color:{series.borderColor}">●</span> {series.name}: <b>${point.y:.1f}M</b>' },
       plotOptions: { series: { animation: false, stacking: 'normal', borderWidth: 0 }, bar: { pointPadding: 0.08, groupPadding: 0.08 } },
       series: ML_FAMILIES.map(f => ({ type: 'bar', name: f, data: bs.map(b => Math.round((b.fam[f] || 0) * 10) / 10), ...wash(ML_FAM_COLORS[f], 0.55) })),
     };
   }, [rows, ctx, xf, by]);
   return (
     <Tile title={<span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>Signal pipeline <MlL3Tag /></span>}
-      subtitle="Open signal opportunity by signal family"
+      subtitle="Open signal opportunity by signal family" style={{ height: '100%', boxSizing: 'border-box' }}
       right={<TabPills options={['Region', ML_ROLE_ONE[ctx.role]]} value={by === 'Region' ? 'Region' : ML_ROLE_ONE[ctx.role]} onChange={v => setBy(v === 'Region' ? 'Region' : 'Person')} />}>
       <HC options={options} style={{ height: Math.max(260, (by === 'Region' ? 5 : 16) * 24 + 90) }} />
     </Tile>
@@ -171,7 +172,7 @@ function MlSignalFunnel({ agg, bySeg }) {
   const top = Math.max(1, agg.sigN);
   return (
     <Tile title={<span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>Signal conversion <MlL3Tag /></span>}
-      subtitle="How far the team takes the signals it is given">
+      subtitle="How far the team takes the signals it is given" style={{ height: '100%', boxSizing: 'border-box' }}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
         {steps.map((s, i) => (
           <div key={s.label} style={{ display: 'grid', gridTemplateColumns: '120px minmax(0,1fr) 60px', gap: 12, alignItems: 'center' }}>
@@ -225,9 +226,39 @@ function MlConfPills({ value, onChange }) {
 
 /* ---------- page ---------- */
 
-function LeadershipPage({ level, measure, period, role, onSelectionsChange }) {
+/* Filter drawer sections — same drawer shell the other dashboards use. */
+function MlDrawerSections({ local, toggle, setMany, level, role, onRole }) {
+  const uniq = (f) => [...new Set(ML_ROWS.map(f))].sort();
+  return (
+    <>
+      <FilterGroupLabel>Sales team</FilterGroupLabel>
+      <FilterSection label="Sales role" options={ML_ROLE_KEYS.map(k => ML_ROLE_LABEL[k])} selected={[ML_ROLE_LABEL[role]]} onToggle={v => onRole && onRole(ML_ROLE_KEYS.find(k => ML_ROLE_LABEL[k] === v))} />
+      <FilterSection label="Region" options={ML_REGIONS} selected={local.region} onToggle={v => toggle('region', v)} />
+      <SearchMultiSelect label={ML_ROLE_ONE[role]} placeholder={`All ${ML_ROLE_LABEL[role].toLowerCase()}`}
+        options={ML_PEOPLE.filter(p => p.role === role).map(p => p.name)} selected={local.person} onChange={v => setMany('person', v)} />
+      <FilterGroupLabel>Distribution</FilterGroupLabel>
+      <FilterSection label="Channel" options={LV_ALL_CHANNELS} selected={local.channel} onToggle={v => toggle('channel', v)} />
+      <SearchMultiSelect label="Firm" placeholder="All firms" options={uniq(r => r.firm)} selected={local.firm} onChange={v => setMany('firm', v)} />
+      <FilterGroupLabel>Products</FilterGroupLabel>
+      <FilterSection label="Vehicle" options={LV_VEHICLES} selected={local.vehicle} onToggle={v => toggle('vehicle', v)} />
+      <SearchMultiSelect label="Product category" placeholder="All categories" options={LV_PROD_CATEGORIES} selected={local.cat} onChange={v => setMany('cat', v)} />
+      <SearchMultiSelect label="Product" placeholder="All products" options={LV_CATALOG.map(p => p.name)} selected={local.product} onChange={v => setMany('product', v)} />
+      <FilterGroupLabel>Sales</FilterGroupLabel>
+      <FilterSection label="Producer category" options={LV_PROD_CATS} selected={local.prodCat} onToggle={v => toggle('prodCat', v)} />
+      <SearchMultiSelect label="Production threshold (R12)" placeholder="All thresholds" options={LV_PROD_BANDS} selected={local.prodBand} onChange={v => setMany('prodBand', v)} />
+      {level >= 3 && (
+        <>
+          <FilterGroupLabel>Segmentation &amp; signals</FilterGroupLabel>
+          <FilterSection label="Segment" options={LV_SEGMENTS} selected={local.segment} onToggle={v => toggle('segment', v)} />
+        </>
+      )}
+    </>
+  );
+}
+
+function LeadershipPage({ level, measure, period, role, onSelectionsChange, xf, setXf, focus }) {
   const L3 = level >= 3;
-  const [xf, setXf] = React.useState(mlEmptyXf);
+  const base = React.useMemo(() => (focus ? mlFocusRows() : ML_ROWS), [focus]);
   const [minConf, setMinConf] = React.useState(50);
   React.useEffect(() => { setXf(s => ({ ...s, person: [] })); }, [role]);
   React.useEffect(() => { if (!L3) setXf(s => ({ ...s, segment: [] })); }, [L3]);
@@ -244,8 +275,8 @@ function LeadershipPage({ level, measure, period, role, onSelectionsChange }) {
     return same ? { ...s, person: [], [dim]: [] } : { ...s, person: [name], [dim]: [key] };
   }), []);
 
-  const rows = React.useMemo(() => mlFilter(ML_ROWS, xf, role), [xf, role]);
-  const gridRows = React.useMemo(() => mlFilter(ML_ROWS, { ...xf, region: [], person: [] }, role), [xf, role]);
+  const rows = React.useMemo(() => mlFilter(base, xf, role), [base, xf, role]);
+  const gridRows = React.useMemo(() => mlFilter(base, { ...xf, person: [] }, role), [base, xf, role]);
   const tot = React.useMemo(() => mlSum(rows, ctx, xf), [rows, ctx, xf]);
   const bySeg = React.useMemo(() => (L3 ? mlBuckets(rows, 'segment', ctx, xf) : []), [rows, ctx, xf, L3]);
   const peopleN = new Set(rows.map(r => r[role])).size;
@@ -263,6 +294,7 @@ function LeadershipPage({ level, measure, period, role, onSelectionsChange }) {
   }, [xf, minConf, L3, onSelectionsChange]);
 
   const g = tot.prior ? (tot.inflow - tot.prior) / tot.prior : 0;
+  const goal = React.useMemo(() => mlGoal(ML_ROWS.filter(r => (!xf.region.length || xf.region.includes(r.region)) && (!xf.person.length || xf.person.includes(r[role]))), role, pk), [xf.region, xf.person, role, pk]);
   const pctOf = (x) => `${Math.round(mlPct(x, tot.n) * 100)}% of book`;
 
   return (
@@ -272,12 +304,13 @@ function LeadershipPage({ level, measure, period, role, onSelectionsChange }) {
         { label: 'Yours', value: M.fmt(tot.yours), strong: true },
         { label: 'Mkt share', value: tot.opp ? lvFmtPct(tot.yours / tot.opp) : '—' },
         { label: actualLabel, value: mlFmtK(tot.sales), sub: `${g >= 0 ? '↑' : '↓'} ${Math.abs(g * 100).toFixed(0)}% sales vs prior` },
-        { label: 'FA/Teams', value: tot.n.toLocaleString() },
+        { label: `${pkShort} sales goal`, value: mlFmtK(goal.goal), sub: `Annual ${mlFmtK(goal.annual)}${pk === 'Rolling 12' ? '' : ` · ${Math.round(ML_PK_FRAC[pk] * 100)}% of year`}` },
+        { label: '% to goal', value: `${Math.round(goal.pct * 100)}%`, strong: goal.pct >= 1, sub: `${mlFmtK(goal.act)} sold · all products` },
+        { label: 'Focus FA/Teams', value: tot.focusN.toLocaleString(), sub: `Covered list · ${Math.round(mlPct(tot.focusSales, tot.sales) * 100)}% of sales` },
         { label: 'Producers', value: tot.producers.toLocaleString(), sub: pctOf(tot.producers) },
-        { label: 'Prospects', value: tot.prospects.toLocaleString(), sub: pctOf(tot.prospects) },
-        { label: 'Activities', value: Math.round(tot.acts).toLocaleString(), sub: `${mlPct(tot.acts, tot.n).toFixed(1)} per FA/Team` },
-        { label: 'Covered', value: `${Math.round(mlPct(tot.covered, tot.n) * 100)}%`, sub: `${tot.stale.toLocaleString()} no touch 90d+` },
-        { label: 'Engaged', value: `${Math.round(mlPct(tot.engaged, tot.n) * 100)}%`, sub: `${Math.round(tot.eng).toLocaleString()} touches` },
+        { label: 'Activities', value: Math.round(tot.acts).toLocaleString(), sub: `${mlPct(tot.acts, tot.focusN).toFixed(1)} per focus FA/Team` },
+        { label: 'Focus covered', value: `${Math.round(mlPct(tot.covered, tot.focusN) * 100)}%`, sub: `${tot.stale.toLocaleString()} no touch 90d+` },
+        { label: 'Focus engaged', value: `${Math.round(mlPct(tot.engaged, tot.focusN) * 100)}%`, sub: `${Math.round(tot.eng).toLocaleString()} touches` },
       ]} />
 
       {L3 && (
@@ -296,7 +329,6 @@ function LeadershipPage({ level, measure, period, role, onSelectionsChange }) {
               ['Actioned', `${Math.round(mlPct(tot.sigAct, tot.sigN) * 100)}%`],
               ['Won', tot.sigWon.toLocaleString()],
               ['Signal-won sales', mlFmtK(tot.wonK), 'rgb(52,211,153)'],
-              ['Seg A coverage', `${Math.round(mlPct(tot.segAcov, tot.segA) * 100)}%`],
             ].map(([l, v, c]) => (
               <div key={l} style={{ minWidth: 0 }}>
                 <div style={{ fontFamily: 'Inter', fontSize: 9.5, color: ML_DIM, textTransform: 'uppercase', letterSpacing: 0.6, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{l}</div>
@@ -304,37 +336,70 @@ function LeadershipPage({ level, measure, period, role, onSelectionsChange }) {
               </div>
             ))}
           </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(230px,1fr))', gap: 10, paddingTop: 10, borderTop: '1px solid rgba(167,139,250,0.2)' }}>
+            {['A', 'B', 'C'].map(sk => {
+              const b = bySeg.find(x => x.key === sk) || mlEmpty();
+              const m = LV_SEG_META[sk];
+              const stats = [
+                ['FA/Teams', b.focusN.toLocaleString()],
+                ['% of sales', `${Math.round(mlPct(b.sales, tot.sales) * 100)}%`],
+                ['Signal opp.', lvFmtM(b.sigOpp)],
+                ['Covered', `${Math.round(mlPct(b.covered, b.focusN) * 100)}%`],
+              ];
+              return (
+                <div key={sk} style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0 }}>
+                  <LvSegBadge seg={sk} size={24} />
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0,1fr))', gap: 8, flex: 1, minWidth: 0 }}>
+                    {stats.map(([l, v]) => (
+                      <div key={l} style={{ minWidth: 0 }}>
+                        <div style={{ fontFamily: 'Inter', fontSize: 9, color: ML_DIM, textTransform: 'uppercase', letterSpacing: 0.5, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{l}</div>
+                        <div style={{ fontFamily: 'Inter', fontSize: 14, fontWeight: 600, color: l === 'Signal opp.' ? m.dot : ML_INK, fontVariantNumeric: 'tabular-nums' }}>{v}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </div>
       )}
 
-      <Tile title="Sales team by region"
-        subtitle={`Regions roll up their ${ML_ROLE_LABEL[role].toLowerCase()} · click a row to filter the page, chevron to collapse${L3 ? ' · shaded columns are Level 3' : ''}`}
-        pad={0} style={{ minWidth: 0 }}>
-        <MlTeamGrid rows={gridRows} ctx={ctx} xf={xf} level={level} onToggle={toggle} M={M} actualLabel={actualLabel} />
-      </Tile>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, alignItems: 'stretch', containerType: 'inline-size' }}>
+        <style>{'.ml-rail{position:relative}.ml-rail-in{position:absolute;inset:0}@container (max-width: 760px){.ml-rail{flex-basis:100%!important}.ml-rail-in{position:static!important}.ml-rail-in .l3-sig-list{max-height:200px!important}}'}</style>
+        <div className="ml-rail" style={{ flex: '1 0 210px', maxWidth: '100%', minWidth: 0 }}>
+          <div className="ml-rail-in"><MlDimRail level={level} rowsAll={base} xf={xf} ctx={ctx} M={M} onToggle={toggle} /></div>
+        </div>
+        <Tile title="Sales team"
+          subtitle={`All ${ML_ROLE_LABEL[role].toLowerCase()} in one sortable list · click a row to filter the page${L3 ? ' · shaded columns are Level 3' : ''}`}
+          pad={0} style={{ flex: '999 1 520px', minWidth: 0 }}>
+          <MlTeamGrid rows={gridRows} ctx={ctx} xf={xf} level={level} onToggle={toggle} M={M} actualLabel={actualLabel} />
+        </Tile>
+      </div>
 
-      <MlDimTileRow level={level} rowsAll={ML_ROWS} xf={xf} ctx={ctx} M={M} onToggle={toggle} pkShort={pkShort} />
+      <MlPeopleBoard rowsAll={base} xf={xf} ctx={ctx} M={M} level={level} onPick={pickPerson} />
+
+      <MlSalesLift rows={rows} level={level} />
+
+      {L3 && (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(460px,1fr))', gap: 16, alignItems: 'stretch' }}>
+          <MlSignalPipeline rows={rows} ctx={ctx} xf={xf} />
+          <MlSignalFunnel agg={tot} bySeg={bySeg} />
+        </div>
+      )}
+
+      <MlDimTileRow level={level} rowsAll={base} xf={xf} ctx={ctx} M={M} onToggle={toggle} pkShort={pkShort} />
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(460px,1fr))', gap: 16 }}>
         <MlProdTrend rows={rows} />
         <MlActTrend rows={rows} role={role} />
       </div>
 
-      <MlHeatmap rowsAll={ML_ROWS} xf={xf} ctx={ctx} M={M} level={level} onPick={pickPerson} />
-
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(460px,1fr))', gap: 16, alignItems: 'start' }}>
-        <MlEffortScatter rowsAll={ML_ROWS} xf={xf} ctx={ctx} onPick={n => pickPerson(n)} />
+        <MlEffortScatter rowsAll={base} xf={xf} ctx={ctx} onPick={n => pickPerson(n)} />
         <MlThresholds rows={rows} ctx={ctx} />
       </div>
-
-      {L3 && (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(460px,1fr))', gap: 16, alignItems: 'start' }}>
-          <MlSignalPipeline rows={rows} ctx={ctx} xf={xf} />
-          <MlSignalFunnel agg={tot} bySeg={bySeg} />
-        </div>
-      )}
     </div>
   );
 }
 
-Object.assign(window, { LeadershipPage });
+Object.assign(window, { LeadershipPage, MlDrawerSections });

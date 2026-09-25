@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<title>Leadership Brief</title>
+<style>
+@font-face{font-family:Inter;src:url("../fonts/Inter_18pt-Regular.ttf");font-weight:400}
+@font-face{font-family:Inter;src:url("../fonts/Inter_18pt-Medium.ttf");font-weight:500}
+@font-face{font-family:Inter;src:url("../fonts/Inter_18pt-SemiBold.ttf");font-weight:600}
+@font-face{font-family:Inter;src:url("../fonts/Inter_18pt-Bold.ttf");font-weight:700}
+body{margin:0;background:#0B1220;font-family:Inter,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif}
+a{color:#31C48D;text-decoration:none}a:hover{color:#0E9F6E}
+.em{width:640px;box-sizing:border-box;background:#111928;color:#fff;line-height:1.5;padding:40px 32px;display:flex;flex-direction:column;gap:32px}
+.row{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.lbl{font-size:12px;font-weight:600;color:#9CA3AF;text-transform:uppercase;letter-spacing:.06em}
+.mut{color:#9CA3AF}.sm{font-size:12px}.md{font-size:14px}
+.card{background:rgba(255,255,255,.051);border:1px solid #4B5563;border-radius:12px}
+.kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.kpi{padding:16px;display:flex;flex-direction:column;gap:6px}
+.kv{font-size:24px;font-weight:700;line-height:1.1}
+.sec{display:flex;flex-direction:column;gap:16px}
+.sec h2{margin:0;font-size:20px;font-weight:700}
+.sec>p{margin:-10px 0 0;font-size:14px;color:#9CA3AF}
+.item{padding:16px;display:flex;flex-direction:column;gap:8px;border-bottom:1px solid #374151}
+.item:last-child{border-bottom:0}
+.nm{font-size:16px;font-weight:700}
+.dot{flex-shrink:0;width:10px;height:10px;border-radius:9999px;margin-top:7px}
+.pill{flex-shrink:0;font-size:12px;font-weight:700;border-radius:9999px;padding:2px 10px;white-space:nowrap}
+.pg{color:#31C48D;background:rgba(49,196,141,.15);border:1px solid rgba(49,196,141,.5)}
+.pa{color:#E3A008;background:rgba(227,160,8,.15);border:1px solid rgba(227,160,8,.5)}
+.pr{color:#F98080;background:rgba(249,128,128,.12);border:1px solid rgba(249,128,128,.45)}
+.pb{color:#76A9FA;background:rgba(118,169,250,.12);border:1px solid rgba(118,169,250,.45)}
+.tag{font-size:12px;color:#D1D5DB;border:1px solid #4B5563;border-radius:4px;padding:1px 7px;white-space:nowrap}
+.tags{display:flex;flex-wrap:wrap;gap:6px}
+.rk{flex-shrink:0;width:28px;height:28px;border-radius:9999px;background:#0E9F6E;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.day{display:grid;grid-template-columns:92px minmax(0,1fr);gap:16px;padding:16px;border-bottom:1px solid #374151}
+.day:last-child{border-bottom:0}
+.mtg{display:flex;flex-direction:column;gap:4px}
+.mtg+.mtg{margin-top:12px;padding-top:12px;border-top:1px dashed #374151}
+.lead{font-size:14px;color:#E5E7EB}
+.lead b{color:#31C48D;font-weight:600}
+.add{background:rgba(14,159,110,.08);border:1px dashed rgba(49,196,141,.55);border-radius:8px;padding:10px 12px;margin-top:12px;display:flex;flex-direction:column;gap:2px}
+.btn{display:block;text-align:center;background:#0E9F6E;color:#fff;font-weight:600;font-size:15px;border-radius:8px;padding:12px}
+.btn:hover{background:#057A55;color:#fff}
+.bar{height:8px;border-radius:9999px;background:#374151;overflow:hidden}.bar>i{display:block;height:8px;border-radius:9999px;background:#0E9F6E}
+.tbl{display:grid;gap:0}.tr{display:grid;grid-template-columns:minmax(0,1.6fr) 44px minmax(0,1fr) 52px;gap:12px;align-items:center;padding:10px 16px;border-bottom:1px solid #374151;font-size:14px}.tr:last-child{border-bottom:0}.th{font-size:11px;font-weight:600;color:#9CA3AF;text-transform:uppercase;letter-spacing:.06em}
+.pr2{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr) 56px 48px;gap:12px;align-items:center;padding:10px 16px;border-bottom:1px solid #374151;font-size:14px}.pr2:last-child{border-bottom:0}
+.part{font-size:12px;font-weight:700;color:#31C48D;text-transform:uppercase;letter-spacing:.1em;border-top:1px solid #374151;padding-top:24px}
+.num{font-variant-numeric:tabular-nums;text-align:right}</style>
+<style>:root.embed{color-scheme:dark;background:transparent}.embed body{background:transparent}.embed .em{width:auto;max-width:880px;margin:0 auto;padding:32px;background:#111928;border:1px solid rgba(75,85,99,.5);border-radius:12px}.embed .em>.row:first-child,.embed .em>.btn,.embed .em>.row:last-child{display:none}</style>
+<style>.tt{display:grid;grid-template-columns:minmax(0,1.7fr) 78px 64px 58px 58px;gap:10px;align-items:center;padding:10px 16px;border-bottom:1px solid #374151;font-size:14px}.tt:last-child{border-bottom:0}.tt>span:not(:first-child){text-align:right;font-variant-numeric:tabular-nums}.rl{font-size:11px;color:#9CA3AF;display:block}.up{color:#31C48D}.dn{color:#F98080}.am{color:#E3A008}</style>
+</head>
+<body>
+<div class="em">
+<div class="row"><div style="display:flex;align-items:center;gap:8px"><div style="width:28px;height:28px;border-radius:6px;background:#0E9F6E;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16px">F</div><div style="font-size:18px;font-weight:700;letter-spacing:-.01em">Field</div></div><div class="lbl" style="letter-spacing:.08em">Leadership Brief · Tue, Sep 22</div></div>
+<div style="display:flex;flex-direction:column;gap:8px">
+<h1 data-scope="region" style="margin:0;font-size:30px;font-weight:700;letter-spacing:-.02em;line-height:1.2">Good morning, Dana.</h1>
+<h1 data-scope="national" style="margin:0;font-size:30px;font-weight:700;letter-spacing:-.02em;line-height:1.2">Good morning, Greg.</h1>
+<p data-scope="region" style="margin:0;font-size:16px;color:#9CA3AF">Northeast sales are <span style="color:#31C48D;font-weight:600">$86.4M MTD, 104% to goal</span>. Morgan Vance and Jordan Ellis are ahead. <span style="color:#E3A008;font-weight:600">Casey Reed is at 71%</span> with external meetings down a third, and 11 Segment A relationships have gone 6 months without a visit.</p>
+<p data-scope="national" style="margin:0;font-size:16px;color:#9CA3AF">National sales are <span style="color:#31C48D;font-weight:600">$402M MTD, 98% to goal</span>. Northeast and West are ahead of goal. <span style="color:#E3A008;font-weight:600">Midwest is at 84%</span> and Southeast activity fell 22% in two weeks.</p>
+<div class="sm" data-scope="region" style="color:#31C48D;font-weight:600">Regional Manager · Northeast · 3 externals, 2 internals, 1 specialist</div>
+<div class="sm" data-scope="national" style="color:#31C48D;font-weight:600">National Sales Manager · 5 regions · 5 regional managers, 29 salespeople</div>
+</div>
+<div class="kpis" data-scope="region">
+<div class="card kpi" data-go="lead:region:Northeast" data-label="Sales MTD"><div class="lbl">Sales MTD</div><div class="kv" style="color:#31C48D">$86.4M</div><div class="sm mut">104% to goal · up 12% on last year</div></div>
+<div class="card kpi" data-go="lead:activity" data-label="Team meetings this week"><div class="lbl">Team meetings this week</div><div class="kv">47</div><div class="sm mut">31 external · 16 internal-booked</div></div>
+<div class="card kpi" data-go="signals" data-label="Open signals"><div class="lbl">Open signals</div><div class="kv">612</div><div class="sm mut">$1.02B expected · 38 new overnight</div></div>
+</div>
+<div class="kpis" data-scope="national">
+<div class="card kpi" data-go="lead" data-label="Sales MTD"><div class="lbl">Sales MTD</div><div class="kv" style="color:#31C48D">$402M</div><div class="sm mut">98% to goal · up 7% on last year</div></div>
+<div class="card kpi" data-go="lead:activity" data-label="Team meetings this week"><div class="lbl">Team meetings this week</div><div class="kv">221</div><div class="sm mut">Down 6% on last week</div></div>
+<div class="card kpi" data-go="signals" data-label="Open signals"><div class="lbl">Open signals</div><div class="kv">2,940</div><div class="sm mut">$4.8B expected · 171 new overnight</div></div>
+</div>
+<div class="sec" data-sec="overnight">
+<h2>What changed overnight</h2>
+<div class="card" data-scope="region">
+<div class="item" data-go="sales:yesterday" data-label="$6.8M in sales yesterday across 9 FA/Teams" style="flex-direction:row;gap:14px"><span class="dot" style="background:#31C48D"></span><div><div class="ttl" style="font-size:16px;font-weight:600">$6.8M in sales yesterday across 9 FA/Teams</div><div class="md mut">Largest was Keystone Wealth ($780K, Private Credit Fund II) in Morgan Vance’s territory. 6 of the 9 followed a meeting in the last 30 days.</div></div></div>
+<div class="item" data-go="signal:Retention Risk" data-label="Retention Risk firmed at Sample Consulting" style="flex-direction:row;gap:14px"><span class="dot" style="background:#F98080"></span><div><div class="ttl" style="font-size:16px;font-weight:600">Retention Risk firmed at Sample Consulting</div><div class="md mut">$6.2M of AUM exposed, second month of net redemptions. Morgan Vance owns the relationship; Alex Kim has it on today’s call list.</div></div></div>
+<div class="item" data-go="lead:cat:Private Credit" data-label="Private Credit Fund II passed $40M YTD in the Northeast" style="flex-direction:row;gap:14px"><span class="dot" style="background:#A78BFA"></span><div><div class="ttl" style="font-size:16px;font-weight:600">Private Credit Fund II passed $40M YTD in the Northeast</div><div class="md mut">First focus category in the region to reach its full-year goal.</div></div></div>
+</div>
+<div class="card" data-scope="national">
+<div class="item" data-go="sales:yesterday" data-label="$31.2M in sales yesterday across 44 FA/Teams" style="flex-direction:row;gap:14px"><span class="dot" style="background:#31C48D"></span><div><div class="ttl" style="font-size:16px;font-weight:600">$31.2M in sales yesterday across 44 FA/Teams</div><div class="md mut">West led with $9.6M. Private Credit Fund II was the top product nationally at $8.1M.</div></div></div>
+<div class="item" data-go="lead:region:Midwest" data-label="Midwest slipped to 84% to goal" style="flex-direction:row;gap:14px"><span class="dot" style="background:#E3A008"></span><div><div class="ttl" style="font-size:16px;font-weight:600">Midwest slipped to 84% to goal</div><div class="md mut">Two large Core Plus redemptions at a wirehouse office in Chicago. Pat Morrow has flagged both.</div></div></div>
+<div class="item" data-go="signal:Retention Risk" data-label="$61M of AUM now carries a Retention Risk signal" style="flex-direction:row;gap:14px"><span class="dot" style="background:#F98080"></span><div><div class="ttl" style="font-size:16px;font-weight:600">$61M of AUM now carries a Retention Risk signal</div><div class="md mut">Up $9M on last week, concentrated in Southeast and Midwest.</div></div></div>
+</div>
+</div>
+<div class="sec" data-sec="recognize">
+<h2>Recognize</h2>
+<p>People worth a note today.</p>
+<div class="card" data-scope="region">
+<div class="item"><div class="row" style="align-items:flex-start"><div><div class="nm" data-go="lead:person:Morgan Vance">Morgan Vance</div><div class="md mut">External · Northeast</div></div><span class="pill pg">118% to goal</span></div><div class="lead">$29.0M MTD. Meetings led with the next best action converted at <b>2.3x</b>, the best in the region.</div></div>
+<div class="item"><div class="row" style="align-items:flex-start"><div><div class="nm" data-go="lead:person:Alex Kim">Alex Kim</div><div class="md mut">Internal · Northeast</div></div><span class="pill pg">18 booked</span></div><div class="lead">Booked 18 external meetings in September, 11 on an open signal. Those meetings produced <b>$9.8M</b> within 30 days.</div></div>
+<div class="item"><div class="row" style="align-items:flex-start"><div><div class="nm" data-go="lead:person:Jordan Ellis">Jordan Ellis</div><div class="md mut">External · Northeast</div></div><span class="pill pg">2 new producers</span></div><div class="lead">Liberty Bell Advisors and Mark Smith both placed first tickets this month on <b>Core Equity ETF</b>.</div></div>
+</div>
+<div class="card" data-scope="national">
+<div class="item"><div class="row" style="align-items:flex-start"><div><div class="nm" data-go="lead:region:Northeast">Northeast · Dana Price</div><div class="md mut">Regional Manager</div></div><span class="pill pg">104% to goal</span></div><div class="lead">Only region ahead of goal in all three focus categories. Webinar follow-up is at 86% and still produced <b>1.8x</b> lift.</div></div>
+<div class="item"><div class="row" style="align-items:flex-start"><div><div class="nm" data-go="lead:person:Skyler Grant">Skyler Grant</div><div class="md mut">External · West</div></div><span class="pill pg">131% to goal</span></div><div class="lead">Top external nationally at <b>$38.2M MTD</b>. 70% of meetings on Segment A.</div></div>
+<div class="item"><div class="row" style="align-items:flex-start"><div><div class="nm" data-go="lead:person:Blair Sutton">Blair Sutton</div><div class="md mut">Specialist · Northeast, Southeast</div></div><span class="pill pg">2.8x lift</span></div><div class="lead">Meetings Blair joined converted at <b>2.8x</b> against 1.6x without a specialist.</div></div>
+</div>
+</div>
+<div class="sec" data-sec="monitor">
+<h2>Monitor</h2>
+<p>Not urgent yet. Watch these this week.</p>
+<div class="card" data-scope="region">
+<div class="item"><div class="row" style="align-items:flex-start"><div><div class="nm" data-go="lead:person:Casey Reed">Casey Reed</div><div class="md mut">External · Northeast</div></div><span class="pill pa">71% to goal</span></div><div class="lead">External meetings down <b>34%</b> on August. 4 Segment A FA/Teams in the territory have gone 6 months without a visit.</div></div>
+<div class="item"><div class="row" style="align-items:flex-start"><div><div class="nm" data-go="activity:followup">Webinar follow-up inside 48 hours</div><div class="md mut">Northeast team</div></div><span class="pill pa">86%</span></div><div class="lead">Target is 95%. Follow-up inside 48 hours lifts sales <b>1.8x</b>; without it, 1.1x.</div></div>
+<div class="item"><div class="row" style="align-items:flex-start"><div><div class="nm" data-go="signal:Retention Risk">Retention Risk across 9 FA/Teams</div><div class="md mut">Northeast</div></div><span class="pill pr">$14.8M</span></div><div class="lead">Largest at Sample Consulting ($6.2M) and The Brown Group ($4.6M). Both have open Upsell signals.</div></div>
+</div>
+<div class="card" data-scope="national">
+<div class="item"><div class="row" style="align-items:flex-start"><div><div class="nm" data-go="lead:region:Midwest">Midwest · Pat Morrow</div><div class="md mut">Regional Manager</div></div><span class="pill pa">84% to goal</span></div><div class="lead">Core Plus redemptions account for most of the gap. Specialist coverage is split with Southwest.</div></div>
+<div class="item"><div class="row" style="align-items:flex-start"><div><div class="nm" data-go="lead:region:Southeast">Southeast · Lee Ortega</div><div class="md mut">Regional Manager</div></div><span class="pill pa">−22% activity</span></div><div class="lead">Riley Hayes and Avery Cole account for most of the drop. Sales are holding for now at 97% to goal.</div></div>
+<div class="item"><div class="row" style="align-items:flex-start"><div><div class="nm" data-go="signal:Retention Risk">Retention Risk nationally</div><div class="md mut">143 FA/Teams</div></div><span class="pill pr">$61M</span></div><div class="lead">Up $9M on last week. 60% sits in Southeast and Midwest.</div></div>
+</div>
+</div>
+<div class="sec" data-sec="act">
+<h2>Act on today</h2>
+<div class="card" data-scope="region">
+<div class="item"><div class="row" style="align-items:flex-start"><div><div class="nm" data-go="activity:cold">Approve Morgan’s Connecticut trip</div><div class="md mut">Week of Oct 12 · 4 Segment A FA/Teams</div></div><span class="pill pg">$50M</span></div><div class="lead">Summit Advisory, Charter Oak Advisors, Doe &amp; Roe Advisors and Harbor Point Advisors. No meetings booked yet.</div></div>
+<div class="item"><div class="row" style="align-items:flex-start"><div><div class="nm" data-go="lead:person:Casey Reed">Schedule a 1:1 with Casey Reed</div><div class="md mut">Coaching</div></div><span class="pill pb">This week</span></div><div class="lead">Review the 4 cold Segment A relationships and join Thursday’s Blue Line Wealth call.</div></div>
+<div class="item"><div class="row" style="align-items:flex-start"><div><div class="nm" data-go="activity:segC">Move 4 Segment C meetings to the internal desk</div><div class="md mut">Morgan Vance’s October calendar</div></div><span class="pill pb">Coverage</span></div><div class="lead">None has a signal above 60. Alex Kim can cover them by phone.</div></div>
+</div>
+<div class="card" data-scope="national">
+<div class="item"><div class="row" style="align-items:flex-start"><div><div class="nm" data-go="lead:region:Midwest">Approve 4 specialist days for the Midwest</div><div class="md mut">Morgan Tate · Core Plus</div></div><span class="pill pg">This week</span></div><div class="lead">Target the two Chicago offices with redemptions. $22M of Core Plus signal opportunity is open there.</div></div>
+<div class="item"><div class="row" style="align-items:flex-start"><div><div class="nm" data-go="lead:region:Southeast">Review Southeast coverage with Lee Ortega</div><div class="md mut">Activity drop</div></div><span class="pill pb">Thu</span></div><div class="lead">Ask for a plan to restore Segment A meetings for Riley Hayes and Avery Cole.</div></div>
+<div class="item"><div class="row" style="align-items:flex-start"><div><div class="nm" data-go="lead:person:Skyler Grant">Share the West Segment A playbook</div><div class="md mut">Skyler Grant</div></div><span class="pill pb">Next call</span></div><div class="lead">Put Skyler on the next all-regions call to walk through territory planning.</div></div>
+</div>
+</div>
+<div class="sec" data-sec="team">
+<h2 data-scope="region">Team scorecard · MTD</h2>
+<h2 data-scope="national">Regions · MTD</h2>
+<div class="card" data-scope="region">
+<div class="tt th"><span>Salesperson</span><span>Sales</span><span>To goal</span><span>Mtgs wk</span><span>Signals</span></div>
+<div class="tt"><span><span data-go="lead:person:Morgan Vance" data-label="Morgan Vance" style="font-weight:600">Morgan Vance</span><span class="rl">External</span></span><span>$29.0M</span><span class="up">118%</span><span>11</span><span>46</span></div>
+<div class="tt"><span><span data-go="lead:person:Jordan Ellis" data-label="Jordan Ellis" style="font-weight:600">Jordan Ellis</span><span class="rl">External</span></span><span>$24.1M</span><span class="up">106%</span><span>9</span><span>38</span></div>
+<div class="tt"><span><span data-go="lead:person:Casey Reed" data-label="Casey Reed" style="font-weight:600">Casey Reed</span><span class="rl">External</span></span><span>$15.8M</span><span class="am">71%</span><span>4</span><span>19</span></div>
+<div class="tt"><span><span data-go="lead:person:Alex Kim" data-label="Alex Kim" style="font-weight:600">Alex Kim</span><span class="rl">Internal</span></span><span>$10.2M</span><span class="up">112%</span><span>14</span><span>31</span></div>
+<div class="tt"><span><span data-go="lead:person:Sam Patel" data-label="Sam Patel" style="font-weight:600">Sam Patel</span><span class="rl">Internal</span></span><span>$7.3M</span><span class="">94%</span><span>9</span><span>22</span></div>
+</div>
+<div class="card" data-scope="national">
+<div class="tt th"><span>Region</span><span>Sales</span><span>To goal</span><span>Mtgs wk</span><span>Signals</span></div>
+<div class="tt"><span><span data-go="lead:region:Northeast" data-label="Northeast" style="font-weight:600">Northeast</span><span class="rl">Dana Price</span></span><span>$86.4M</span><span class="up">104%</span><span>47</span><span>612</span></div>
+<div class="tt"><span><span data-go="lead:region:West" data-label="West" style="font-weight:600">West</span><span class="rl">Jess Lyle</span></span><span>$104.7M</span><span class="up">109%</span><span>58</span><span>701</span></div>
+<div class="tt"><span><span data-go="lead:region:Southeast" data-label="Southeast" style="font-weight:600">Southeast</span><span class="rl">Lee Ortega</span></span><span>$79.2M</span><span class="">97%</span><span>38</span><span>566</span></div>
+<div class="tt"><span><span data-go="lead:region:Southwest" data-label="Southwest" style="font-weight:600">Southwest</span><span class="rl">Sam Rivers</span></span><span>$63.5M</span><span class="">95%</span><span>36</span><span>488</span></div>
+<div class="tt"><span><span data-go="lead:region:Midwest" data-label="Midwest" style="font-weight:600">Midwest</span><span class="rl">Pat Morrow</span></span><span>$68.2M</span><span class="am">84%</span><span>42</span><span>573</span></div>
+</div>
+</div>
+<a href="#" class="btn">Open Sales Leadership</a>
+<div class="md mut" style="border-top:1px solid #374151;padding-top:16px"><b style="color:#E5E7EB">How this was built:</b> sales and CRM activity for everyone reporting to you, compared against sales goals, plus signals refreshed nightly from monthly data-pack holdings and flows. Figures are scoped to the focus categories unless the subscription is set to all products.</div>
+<div class="row sm mut"><span>Field · fieldwealth.ai</span><span style="display:flex;gap:16px"><a href="#" style="color:#9CA3AF">Preferences</a><a href="#" style="color:#9CA3AF">Unsubscribe</a></span></div>
+</div>
+<script src="brief-links.js"></script>
+<script>(function(){var p=new URLSearchParams(location.search);(p.get('hide')||'').split(',').filter(Boolean).forEach(function(k){document.querySelectorAll('[data-sec="'+k+'"]').forEach(function(e){e.style.display='none'})});if(p.get('embed'))document.documentElement.className+=' embed';})();</script>
+</body></html>

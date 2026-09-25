@@ -25,9 +25,10 @@ const FO_OFFICES = ['New York – Park Ave','Boston – Seaport','Philadelphia �
 const FO_TEAMS = ['The Doe Wealth Group','The Smith Group','Doe & Roe Advisors','Sample Consulting','The Smith Group II','Alpine Partners','The Brown Group','Summit Advisory','Keystone Wealth','Harbor Point Group'];
 const FO_ADVISORS = ['Jane Smith','John Doe','Mary Roe','Robert Sample','Linda Public','Mark Jones','Emily Doe','Chris Brown','Pat Smith','Sarah Public','Alex Roe','Sam Jones'];
 
-function FilterDrawer({ open, onClose, filters, onChange, onApply, onReset, renderSections, arrayKeys, defaults, chipLabel }) {
+function FilterDrawer({ open, onClose, filters, onChange, onApply, onReset, renderSections, arrayKeys, defaults, chipLabel, focus, onFocusChange }) {
   const [local, setLocal] = React.useState(filters);
-  React.useEffect(() => { if (open) setLocal(filters); }, [open]);
+  const [lf, setLf] = React.useState(focus);
+  React.useEffect(() => { if (open) { setLocal(filters); setLf(focus); } }, [open]);
 
   const toggle = (key, val) => {
     const arr = local[key] || [];
@@ -56,7 +57,7 @@ function FilterDrawer({ open, onClose, filters, onChange, onApply, onReset, rend
         background:'rgb(17,24,39)', borderLeft:'1px solid rgba(75,85,99,0.6)',
         transform: open ? 'translateX(0)' : 'translateX(100%)',
         transition: 'transform .26s cubic-bezier(.2,.8,.2,1)',
-        display:'flex', flexDirection:'column', boxShadow:'-20px 0 60px rgba(0,0,0,0.5)',
+        display:'flex', flexDirection:'column', boxShadow: open ? '-20px 0 60px rgba(0,0,0,0.5)' : 'none', visibility: open ? 'visible' : 'hidden', transitionProperty: 'transform, visibility', transitionDelay: open ? '0s' : '0s, .26s',
       }}>
         <div style={{ padding:'18px 22px', borderBottom:'1px solid rgba(75,85,99,0.4)', display:'flex', alignItems:'center', gap:10 }}>
           <i className="fa-solid fa-filter" style={{ color:'rgb(52,211,153)' }} />
@@ -87,6 +88,7 @@ function FilterDrawer({ open, onClose, filters, onChange, onApply, onReset, rend
         )}
 
         <div style={{ flex:1, overflowY:'auto', padding:'18px 22px', display:'flex', flexDirection:'column', gap:20 }}>
+          {focus && lf && <FocusCategoriesSection value={lf} onChange={setLf} />}
           {renderSections ? renderSections({ local, toggle, setMany }) : (
           <>
           <FilterGroupLabel>Territory</FilterGroupLabel>
@@ -111,7 +113,6 @@ function FilterDrawer({ open, onClose, filters, onChange, onApply, onReset, rend
 
           <FilterGroupLabel>Product</FilterGroupLabel>
           <SearchMultiSelect label="Category" placeholder="All categories" hint="Morningstar-equivalent — named generically pending licensing" options={FO_CATEGORIES} selected={local.categories} onChange={(v) => setMany('categories', v)} />
-          <SearchMultiSelect label="Focus Categories" placeholder="All focus categories" options={FO_FOCUS} selected={local.focus} onChange={(v) => setMany('focus', v)} />
 
           <div>
             <div style={filterLabelStyle}>AUM Range (max)</div>
@@ -137,12 +138,12 @@ function FilterDrawer({ open, onClose, filters, onChange, onApply, onReset, rend
         </div>
 
         <div style={{ padding:'14px 22px', borderTop:'1px solid rgba(75,85,99,0.4)', display:'flex', gap:10 }}>
-          <button onClick={() => { setLocal(BASE); onReset && onReset(); }} style={{
+          <button onClick={() => { setLocal(BASE); if (focus) setLf({ on: true, cats: [...FOCUS_STRATEGIES] }); onReset && onReset(); }} style={{
             flex:1, height:38, borderRadius:8,
             border:'1px solid rgba(75,85,99,0.6)', background:'transparent',
             color:'rgb(209,213,219)', fontFamily:'Inter', fontSize:13, fontWeight:500, cursor:'pointer',
           }}>Reset</button>
-          <button onClick={() => { onChange(local); onApply && onApply(); }} style={{
+          <button onClick={() => { onChange(local); if (focus && onFocusChange) onFocusChange(lf); onApply && onApply(); }} style={{
             flex:2, height:38, borderRadius:8,
             border:'1px solid rgb(16,185,129)', background:'rgb(16,185,129)',
             color:'#fff', fontFamily:'Inter', fontSize:13, fontWeight:600, cursor:'pointer',
@@ -150,6 +151,81 @@ function FilterDrawer({ open, onClose, filters, onChange, onApply, onReset, rend
         </div>
       </aside>
     </>
+  );
+}
+
+/* Focus categories sit first in every drawer: they scope the whole dashboard,
+   on by default. Pick categories one by one or by focus effort. */
+function FocusCategoriesSection({ value, onChange }) {
+  const all = FOCUS_STRATEGIES;
+  const cats = value.cats && value.cats.length ? value.cats : all;
+  const on = value.on;
+  const set = (patch) => onChange({ ...value, ...patch });
+  const togCat = (c) => {
+    const next = cats.includes(c) ? cats.filter(x => x !== c) : [...cats, c];
+    set({ on: true, cats: next.length ? all.filter(x => next.includes(x)) : cats });
+  };
+  const groupOn = (g) => on && g.cats.every(c => cats.includes(c)) && cats.length === g.cats.length;
+  const seg = (k, label) => {
+    const act = (k === 'focus') === on;
+    return (
+      <button key={k} onClick={() => set({ on: k === 'focus' })} style={{
+        flex: 1, height: 30, borderRadius: 6, border: 'none', cursor: 'pointer',
+        background: act ? 'rgba(16,185,129,0.2)' : 'transparent', color: act ? 'rgb(52,211,153)' : 'rgb(209,213,219)',
+        fontFamily: 'Inter', fontSize: 12, fontWeight: act ? 600 : 500,
+      }}>{label}</button>
+    );
+  };
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 12, padding: 14, borderRadius: 10, border: '1px solid rgba(16,185,129,0.35)', background: 'rgba(16,185,129,0.05)' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <i className="fa-solid fa-star" style={{ fontSize: 10, color: 'rgb(52,211,153)' }} />
+        <span style={{ fontFamily: 'Inter', fontSize: 12, fontWeight: 600, color: 'rgb(249,250,251)', flex: 1 }}>Focus categories</span>
+        <span style={{ fontFamily: 'Inter', fontSize: 10.5, color: 'rgb(156,163,175)' }}>Default</span>
+      </div>
+      <div style={{ display: 'flex', padding: 3, gap: 3, borderRadius: 8, background: 'rgba(0,0,0,0.35)', border: '1px solid rgba(75,85,99,0.5)' }}>
+        {seg('focus', 'Focus categories')}{seg('all', 'All products')}
+      </div>
+      <div style={{ opacity: on ? 1 : 0.5, display: 'flex', flexDirection: 'column', gap: 12 }}>
+        <div>
+          <div style={filterLabelStyle}>By focus effort</div>
+          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+            {FOCUS_GROUPS.map(g => {
+              const act = groupOn(g);
+              return (
+                <button key={g.key} title={g.desc} onClick={() => set({ on: true, cats: act ? [...all] : [...g.cats] })} style={{
+                  height: 28, padding: '0 11px', borderRadius: 9999, cursor: 'pointer',
+                  border: `1px solid ${act ? 'rgb(16,185,129)' : 'rgba(75,85,99,0.6)'}`, background: act ? 'rgba(16,185,129,0.18)' : 'transparent',
+                  color: act ? 'rgb(52,211,153)' : 'rgb(209,213,219)', fontFamily: 'Inter', fontSize: 11.5, fontWeight: act ? 600 : 500,
+                }}>{g.key}</button>
+              );
+            })}
+          </div>
+        </div>
+        <div>
+          <div style={{ ...filterLabelStyle, display: 'flex' }}><span style={{ flex: 1 }}>Categories</span><span style={{ textTransform: 'none', letterSpacing: 0, fontWeight: 400 }}>{on ? `${cats.length} of ${all.length}` : 'Off'}</span></div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+            {all.map(c => {
+              const act = on && cats.includes(c);
+              return (
+                <button key={c} onClick={() => togCat(c)} style={{
+                  width: '100%', textAlign: 'left', padding: '7px 8px', borderRadius: 6, border: 'none', cursor: 'pointer',
+                  background: act ? 'rgba(16,185,129,0.10)' : 'transparent', display: 'flex', alignItems: 'center', gap: 9,
+                  fontFamily: 'Inter', fontSize: 12, color: act ? 'rgb(249,250,251)' : 'rgb(163,163,163)',
+                }}>
+                  <span style={{ width: 14, height: 14, borderRadius: 3, flexShrink: 0, border: `1px solid ${act ? 'rgb(16,185,129)' : 'rgba(107,114,128,0.7)'}`, background: act ? 'rgb(16,185,129)' : 'transparent', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                    {act && <i className="fa-solid fa-check" style={{ fontSize: 8, color: '#fff' }} />}
+                  </span>
+                  <span style={{ flex: 1 }}>{c}</span>
+                  <span style={{ fontSize: 10, color: 'rgb(107,114,128)' }}>{FOCUS_GROUP_OF[c]}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+      <div style={{ fontFamily: 'Inter', fontSize: 10.5, lineHeight: 1.5, color: 'rgb(156,163,175)' }}>Opportunity, sales, market share, activity and signals all count only the categories chosen, so actuals compare like for like with where the team is focused.</div>
+    </div>
   );
 }
 
@@ -461,8 +537,8 @@ function RowDrawer({ open, onClose, title, subtitle, data }) {
   );
 }
 
-const hSubL = { textAlign:'left',  padding:'8px 12px 10px 14px', fontFamily:'Inter', fontSize:9.5, fontWeight:600, color:'rgb(107,114,128)', letterSpacing:0.8, textTransform:'uppercase' };
-const hSubR = { textAlign:'right', padding:'8px 10px 10px',      fontFamily:'Inter', fontSize:9.5, fontWeight:600, color:'rgb(107,114,128)', letterSpacing:0.8, textTransform:'uppercase' };
+const hSubL = { textAlign:'left',  padding:'8px 12px 10px 14px', fontFamily:'Inter', fontSize:9.5, fontWeight:600, color:'rgb(200,205,213)', letterSpacing:0.8, textTransform:'uppercase' };
+const hSubR = { textAlign:'right', padding:'8px 10px 10px',      fontFamily:'Inter', fontSize:9.5, fontWeight:600, color:'rgb(200,205,213)', letterSpacing:0.8, textTransform:'uppercase' };
 const tdNum    = { padding:'12px 10px', textAlign:'right', color:'rgb(163,163,163)', fontFamily:'Inter', fontSize:12.5, fontVariantNumeric:'tabular-nums' };
 const tdYours  = { padding:'12px 10px', textAlign:'right', color:'rgb(249,250,251)', fontFamily:'Inter', fontSize:12.5, fontWeight:600, fontVariantNumeric:'tabular-nums' };
 const tdShareCell = { padding:'12px 14px 12px 10px', textAlign:'right', verticalAlign:'middle', minWidth:120 };
@@ -488,7 +564,7 @@ function SummaryCell({ label, color, mktOpp, yoursLabel, yours, share, shareColo
 function SummaryStat({ label, value, color, bold }) {
   return (
     <div style={{ display:'flex', flexDirection:'column', gap:4 }}>
-      <div style={{ fontFamily:'Inter', fontSize:9.5, fontWeight:600, color:'rgb(107,114,128)', textTransform:'uppercase', letterSpacing:0.8 }}>{label}</div>
+      <div style={{ fontFamily:'Inter', fontSize:9.5, fontWeight:600, color:'rgb(200,205,213)', textTransform:'uppercase', letterSpacing:0.8 }}>{label}</div>
       <div style={{
         fontFamily:'Inter Display, Inter', fontSize:22, fontWeight:700,
         color: color || 'rgb(249,250,251)',
@@ -561,7 +637,7 @@ function vehicleFg(v) {
 function DrawerStat({ label, value, accent, positive }) {
   return (
     <div style={{ padding:'10px 12px', background:'rgba(255,255,255,0.03)', border:'1px solid rgba(75,85,99,0.3)', borderRadius:8 }}>
-      <div style={{ fontFamily:'Inter', fontSize:9, fontWeight:600, color:'rgb(107,114,128)', textTransform:'uppercase', letterSpacing:0.5 }}>{label}</div>
+      <div style={{ fontFamily:'Inter', fontSize:9, fontWeight:600, color:'rgb(200,205,213)', textTransform:'uppercase', letterSpacing:0.5 }}>{label}</div>
       <div style={{
         fontFamily:'Inter Display, Inter', fontWeight:700, fontSize:16,
         color: accent ? 'rgb(52,211,153)' : positive ? 'rgb(52,211,153)' : 'rgb(249,250,251)',

@@ -77,7 +77,7 @@ function ExportPanel({ open, onClose, view, period }) {
         background:'rgb(17,24,39)', borderLeft:'1px solid rgba(75,85,99,0.6)',
         transform: open ? 'translateX(0)' : 'translateX(100%)',
         transition:'transform .26s cubic-bezier(.2,.8,.2,1)',
-        display:'flex', flexDirection:'column', boxShadow:'-20px 0 60px rgba(0,0,0,0.5)',
+        display:'flex', flexDirection:'column', boxShadow: open ? '-20px 0 60px rgba(0,0,0,0.5)' : 'none', visibility: open ? 'visible' : 'hidden', transitionProperty: 'transform, visibility', transitionDelay: open ? '0s' : '0s, .26s',
       }}>
         <div style={{ padding:'18px 22px', borderBottom:'1px solid rgba(75,85,99,0.4)', display:'flex', alignItems:'center', gap:10 }}>
           <i className="fa-solid fa-arrow-up-from-bracket" style={{ color:'rgb(52,211,153)' }} />

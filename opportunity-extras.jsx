@@ -502,12 +502,12 @@ function TerritoryHeatMap({ vehicleFilter, height = 360, selectedCity, onCityCli
         display:'flex', gap:18,
       }}>
         <div>
-          <div style={{ fontFamily:'Inter', fontSize:9.5, fontWeight:600, color:'rgb(107,114,128)', textTransform:'uppercase', letterSpacing:0.5 }}>Mkt Opp</div>
+          <div style={{ fontFamily:'Inter', fontSize:9.5, fontWeight:600, color:'rgb(200,205,213)', textTransform:'uppercase', letterSpacing:0.5 }}>Mkt Opp</div>
           <div style={{ fontFamily:'Inter Display, Inter', fontSize:16, fontWeight:700, color:'rgb(249,250,251)', marginTop:2, fontVariantNumeric:'tabular-nums' }}>{summaryOppText}</div>
         </div>
         <div style={{ width:1, background:'rgba(75,85,99,0.4)' }} />
         <div>
-          <div style={{ fontFamily:'Inter', fontSize:9.5, fontWeight:600, color:'rgb(107,114,128)', textTransform:'uppercase', letterSpacing:0.5 }}>Mkt Share</div>
+          <div style={{ fontFamily:'Inter', fontSize:9.5, fontWeight:600, color:'rgb(200,205,213)', textTransform:'uppercase', letterSpacing:0.5 }}>Mkt Share</div>
           <div style={{ fontFamily:'Inter Display, Inter', fontSize:16, fontWeight:700, color: shareColors(summaryShareNum, shareBands).stroke, marginTop:2, fontVariantNumeric:'tabular-nums' }}>{summaryShareText}</div>
         </div>
       </div>
@@ -522,7 +522,7 @@ function TerritoryHeatMap({ vehicleFilter, height = 360, selectedCity, onCityCli
         backdropFilter:'blur(6px)',
       }}>
         <div>
-          <div style={{ fontFamily:'Inter', fontSize:9.5, fontWeight:600, color:'rgb(107,114,128)', textTransform:'uppercase', letterSpacing:0.5, marginBottom:4 }}>Bubble = Mkt Opp $</div>
+          <div style={{ fontFamily:'Inter', fontSize:9.5, fontWeight:600, color:'rgb(200,205,213)', textTransform:'uppercase', letterSpacing:0.5, marginBottom:4 }}>Bubble = Mkt Opp $</div>
           <div style={{ display:'flex', alignItems:'flex-end', gap:10 }}>
             {[8, 14, 22].map((r,i) => (
               <div key={i} style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:3 }}>
@@ -542,7 +542,7 @@ function TerritoryHeatMap({ vehicleFilter, height = 360, selectedCity, onCityCli
         border:'1px solid rgba(75,85,99,0.4)', borderRadius:8,
         backdropFilter:'blur(6px)',
       }}>
-        <div style={{ fontFamily:'Inter', fontSize:9.5, fontWeight:600, color:'rgb(107,114,128)', textTransform:'uppercase', letterSpacing:0.5, marginBottom:6 }}>Color = Mkt Share</div>
+        <div style={{ fontFamily:'Inter', fontSize:9.5, fontWeight:600, color:'rgb(200,205,213)', textTransform:'uppercase', letterSpacing:0.5, marginBottom:6 }}>Color = Mkt Share</div>
         <div style={{ display:'flex', alignItems:'center', gap:10, fontFamily:'Inter', fontSize:10 }}>
           <span style={{ display:'inline-flex', alignItems:'center', gap:5, color:'rgb(248,113,113)' }}>
             <span style={{ width:10, height:10, borderRadius:9999, background:'rgba(239,68,68,0.7)', border:'1px solid rgb(248,113,113)' }} /> &lt;15%
@@ -585,7 +585,7 @@ function TerritoryClientList({ city, clients, onSelectClient, height = 460 }) {
         display:'flex', alignItems:'center', justifyContent:'space-between', gap:10,
       }}>
         <div style={{ minWidth:0 }}>
-          <div style={{ fontFamily:'Inter', fontSize:9.5, fontWeight:600, color:'rgb(107,114,128)', textTransform:'uppercase', letterSpacing:0.5 }}>
+          <div style={{ fontFamily:'Inter', fontSize:9.5, fontWeight:600, color:'rgb(200,205,213)', textTransform:'uppercase', letterSpacing:0.5 }}>
             {city ? 'Clients in' : 'Select a city'}
           </div>
           <div style={{
@@ -701,7 +701,7 @@ function TerritoryClientList({ city, clients, onSelectClient, height = 460 }) {
 function Metric({ label, value, accent }) {
   return (
     <div style={{ display:'flex', flexDirection:'column', gap:1 }}>
-      <span style={{ fontFamily:'Inter', fontSize:8.5, color:'rgb(107,114,128)', textTransform:'uppercase', letterSpacing:0.4 }}>{label}</span>
+      <span style={{ fontFamily:'Inter', fontSize:8.5, color:'rgb(200,205,213)', textTransform:'uppercase', letterSpacing:0.4 }}>{label}</span>
       <span style={{
         fontFamily:'Inter', fontSize:11, fontWeight:600,
         color: accent ? 'rgb(52,211,153)' : 'rgb(209,213,219)',
@@ -836,7 +836,7 @@ function TileCustomize({ config, onChange, options, anchor = 'right' }) {
 function TCSection({ label, children }) {
   return (
     <div style={{ marginBottom:10 }}>
-      <div style={{ fontFamily:'Inter', fontSize:9.5, fontWeight:600, color:'rgb(107,114,128)', textTransform:'uppercase', letterSpacing:0.5, marginBottom:5 }}>{label}</div>
+      <div style={{ fontFamily:'Inter', fontSize:9.5, fontWeight:600, color:'rgb(200,205,213)', textTransform:'uppercase', letterSpacing:0.5, marginBottom:5 }}>{label}</div>
       {children}
     </div>
   );
@@ -1030,7 +1030,7 @@ function CategoryDonut({ selectedClient, activeCats, metric = 'AUM', vehicleFilt
         pointerEvents:'none',
       }}>
         <div style={{ textAlign:'center' }}>
-          <div style={{ fontFamily:'Inter', fontSize:10, color:'rgb(107,114,128)', textTransform:'uppercase', letterSpacing:0.5 }}>Total {metric}</div>
+          <div style={{ fontFamily:'Inter', fontSize:10, color:'rgb(200,205,213)', textTransform:'uppercase', letterSpacing:0.5 }}>Total {metric}</div>
           <div style={{ fontFamily:'Inter Display, Inter', fontSize:22, fontWeight:700, color:'rgb(249,250,251)', fontVariantNumeric:'tabular-nums', marginTop:2 }}>${total.toFixed(1)}M</div>
           <div style={{ fontFamily:'Inter', fontSize:11, color:'rgb(52,211,153)', fontVariantNumeric:'tabular-nums', marginTop:2, fontWeight:600 }}>Yours: ${yoursTotal.toFixed(2)}M · {total ? (yoursTotal/total*100).toFixed(1) : 0}%</div>
         </div>

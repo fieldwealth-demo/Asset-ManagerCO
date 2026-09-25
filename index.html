@@ -20,7 +20,7 @@
     body {
       background-color: rgb(11,21,36);
       background-image:
-        radial-gradient(ellipse 60% 80% at 75% 10%, rgba(12, 90, 82, 0.30) 0%, rgba(10, 70, 70, 0.12) 28%, transparent 55%),
+        radial-gradient(ellipse 50% 60% at 55% 0%, rgba(12, 90, 82, 0.22) 0%, rgba(10, 70, 70, 0.08) 30%, transparent 60%),
         radial-gradient(ellipse 60% 80% at 20% 85%, rgba(10, 70, 70, 0.10) 0%, transparent 55%),
         linear-gradient(135deg, rgb(10, 20, 34) 0%, rgb(11, 22, 36) 50%, rgb(9, 18, 30) 100%);
       background-attachment: fixed;
@@ -33,12 +33,14 @@
     .dp-row:hover { background: rgba(255,255,255,0.03); }
     @media (max-width: 1240px) { .tb-search { display: none !important; } }
     @media (max-width: 1000px) { .tb-date { display: none !important; } }
+    /* One scrollbar treatment everywhere: Field green thumb on a visible
+       track, 12px, so it reads against the dark page. */
     ::-webkit-scrollbar { width: 12px; height: 12px; }
-    ::-webkit-scrollbar-track { background: rgba(255,255,255,0.04); border-radius: 9999px; }
-    ::-webkit-scrollbar-thumb { background: rgba(148,163,184,0.75); border-radius: 9999px; border: 3px solid transparent; background-clip: padding-box; }
-    ::-webkit-scrollbar-thumb:hover { background: rgba(203,213,225,0.95); background-clip: padding-box; border: 3px solid transparent; }
+    ::-webkit-scrollbar-track { background: rgba(255,255,255,0.10); border-radius: 9999px; }
+    ::-webkit-scrollbar-thumb { background: rgb(52,211,153); border-radius: 9999px; border: 2px solid transparent; background-clip: padding-box; min-height: 40px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgb(110,231,183); background-clip: padding-box; border: 2px solid transparent; }
     ::-webkit-scrollbar-corner { background: transparent; }
-    * { scrollbar-color: rgba(148,163,184,0.75) rgba(255,255,255,0.04); scrollbar-width: thin; }
+    *, html, body, main, aside > div, .af-scroll { scrollbar-color: rgb(52,211,153) rgba(255,255,255,0.10) !important; scrollbar-width: auto !important; }
   </style>
 </head>
 <body>
@@ -71,6 +73,7 @@
   <script type="text/babel" src="level3.jsx"></script>
   <script type="text/babel" src="lead-data.jsx"></script>
   <script type="text/babel" src="lead-parts.jsx"></script>
+  <script type="text/babel" src="lead-lift.jsx"></script>
   <script type="text/babel" src="leadership.jsx"></script>
   <script type="text/babel" src="datapacks-data.jsx"></script>
   <script type="text/babel" src="datapacks.jsx"></script>
@@ -81,11 +84,26 @@
   <script type="text/babel" src="tilestudio/TileStudio.jsx"></script>
   <script type="text/babel" src="tilestudio/TilePreview.jsx"></script>
   <script type="text/babel" src="custom-reports.jsx"></script>
+  <script type="text/babel" src="emailExport.jsx"></script>
+  <script type="text/babel" src="subscriptions.jsx"></script>
+  <script type="text/babel" src="briefs.jsx"></script>
+  <script type="text/babel" src="brief-popup.jsx"></script>
+  <script type="text/babel" src="ai-signal-answers.jsx"></script>
   <script type="text/babel">
     function App() {
+      // Deep links from emails: #signals, #leadership, #sales, #briefs, #leadbriefs, #home, or any page id.
+      const HASH_PAGES = { signals: 'l3intel', leadership: 'management', sales: 'l2sales', briefs: 'briefs', leadbriefs: 'leadbriefs', home: 'home' };
+      const HASH_IDS = ['home', 'leadbriefs', 'management', 'opportunity', 'briefs', 'l3intel', 'l2sales', 'advantage', 'reports'];
+      const hashPage = () => { const h = decodeURIComponent(location.hash.slice(1)); return HASH_PAGES[h] || (HASH_IDS.includes(h) ? h : null); };
       const [active, setActive] = React.useState(() => {
+        const h = hashPage(); if (h) return h;
         try { return localStorage.getItem('amp_active') || 'home'; } catch(e) { return 'home'; }
       });
+      React.useEffect(() => {
+        const on = () => { const h = hashPage(); if (h) setActive(h); };
+        window.addEventListener('hashchange', on);
+        return () => window.removeEventListener('hashchange', on);
+      }, []);
       React.useEffect(() => {
         try { localStorage.setItem('amp_active', active); } catch(e) {}
       }, [active]);
@@ -102,26 +120,32 @@
 
       const SECTIONS = [
         null,
-        { id: 'l1', label: 'Level 1 · Distribution Intel' },
-        { id: 'l2', label: 'Level 2 · Sales & CRM' },
-        { id: 'l3', label: 'Level 3 · Predictive' },
+        { id: 'lead', label: 'Sales Leadership' },
+        { id: 'whole', label: 'Territory' },
+        { id: 'ins', label: 'Insights' },
       ];
+      // Grouped by who uses the view. The subscription level decides which
+      // version opens (Leadership) or whether an item is available at all;
+      // items above the subscribed level stay visible with a lock.
+      const ITEM_LEVEL = { l2sales: 2, l3intel: 3 };
       const ALL_NAV = [
         { id: 'home', label: 'Ask Field', icon: 'sparkles' },
-        { id: 'management', label: 'Management', icon: 'chart-column', section: 'l1' },
-        { id: 'opportunity', label: 'Opportunity', icon: 'bullseye', section: 'l1' },
-        { id: 'advantage', label: 'Competitive Advantage', icon: 'trophy', section: 'l1' },
-        { id: 'reports', label: 'Custom Reports', icon: 'table-columns', section: 'l1' },
-        { id: 'l2sales', label: 'Sales & Activity', icon: 'handshake', section: 'l2' },
-        { id: 'lead', label: 'Sales Leadership', icon: 'people-group', section: 'l2' },
-        { id: 'l3intel', label: 'Segmentation & Signals', icon: 'wave-pulse', section: 'l3' },
+        { id: 'leadbriefs', label: 'Leadership Brief & Review', icon: 'user-tie', section: 'lead' },
+        { id: 'management', label: 'Leadership Dashboard', icon: 'chart-column', section: 'lead' },
+        ...(level === 1 ? [{ id: 'opportunity', label: 'Opportunity', icon: 'bullseye', section: 'whole' }] : []),
+        { id: 'briefs', label: 'Territory Brief & Review', icon: 'newspaper', section: 'whole' },
+        { id: 'l3intel', label: 'Segmentation & Signals', icon: 'wave-pulse', section: 'whole' },
+        { id: 'l2sales', label: 'Territory Analytics', icon: 'handshake', section: 'whole' },
+        { id: 'advantage', label: 'Competitive Advantage', icon: 'trophy', section: 'ins' },
+        { id: 'reports', label: 'Custom Reports', icon: 'table-columns', section: 'ins' },
       ];
-      const SECTION_LEVEL = { l1: 1, l2: 2, l3: 3 };
-      const NAV = ALL_NAV.filter(it => !it.section || SECTION_LEVEL[it.section] <= level);
-      const VISIBLE_SECTIONS = SECTIONS.filter(s => !s || SECTION_LEVEL[s.id] <= level);
+      const NAV = ALL_NAV.map(it => (ITEM_LEVEL[it.id] > level ? { ...it, locked: `L${ITEM_LEVEL[it.id]}` } : it));
+      const VISIBLE_SECTIONS = SECTIONS;
+      const locked = ITEM_LEVEL[active] > level;
       React.useEffect(() => {
-        if (!NAV.some(it => it.id === active) && ['l2sales','l3intel','lead'].includes(active)) setActive('home');
-      }, [level]);
+        if (active === 'lead') setActive('management');
+        if (active === 'opportunity' && level >= 2) setActive('l2sales');
+      }, [level, active]);
       React.useEffect(() => { if (active === 'distribution') setActive('opportunity'); }, [active]);
       const NAV_FOOTER = [
         { id: 'settings', label: 'Settings', icon: 'gear' },
@@ -161,6 +185,29 @@
       const [leadSelections, setLeadSelections] = React.useState([]);
       const [periodLead, setPeriodLead] = React.useState('YTD');
       const [leadRole, setLeadRole] = React.useState('ext');
+      const [leadXf, setLeadXf] = React.useState(mlEmptyXf);
+      const [leadFilterOpen, setLeadFilterOpen] = React.useState(false);
+      const sub = useSubscriptions();
+      // Focus categories: one scope across every dashboard, on by default.
+      // Chosen in each filter drawer; the header chip clears or re-applies it.
+      const [focusSt, setFocusSt] = React.useState(() => {
+        try { const v = JSON.parse(localStorage.getItem('amp_focus_v2')); if (v && Array.isArray(v.cats)) return v; } catch (e) {}
+        return { on: true, cats: [...FOCUS_STRATEGIES] };
+      });
+      React.useEffect(() => { try { localStorage.setItem('amp_focus_v2', JSON.stringify(focusSt)); } catch (e) {} }, [focusSt]);
+      const focusKey = focusSt.on ? (focusSt.cats.length ? focusSt.cats : FOCUS_STRATEGIES).join('|') : '';
+      if (window.__focusKeyApplied !== focusKey) { setFocusActive(focusSt.cats); window.__focusKeyApplied = focusKey; }
+      const focusSw = (openFn) => <FocusStrategiesToggle on={focusSt.on} cats={focusSt.cats} onChange={v => setFocusSt(s => ({ ...s, on: v }))} onOpen={openFn} />;
+      const focusDrawer = { focus: focusSt, onFocusChange: setFocusSt };
+      // L2 and L3 share one filter state; the focus scope rides on top of it.
+      const lvlF = React.useMemo(() => ({ ...lvlFilters, focusStrat: focusKey }), [lvlFilters, focusKey]);
+      const setLvlF = React.useCallback((v) => setLvlFilters(prev => {
+        const nv = typeof v === 'function' ? v({ ...prev, focusStrat: focusKey }) : v;
+        const { focusStrat, ...rest } = nv;
+        return rest;
+      }), [focusKey]);
+      const lvlF2 = lvlF, lvlF3 = lvlF, setLvlF2 = setLvlF, setLvlF3 = setLvlF;
+      const levelSw = <LvLevelSwitch level={level} onChange={setLevel} />;
       const clearLvlSelections = React.useCallback(() => {
         setLvlFilters({ ...LV_FILTER_DEFAULT });
         lvlSelections.forEach(s => s.onRemove && s.onRemove());
@@ -201,6 +248,23 @@
         };
       };
 
+      // Links inside a brief post {ampGo}; teams open the profile, everything
+      // else opens a pre-filtered dashboard pop-up over the brief.
+      const [briefPop, setBriefPop] = React.useState(null);
+      React.useEffect(() => {
+        const onMsg = (e) => {
+          const d = e.data;
+          if (!d || typeof d.ampGo !== 'string') return;
+          const { kind, arg } = bpParse(d.ampGo);
+          if (kind === 'team') {
+            const r = (window.LV_ROWS || []).find(x => x.name === arg);
+            setClientDetail(r ? lvClientRow(r) : rowFromAIClient({ name: arg, opp: '$0M', yours: '$0M', share: '—' }));
+          } else setBriefPop({ go: d.ampGo, label: d.label });
+        };
+        window.addEventListener('message', onMsg);
+        return () => window.removeEventListener('message', onMsg);
+      }, []);
+
       const handleAIAction = (action) => {
         // action may be a string (legacy home-page calls) or an object {id, ...}
         const id = typeof action === 'string' ? action : action && action.id;
@@ -229,14 +293,16 @@
       return (
         <div style={{ display:'flex', height:'100vh', overflow:'hidden', background:'transparent' }} data-screen-label={
           active === 'home' ? '01 Home' :
-          active === 'management' ? '02 Management' :
+          active === 'management' ? '02 Sales Leadership' :
           active === 'opportunity' ? '03 Opportunity' :
           active === 'advantage' ? '04 Competitive Advantage' :
           active === 'reports' ? '06 Custom Reports' :
           active === 'datapacks' ? '07 Data Packs' :
-          active === 'l2sales' ? '08 Level 2 Sales & Activity' :
+          active === 'l2sales' ? '08 Level 2 Territory Analytics' :
           active === 'l3intel' ? '09 Level 3 Segmentation & Signals' :
-          active === 'lead' ? '10 Sales Leadership' : active
+          active === 'lead' ? '10 Sales Leadership' :
+          active === 'briefs' ? '11 Territory Brief & Review' :
+          active === 'leadbriefs' ? '12 Leadership Brief & Review' : active
         }>
           <Sidebar
             items={NAV}
@@ -255,21 +321,21 @@
           <div style={{ flex:1, marginLeft: sbWidth + (sbWidth > 100 ? 24 : 0), display:'flex', flexDirection:'column', minWidth:0, transition:'margin-left 220ms cubic-bezier(0.22, 0.61, 0.36, 1)' }}>
             {active === 'home' && (
               <>
-                <TopBar title="Ask Field" dateStr={DATE} showSearch={false} levelSwitch={<LvLevelSwitch level={level} onChange={setLevel} />} />
-                <HomePage onNav={setActive} onAIAction={handleAIAction} />
+                <TopBar levelSwitch={levelSw} title="Ask Field" dateStr={DATE} showSearch={false} badge={<span id="askfield-hdr-slot" style={{ display: 'inline-flex', alignSelf: 'center' }}></span>} />
+                <HomePage level={level} onNav={setActive} onAIAction={handleAIAction} subs={sub.subs} onSubscribe={sub.open} onReadEmail={() => setActive('briefs')} />
               </>
             )}
-            {active === 'management' && (
+            {active === 'management' && level === 1 && (
               <>
-                <TopBar title="Management Dashboard" dateStr={DATE} activeSelections={mgmtSelections} period={periodMgmt} onPeriod={setPeriodMgmt} showExport showFilter onClearAll={clearMgmtSelections}
+                <TopBar levelSwitch={levelSw} focusToggle={focusSw(() => setFilterOpen(true))} title="Sales Leadership" badge={<LvLevelBadge n={1} />} dateStr={DATE} activeSelections={mgmtSelections} period={periodMgmt} onPeriod={setPeriodMgmt} showExport showFilter onClearAll={clearMgmtSelections}
                   onExportClick={() => setExportOpen(true)}
                   onFilterClick={() => setFilterOpen(true)} filterActive={filterActive} onAiClick={() => setAiOpen(true)} />
-                <main style={{ flex:1, display:'flex', flexDirection:'column', minHeight:0, overflow:'auto' }}><ManagementPage filters={filters} onSelectionsChange={setMgmtSelections} /></main>
+                <main style={{ flex:1, display:'flex', flexDirection:'column', minHeight:0, overflow:'auto' }}><ManagementPage filters={filters} focus={focusKey} onSelectionsChange={setMgmtSelections} /></main>
               </>
             )}
             {active === 'opportunity' && (
               <>
-                <TopBar
+                <TopBar levelSwitch={levelSw} focusToggle={focusSw(() => setFilterOpen(true))}
                   title={"Opportunity Dashboard"} dateStr={DATE}
                   activeSelections={oppSelections}
                   period={periodOpp} onPeriod={setPeriodOpp} showExport showFilter
@@ -280,6 +346,7 @@
                 />
                 <main style={{ flex:1, minHeight:0, overflow:'auto' }}>
                   <OpportunityPage
+                    focus={focusKey}
                     onViewClient={(row) => setClientDetail(row)}
                     onSelectionsChange={setOppSelections}
                     filters={filters}
@@ -290,7 +357,7 @@
             )}
             {active === 'advantage' && (
               <>
-                <TopBar
+                <TopBar levelSwitch={levelSw} focusToggle={focusSw(() => setFilterOpen(true))}
                   title="Competitive Advantage" dateStr={DATE}
                   activeSelections={advSelections}
                   period={periodAdv} onPeriod={setPeriodAdv} showExport showFilter
@@ -299,12 +366,12 @@
                   onFilterClick={() => setFilterOpen(true)} filterActive={filterActive}
                   onAiClick={() => setAiOpen(true)}
                 />
-                <main style={{ flex:1, minHeight:0, overflow:'auto' }}><AdvantagePage onSelectionsChange={setAdvSelections} onViewClient={(row) => setClientDetail(row)} /></main>
+                <main style={{ flex:1, minHeight:0, overflow:'auto' }}><AdvantagePage focus={focusKey} onSelectionsChange={setAdvSelections} onViewClient={(row) => setClientDetail(row)} /></main>
               </>
             )}
             {active === 'distribution' && (
               <>
-                <TopBar
+                <TopBar levelSwitch={levelSw}
                   title="Distribution Intelligence" dateStr={DATE}
                   activeSelections={distSelections}
                   period={periodDist} onPeriod={setPeriodDist} showExport showFilter
@@ -316,16 +383,36 @@
                 <main style={{ flex:1, minHeight:0, overflow:'auto' }}><DistributionPage onSelectionsChange={setDistSelections} onViewClient={(row) => setClientDetail(row)} /></main>
               </>
             )}
-            {active === 'l2sales' && (
+            {locked && (
               <>
-                <TopBar
-                  title="Sales & Activity"
+                <TopBar levelSwitch={levelSw} title={active === 'l2sales' ? 'Territory Analytics' : 'Segmentation & Signals'} badge={<LvLevelBadge n={ITEM_LEVEL[active]} />} showSearch={false} />
+                <main style={{ flex:1, display:'flex', alignItems:'center', justifyContent:'center', padding:40 }}>
+                  <div style={{ maxWidth:460, textAlign:'center', display:'flex', flexDirection:'column', alignItems:'center', gap:12 }}>
+                    <div style={{ width:48, height:48, borderRadius:12, background:'rgba(16,185,129,0.12)', border:'1px solid rgba(16,185,129,0.4)', display:'flex', alignItems:'center', justifyContent:'center' }}>
+                      <i className="fa-solid fa-lock" style={{ color:'rgb(52,211,153)', fontSize:18 }} />
+                    </div>
+                    <div style={{ fontFamily:'Inter', fontSize:18, fontWeight:600, color:'rgb(249,250,251)' }}>Available with Level {ITEM_LEVEL[active]}</div>
+                    <div style={{ fontFamily:'Inter', fontSize:13, lineHeight:1.55, color:'rgb(163,163,163)' }}>
+                      {active === 'l2sales'
+                        ? 'Adds your own sales and CRM activity to the opportunity view, so you can see actual production and coverage for every FA/Team.'
+                        : 'Adds segmentation and confidence-scored signals, with a next best action for every FA/Team.'}
+                    </div>
+                    <button onClick={() => setLevel(ITEM_LEVEL[active])} style={{ height:34, padding:'0 16px', borderRadius:8, border:'1px solid rgb(16,185,129)', background:'rgb(16,185,129)', color:'#fff', fontFamily:'Inter', fontSize:12.5, fontWeight:600, cursor:'pointer' }}>Preview Level {ITEM_LEVEL[active]}</button>
+                  </div>
+                </main>
+              </>
+            )}
+            {active === 'l2sales' && !locked && (
+              <>
+                <TopBar levelSwitch={levelSw} focusToggle={focusSw(() => setLvlFilterOpen(true))}
+                  title="Territory Analytics"
                   badge={<LvLevelBadge n={2} />}
                   secondRow
-                  levelSwitch={<LvLevelSwitch level={level} onChange={setLevel} />}
+                 
                   measureToggle={<TabPills options={['AUM', 'Inflows', 'Net Flows']} value={lvlMeasure} onChange={setLvlMeasure} />}
                   activeSelections={lvlSelections}
                   period={periodLvl2} onPeriod={setPeriodLvl2} showExport showFilter
+                  onSubscribeClick={() => sub.open('brief', { view: 'Territory Analytics', chips: lvlSelections.map(c => c.label) })} subscribed={sub.subscribed}
                   filterActive={lvCount(lvlFilters) > 0}
                   onFilterClick={() => setLvlFilterOpen(true)}
                   onClearAll={clearLvlSelections}
@@ -333,22 +420,23 @@
                   onAiClick={() => setAiOpen(true)}
                 />
                 <main style={{ flex:1, minHeight:0, overflow:'auto' }}>
-                  <Level2Page filters={lvlFilters} setFilters={setLvlFilters} period={periodLvl2} measure={lvlMeasure}
+                  <Level2Page filters={lvlF2} setFilters={setLvlF2} period={periodLvl2} measure={lvlMeasure}
                     onSelectionsChange={setLvlSelections}
                     onViewClient={(row) => setClientDetail(row)} />
                 </main>
               </>
             )}
-            {active === 'l3intel' && (
+            {active === 'l3intel' && !locked && (
               <>
-                <TopBar
+                <TopBar levelSwitch={levelSw} focusToggle={focusSw(() => setLvlFilterOpen(true))}
                   title="Segmentation & Signals"
                   badge={<LvLevelBadge n={3} />}
                   secondRow
-                  levelSwitch={<LvLevelSwitch level={level} onChange={setLevel} />}
+                 
                   measureToggle={<TabPills options={['AUM', 'Inflows', 'Net Flows']} value={lvlMeasure} onChange={setLvlMeasure} />}
                   activeSelections={lvlSelections}
                   period={periodLvl3} onPeriod={setPeriodLvl3} showExport showFilter
+                  onSubscribeClick={() => sub.open('brief', { view: 'Segmentation & Signals', chips: lvlSelections.map(c => c.label) })} subscribed={sub.subscribed}
                   filterActive={lvCount(lvlFilters) > 0}
                   onFilterClick={() => setLvlFilterOpen(true)}
                   onClearAll={clearLvlSelections}
@@ -356,56 +444,74 @@
                   onAiClick={() => setAiOpen(true)}
                 />
                 <main style={{ flex:1, minHeight:0, overflow:'auto' }}>
-                  <Level3Page filters={lvlFilters} setFilters={setLvlFilters} period={periodLvl3} measure={lvlMeasure}
+                  <Level3Page filters={lvlF3} setFilters={setLvlF3} period={periodLvl3} measure={lvlMeasure}
                     onSelectionsChange={setLvlSelections}
                     onViewClient={(row) => setClientDetail(row)} />
                 </main>
               </>
             )}
-            {active === 'lead' && (
+            {active === 'management' && level >= 2 && (
               <>
-                <TopBar
+                <TopBar levelSwitch={levelSw} focusToggle={focusSw(() => setLeadFilterOpen(true))}
                   title="Sales Leadership"
                   badge={<LvLevelBadge n={level >= 3 ? '2 + 3' : 2} />}
                   secondRow
-                  levelSwitch={<LvLevelSwitch level={level} onChange={setLevel} />}
-                  measureToggle={<div style={{ display:'flex', gap:8, alignItems:'center' }}>
-                    <TabPills options={['Externals','Internals','Specialists']} value={ML_ROLE_LABEL[leadRole]} onChange={v => setLeadRole(ML_ROLE_KEYS.find(k => ML_ROLE_LABEL[k] === v))} />
-                    <TabPills options={['AUM', 'Inflows', 'Net Flows']} value={lvlMeasure} onChange={setLvlMeasure} />
-                  </div>}
+                 
+                  measureToggle={<TabPills options={['AUM', 'Inflows', 'Net Flows']} value={lvlMeasure} onChange={setLvlMeasure} />}
+                  onSubscribeClick={() => sub.open('brief', { view: 'Sales Leadership', chips: leadSelections.map(c => c.label).filter(x => typeof x === 'string') })} subscribed={sub.subscribed}
                   activeSelections={leadSelections}
-                  period={periodLead} onPeriod={setPeriodLead} showExport
+                  period={periodLead} onPeriod={setPeriodLead} showExport showFilter
+                  filterActive={ML_XF_KEYS.some(k => leadXf[k].length)}
+                  onFilterClick={() => setLeadFilterOpen(true)}
                   onClearAll={() => leadSelections.forEach(s => s.onRemove && s.onRemove())}
                   onExportClick={() => setExportOpen(true)}
                   onAiClick={() => setAiOpen(true)}
                 />
                 <main style={{ flex:1, minHeight:0, overflow:'auto' }}>
-                  <LeadershipPage level={level} measure={lvlMeasure} period={periodLead} role={leadRole} onSelectionsChange={setLeadSelections} />
+                  <LeadershipPage focus={focusKey} level={level} measure={lvlMeasure} period={periodLead} role={leadRole} xf={leadXf} setXf={setLeadXf} onSelectionsChange={setLeadSelections} />
                 </main>
               </>
             )}
             {active === 'distribution' && (
               <>
-                <TopBar title="Distribution Intelligence" dateStr={DATE} />
+                <TopBar levelSwitch={levelSw} title="Distribution Intelligence" dateStr={DATE} />
                 <main style={{ flex:1, minHeight:0, overflow:'auto' }} />
               </>
             )}
             {active === 'reports' && (
               <>
-                <TopBar title="Custom Reports" dateStr={DATE} onAiClick={() => setAiOpen(true)} />
+                <TopBar levelSwitch={levelSw} title="Custom Reports" dateStr={DATE} onAiClick={() => setAiOpen(true)} />
                 <main style={{ flex:1, minHeight:0, overflow:'auto', display:'flex', flexDirection:'column' }}><CustomReportsPage /></main>
               </>
             )}
 
+            {active === 'briefs' && (
+              <>
+                <TopBar levelSwitch={levelSw} title="Territory Brief & Review" dateStr={DATE} showSearch={false} onAiClick={() => setAiOpen(true)} />
+                <main style={{ flex:1, minHeight:0, overflow:'auto' }}><BriefsPage subs={sub.subs} onEdit={sub.open} /></main>
+              </>
+            )}
+            {active === 'leadbriefs' && (
+              <>
+                <TopBar levelSwitch={levelSw} title="Leadership Brief & Review" dateStr={DATE} showSearch={false} onAiClick={() => setAiOpen(true)} />
+                <main style={{ flex:1, minHeight:0, overflow:'auto' }}><BriefsPage audience="lead" subs={sub.subs} onEdit={sub.open} /></main>
+              </>
+            )}
+            {active === 'settings' && (
+              <>
+                <TopBar levelSwitch={levelSw} title="Settings" dateStr={DATE} showSearch={false} />
+                <main style={{ flex:1, minHeight:0, overflow:'auto' }}><SubscriptionsPage subs={sub.subs} setSubs={sub.setSubs} onEdit={sub.open} /></main>
+              </>
+            )}
             {active === 'datapacks' && (
               <>
-                <TopBar title="Data Packs" dateStr={DATE} />
+                <TopBar levelSwitch={levelSw} title="Data Packs" dateStr={DATE} />
                 <main style={{ flex:1, minHeight:0, overflow:'auto' }}><DataPacksPage /></main>
               </>
             )}
-            {!['home','management','opportunity','advantage','distribution','datapacks','reports','l2sales','l3intel','lead'].includes(active) && (
+            {!['home','management','opportunity','advantage','distribution','datapacks','reports','l2sales','l3intel','lead','settings','briefs','leadbriefs'].includes(active) && (
               <>
-                <TopBar title={active.charAt(0).toUpperCase() + active.slice(1)} dateStr={DATE} />
+                <TopBar levelSwitch={levelSw} title={active.charAt(0).toUpperCase() + active.slice(1)} dateStr={DATE} />
                 <div style={{ padding: 40, color:'rgb(163,163,163)' }}>
                   <h2 style={{ color:'rgb(249,250,251)' }}>Coming soon</h2>
                   <p>This screen is not part of the prototype.</p>
@@ -413,6 +519,7 @@
               </>
             )}
           </div>
+          {briefPop && <BriefLinkPopup key={briefPop.go} go={briefPop.go} label={briefPop.label} level={level} measure={lvlMeasure} focusKey={focusKey} onClose={() => setBriefPop(null)} onViewClient={(row) => setClientDetail(row)} />}
           <ClientDetailPage clientRow={clientDetail} onBack={() => setClientDetail(null)} />
           <AIAssistantPanel
             open={aiOpen}
@@ -427,6 +534,7 @@
             onChange={setFilters}
             onApply={() => setFilterOpen(false)}
             onReset={() => setFilters(DEFAULT_FILTERS)}
+            {...focusDrawer}
           />
           <FilterDrawer
             open={lvlFilterOpen}
@@ -441,7 +549,24 @@
             onChange={setLvlFilters}
             onApply={() => setLvlFilterOpen(false)}
             onReset={() => setLvlFilters({ ...LV_FILTER_DEFAULT })}
+            {...focusDrawer}
           />
+          <FilterDrawer
+            open={leadFilterOpen}
+            onClose={() => setLeadFilterOpen(false)}
+            filters={leadXf}
+            defaults={mlEmptyXf()}
+            arrayKeys={ML_XF_KEYS}
+            chipLabel={(k, v) => (ML_DIMS[k] && ML_DIMS[k].label_ ? ML_DIMS[k].label_(v) : v)}
+            renderSections={({ local, toggle, setMany }) => (
+              <MlDrawerSections local={local} toggle={toggle} setMany={setMany} level={level} role={leadRole} onRole={setLeadRole} />
+            )}
+            onChange={setLeadXf}
+            onApply={() => setLeadFilterOpen(false)}
+            onReset={() => setLeadXf(mlEmptyXf())}
+            {...focusDrawer}
+          />
+          {sub.ui}
           <ExportPanel
             open={exportOpen}
             onClose={() => setExportOpen(false)}
@@ -454,5 +579,38 @@
 
     ReactDOM.createRoot(document.getElementById('root')).render(<App />);
   </script>
+<style>.ag-fit th{vertical-align:bottom;line-height:1.25}.ag-fit.ag-wrap th,.ag-fit.ag-wrap th *{white-space:normal!important;overflow-wrap:normal;word-break:keep-all}</style>
+<script>
+/* Main grids fit their tile: headers stay on one line where they can; if the
+   grid still overflows, headers wrap, then the table scales down (not below
+   88%) so no grid needs a horizontal scroll. */
+(function () {
+  var pending = null;
+  var ro = window.ResizeObserver ? new ResizeObserver(function () { later(); }) : null;
+  function fit(wrap, t) {
+    if (!t.classList.contains('ag-fit')) { t.classList.add('ag-fit'); wrap.setAttribute('data-agfit', ''); if (ro) ro.observe(wrap); }
+    var cw = wrap.clientWidth; if (!cw) return;
+    t.style.zoom = '';
+    t.classList.remove('ag-wrap');
+    var sw = t.scrollWidth;
+    if (sw > cw + 1 && sw * 0.95 > cw) { t.classList.add('ag-wrap'); sw = t.scrollWidth; }
+    var z = sw > cw + 1 ? Math.max(0.88, Math.floor((cw / sw) * 1000) / 1000) : 1;
+    t.style.zoom = z === 1 ? '' : String(z);
+    var ov = sw * z <= cw + 1 ? 'hidden' : 'auto';
+    if (wrap.style.overflowX !== ov) wrap.style.overflowX = ov;
+  }
+  function scan() {
+    pending = null;
+    document.querySelectorAll('div[style*="overflow-x: auto"] > table, div[style*="overflow: auto"] > table, [data-agfit] > table').forEach(function (t) { fit(t.parentElement, t); });
+  }
+  function later() { if (!pending) pending = setTimeout(scan, 200); }
+  window.addEventListener('resize', later);
+  new MutationObserver(function (m) {
+    for (var i = 0; i < m.length; i++) if (m[i].type === 'childList' && m[i].addedNodes.length) { later(); return; }
+  }).observe(document.body, { childList: true, subtree: true });
+  if (ro) ro.observe(document.body);
+  later();
+})();
+</script>
 </body>
 </html>

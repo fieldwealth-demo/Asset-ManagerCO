@@ -225,8 +225,10 @@ function AIActionButton({ icon, label, sub, onClick, primary }) {
   );
 }
 
-function AIInsightsPanel({ prompt, onClient, onViewProfile, onCreateMaterial, onScheduleMeeting }) {
+function AIInsightsPanel({ prompt, onClient, onViewProfile, onCreateMaterial, onScheduleMeeting, onNav }) {
   const promptText = prompt || 'What are my top client opportunities in Large Blend?';
+  const sigAnswer = window.aiSignalAnswer && window.aiSignalAnswer(promptText);
+  if (sigAnswer) return <AISignalAnswer prompt={promptText} answer={sigAnswer} onNav={onNav} />;
   return (
     <div style={{
       width: '100%', maxWidth: 920,

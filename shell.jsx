@@ -3,7 +3,8 @@
    design system): dual-state rail with push-content layout, persisted
    expand/collapse, collapsed tooltips + flyouts, profile cluster + footer. */
 
-function TopBar({ title, dateStr, activeSelections, period, onPeriod, showExport, showFilter, onClearAll, onFilterClick, onExportClick, filterActive, showSearch = true, onAiClick, badge, levelSwitch, secondRow, measureToggle }) {
+function TopBar({ title, dateStr, activeSelections, period, onPeriod, showExport, showFilter, onClearAll, onFilterClick, onExportClick, filterActive, showSearch = true, onAiClick, badge, levelSwitch, secondRow, measureToggle, onSubscribeClick, subscribed, focusToggle }) {
+  secondRow = secondRow || !!levelSwitch;
   const inlineSelections = activeSelections !== undefined && !secondRow;
   return (
     <div style={{
@@ -20,9 +21,9 @@ function TopBar({ title, dateStr, activeSelections, period, onPeriod, showExport
         <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, flexShrink: 0 }}>
           <div style={{ fontFamily: 'Inter', fontWeight: 600, fontSize: 15, color: 'rgb(249,250,251)', whiteSpace: 'nowrap' }}>{title}</div>
           {badge}
-          {dateStr && <div className="tb-date" style={{ fontFamily: 'Inter', fontSize: 11.5, color: 'rgb(163,163,163)', whiteSpace: 'nowrap' }}>{dateStr}</div>}
         </div>
         {!secondRow && levelSwitch}
+        {!secondRow && focusToggle}
 
         {/* Active selections sit inline with the page header so the layout below
            never shifts when a selection is applied or cleared. */}
@@ -92,6 +93,19 @@ function TopBar({ title, dateStr, activeSelections, period, onPeriod, showExport
               {filterActive && <span style={{ marginLeft:2, background:'rgb(16,185,129)', color:'#fff', fontSize:9, fontWeight:700, padding:'1px 5px', borderRadius:9999 }}>●</span>}
             </button>
           )}
+          {onSubscribeClick && (
+            <button onClick={onSubscribeClick} title={subscribed ? 'Manage email subscriptions' : 'Subscribe to email'} style={{
+              height: 30, padding: '0 10px', borderRadius: 6,
+              border: `1px solid ${subscribed ? 'rgb(16,185,129)' : 'rgb(75,85,99)'}`,
+              background: subscribed ? 'rgba(16,185,129,0.15)' : 'rgba(0,0,0,0.35)',
+              color: subscribed ? 'rgb(52,211,153)' : 'rgb(229,231,235)',
+              fontFamily: 'Inter', fontSize: 12, fontWeight: 500, cursor: 'pointer',
+              display: 'inline-flex', alignItems: 'center', gap: 6, whiteSpace: 'nowrap',
+            }}>
+              <i className={`fa-solid fa-${subscribed ? 'envelope-circle-check' : 'envelope'}`} style={{ fontSize: 11 }} />
+              {subscribed ? 'Subscribed' : 'Subscribe'}
+            </button>
+          )}
           {onAiClick && (
             <button onClick={onAiClick} style={{
               height: 30, padding: '0 12px', borderRadius: 6, border: '1px solid rgb(16,185,129)',
@@ -115,6 +129,7 @@ function TopBar({ title, dateStr, activeSelections, period, onPeriod, showExport
           borderTop: '1px solid rgba(75,85,99,0.25)', paddingTop: 8,
         }}>
           {levelSwitch}
+          {focusToggle}
           <div style={{
             flex: '1 1 auto', minWidth: 0, display: 'flex', alignItems: 'center', gap: 8,
             overflowX: 'auto', overflowY: 'hidden', height: 26,
@@ -123,7 +138,7 @@ function TopBar({ title, dateStr, activeSelections, period, onPeriod, showExport
               <SelectionChip key={sel.key || i} label={sel.label} icon={sel.icon} onRemove={sel.onRemove} />
             ))}
           </div>
-          <button onClick={onClearAll} disabled={!(activeSelections || []).length} style={{
+          {activeSelections !== undefined && <button onClick={onClearAll} disabled={!(activeSelections || []).length} style={{
             flexShrink: 0, height: 26, padding: '0 11px', borderRadius: 6, cursor: (activeSelections || []).length ? 'pointer' : 'default',
             background: (activeSelections || []).length ? 'rgba(16,185,129,0.14)' : 'transparent',
             border: `1px solid ${(activeSelections || []).length ? 'rgb(16,185,129)' : 'rgba(75,85,99,0.35)'}`,
@@ -134,7 +149,52 @@ function TopBar({ title, dateStr, activeSelections, period, onPeriod, showExport
           }}>
             <i className="fa-solid fa-xmark" style={{ fontSize: 9 }} />
             Clear all{(activeSelections || []).length ? ` (${activeSelections.length})` : ''}
+          </button>}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* Focus categories — the default scope of every dashboard. The chip shows
+   what is applied; x widens to all products; clicking the label opens the
+   filter drawer, where the categories themselves are chosen. */
+function FocusStrategiesToggle({ on, cats, onChange, onOpen }) {
+  const all = window.FOCUS_STRATEGIES || [];
+  const list = cats && cats.length ? cats : all;
+  const label = !on ? 'All products' : list.length === all.length ? 'Focus categories' : list.length === 1 ? `Focus: ${list[0]}` : `Focus: ${list.length} of ${all.length}`;
+  const [tip, setTip] = React.useState(false);
+  return (
+    <div style={{ position: 'relative', flexShrink: 0 }} onMouseEnter={() => setTip(true)} onMouseLeave={() => setTip(false)}>
+      <div style={{
+        height: 26, borderRadius: 7, whiteSpace: 'nowrap', display: 'inline-flex', alignItems: 'center', overflow: 'hidden',
+        border: `1px solid ${on ? 'rgb(16,185,129)' : 'rgba(75,85,99,0.6)'}`,
+        background: on ? 'rgba(16,185,129,0.16)' : 'rgba(0,0,0,0.35)',
+      }}>
+        <button onClick={onOpen} style={{
+          height: '100%', padding: on ? '0 6px 0 9px' : '0 10px 0 9px', border: 'none', background: 'transparent', cursor: 'pointer',
+          color: on ? 'rgb(52,211,153)' : 'rgb(209,213,219)', fontFamily: 'Inter', fontSize: 11.5, fontWeight: on ? 600 : 500,
+          display: 'inline-flex', alignItems: 'center', gap: 7,
+        }}>
+          <i className={`fa-solid fa-${on ? 'star' : 'layer-group'}`} style={{ fontSize: 9.5 }} />{label}
+        </button>
+        {on ? (
+          <button onClick={() => onChange(false)} title="Clear focus · show all products" style={{ height: '100%', width: 22, border: 'none', borderLeft: '1px solid rgba(16,185,129,0.4)', background: 'transparent', color: 'rgb(110,240,180)', cursor: 'pointer' }}>
+            <i className="fa-solid fa-xmark" style={{ fontSize: 9 }} />
           </button>
+        ) : (
+          <button onClick={() => onChange(true)} title="Apply focus categories" style={{ height: '100%', padding: '0 9px', border: 'none', borderLeft: '1px solid rgba(75,85,99,0.6)', background: 'transparent', color: 'rgb(52,211,153)', cursor: 'pointer', fontFamily: 'Inter', fontSize: 11, fontWeight: 600 }}>Apply focus</button>
+        )}
+      </div>
+      {tip && (
+        <div style={{ position: 'absolute', top: 32, left: 0, zIndex: 40, width: 260, padding: '10px 12px', borderRadius: 8, background: 'rgb(17,24,39)', border: '1px solid rgba(75,85,99,0.6)', boxShadow: '0 10px 30px rgba(0,0,0,0.5)', fontFamily: 'Inter' }}>
+          <div style={{ fontSize: 11, fontWeight: 600, color: 'rgb(249,250,251)', marginBottom: 6 }}>{on ? 'Focus categories applied' : 'Showing all products'}</div>
+          {on && (
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginBottom: 6 }}>
+              {list.map(s => <span key={s} style={{ fontSize: 10.5, color: 'rgb(52,211,153)', border: '1px solid rgba(16,185,129,0.45)', borderRadius: 9999, padding: '1px 8px' }}>{s}</span>)}
+            </div>
+          )}
+          <div style={{ fontSize: 10.5, lineHeight: 1.45, color: 'rgb(163,163,163)' }}>{on ? 'Opportunity, sales, market share, activity and signals count only these categories. Change them in Filters.' : 'Every figure covers the whole product line. Apply focus to compare where the team is focused.'}</div>
         </div>
       )}
     </div>
@@ -183,8 +243,8 @@ function CoverageTooltip() {
       <div style={{ fontFamily:'Inter', fontSize:11.5, fontWeight:600, color:'rgb(249,250,251)', marginBottom:8 }}>Data source coverage</div>
       <table style={{ width:'100%', borderCollapse:'collapse', fontFamily:'Inter', fontSize:11 }}>
         <thead><tr>
-          <th style={{ textAlign:'left', color:'rgb(107,114,128)', fontWeight:500, fontSize:9.5, letterSpacing:0.5, textTransform:'uppercase', paddingBottom:5 }}>Source</th>
-          <th style={{ textAlign:'right', color:'rgb(107,114,128)', fontWeight:500, fontSize:9.5, letterSpacing:0.5, textTransform:'uppercase', paddingBottom:5 }}>Actual coverage</th>
+          <th style={{ textAlign:'left', color:'rgb(200,205,213)', fontWeight:500, fontSize:9.5, letterSpacing:0.5, textTransform:'uppercase', paddingBottom:5 }}>Source</th>
+          <th style={{ textAlign:'right', color:'rgb(200,205,213)', fontWeight:500, fontSize:9.5, letterSpacing:0.5, textTransform:'uppercase', paddingBottom:5 }}>Actual coverage</th>
         </tr></thead>
         <tbody>
           {SOURCE_COVERAGE.map(s => (
@@ -281,10 +341,10 @@ function PeriodDropdown({ value, onChange }) {
           {customOpen && (
             <div style={{ marginTop:6, paddingTop:10, borderTop:'1px solid rgba(75,85,99,0.35)', padding:'10px 8px 4px' }}>
               <div style={{ display:'grid', gridTemplateColumns:'auto 1fr 1fr', gap:6, alignItems:'center' }}>
-                <span style={{ fontFamily:'Inter', fontSize:10, color:'rgb(107,114,128)', textTransform:'uppercase', letterSpacing:0.5 }}>From</span>
+                <span style={{ fontFamily:'Inter', fontSize:10, color:'rgb(200,205,213)', textTransform:'uppercase', letterSpacing:0.5 }}>From</span>
                 <MiniSelect value={fromM} options={MONTHS} onChange={setFromM} />
                 <MiniSelect value={fromY} options={YEARS} onChange={setFromY} />
-                <span style={{ fontFamily:'Inter', fontSize:10, color:'rgb(107,114,128)', textTransform:'uppercase', letterSpacing:0.5 }}>To</span>
+                <span style={{ fontFamily:'Inter', fontSize:10, color:'rgb(200,205,213)', textTransform:'uppercase', letterSpacing:0.5 }}>To</span>
                 <MiniSelect value={toM} options={MONTHS} onChange={setToM} />
                 <MiniSelect value={toY} options={YEARS} onChange={setToY} />
               </div>
@@ -395,7 +455,7 @@ function VehicleFilterChips({ selected, onToggle, options, showLabel = true, com
   return (
     <div style={{ display:'inline-flex', alignItems:'center', gap:8 }}>
       {showLabel && (
-        <span style={{ fontFamily:'Inter', fontSize:10.5, fontWeight:600, color:'rgb(163,163,163)', textTransform:'uppercase', letterSpacing:0.4 }}>
+        <span style={{ fontFamily:'Inter', fontSize:10.5, fontWeight:600, color:'rgb(200,205,213)', textTransform:'uppercase', letterSpacing:0.4 }}>
           Vehicle
         </span>
       )}
@@ -517,7 +577,7 @@ function DimensionPicker({ value, options, onChange, label = 'Dimension', varian
           background:'rgb(17,24,39)', border:'1px solid rgba(75,85,99,0.6)', borderRadius:8,
           boxShadow:'0 12px 32px rgba(0,0,0,0.45)', padding:4, maxHeight:280, overflowY:'auto',
         }}>
-          <div style={{ fontFamily:'Inter', fontSize:9.5, color:'rgb(107,114,128)', textTransform:'uppercase', letterSpacing:0.6, padding:'6px 10px 4px' }}>{label}</div>
+          <div style={{ fontFamily:'Inter', fontSize:9.5, color:'rgb(200,205,213)', textTransform:'uppercase', letterSpacing:0.6, padding:'6px 10px 4px' }}>{label}</div>
           {options.map(o => {
             const sel = o.key === value;
             return (
@@ -538,4 +598,4 @@ function DimensionPicker({ value, options, onChange, label = 'Dimension', varian
   );
 }
 
-Object.assign(window, { TopBar, SelectionChip, Tile, TabPills, AIFab, PeriodDropdown, VehicleFilterChips, DimensionPicker, MiniSelect, SOURCE_COVERAGE, UNIFIED_MAX_PERIOD });
+Object.assign(window, { TopBar, SelectionChip, Tile, TabPills, AIFab, PeriodDropdown, VehicleFilterChips, DimensionPicker, MiniSelect, SOURCE_COVERAGE, UNIFIED_MAX_PERIOD, FocusStrategiesToggle });

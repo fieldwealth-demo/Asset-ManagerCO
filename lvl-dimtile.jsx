@@ -165,7 +165,7 @@ function lvInBucket(r, dimKey, key) {
 /* ---------- the tile ---------- */
 
 const LVD_LINE = 'rgba(75,85,99,0.35)';
-const LVD_DIM = 'rgb(107,114,128)';
+const LVD_DIM = 'rgb(200,205,213)';
 const lvdPeriodKey = (p) => (LV_ROWS[0] && LV_ROWS[0].sales[p] !== undefined ? p : 'Rolling 12');
 const lvdPeriodShort = (p) => (p === 'Rolling 12' ? 'R12' : p);
 
@@ -197,7 +197,7 @@ function LvDimTile({ dim, onDim, dims, rows, highlight, measure, period, filters
 
   // Label track carries a real floor so a firm or product name stays readable;
   // the tile grid's minimum below is sized to seat it plus the numbers.
-  const cols = 'minmax(104px,1fr) 46px 46px 32px 46px 30px 30px 34px';
+  const cols = 'minmax(104px,2.2fr) minmax(46px,1fr) minmax(46px,1fr) minmax(32px,0.8fr) minmax(46px,1fr) minmax(30px,0.7fr) minmax(30px,0.7fr) minmax(34px,0.8fr)';
   const head = { fontFamily: 'Inter', fontSize: 8.5, color: LVD_DIM, textAlign: 'right', textTransform: 'uppercase', letterSpacing: 0.4, whiteSpace: 'nowrap' };
   const num = { fontFamily: 'Inter', fontSize: 11, textAlign: 'right', fontVariantNumeric: 'tabular-nums' };
   const dash = <span style={{ color: LVD_DIM }}>—</span>;
@@ -333,4 +333,61 @@ function LvDimTileRow({ defaults, dims, rows, highlight, measure, period, filter
   );
 }
 
-Object.assign(window, { lvInBucket, LV_DIMS, LV_DIMS_L2, LV_DIMS_L3, lvDimBuckets, LvDimTile, LvDimPicker, LvDimTileRow });
+/* Narrow dimension rail that sits to the left of a main grid and takes the
+   grid's height. The header picker swaps the dimension; each value is a
+   filter toggle. */
+function LvRail({ picker, note, items, onToggle, head = 'Sales' }) {
+  const anyOn = items.some(b => b.on);
+  const max = Math.max(1, ...items.map(b => Math.abs(b.bar != null ? b.bar : b.value || 0)));
+  return (
+    <div style={{ height: '100%', boxSizing: 'border-box', display: 'flex', flexDirection: 'column', gap: 8, padding: '12px 12px 10px', background: 'rgba(255,255,255,0.035)', border: `1px solid ${LVD_LINE}`, borderRadius: 12, minWidth: 0 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0, paddingLeft: 6, position: 'relative', zIndex: 5 }}>{picker}</div>
+      {note && <div style={{ fontFamily: 'Inter', fontSize: 10, color: LVD_DIM, paddingLeft: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{note}</div>}
+      <div style={{ display: 'flex', justifyContent: 'space-between', fontFamily: 'Inter', fontSize: 9, fontWeight: 600, color: LVD_DIM, textTransform: 'uppercase', letterSpacing: 0.5, paddingBottom: 5, borderBottom: `1px solid ${LVD_LINE}` }}>
+        <span>Value</span><span>{head}</span>
+      </div>
+      <div className="l3-sig-list" style={{ flex: 1, minHeight: 0, overflowY: 'auto', overflowX: 'hidden', display: 'flex', flexDirection: 'column', gap: 2, marginRight: -4, paddingRight: 4 }}>
+        {items.map(b => (
+          <button key={b.key} onClick={() => onToggle(b.key)} style={{
+            display: 'flex', flexDirection: 'column', gap: 4, padding: '6px 7px', border: 'none', borderRadius: 7, cursor: 'pointer', textAlign: 'left', flexShrink: 0,
+            background: b.on ? 'rgba(16,185,129,0.12)' : 'transparent', boxShadow: b.on ? 'inset 0 0 0 1px rgba(16,185,129,0.55)' : 'none',
+          }}>
+            <span style={{ display: 'flex', alignItems: 'baseline', gap: 8, width: '100%' }}>
+              <span style={{ flex: 1, minWidth: 0, fontFamily: 'Inter', fontSize: 11.5, fontWeight: b.on ? 600 : 500, color: b.on ? 'rgb(52,211,153)' : anyOn ? 'rgb(163,163,163)' : 'rgb(229,231,235)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{b.label}</span>
+              <span style={{ fontFamily: 'Inter', fontSize: 11.5, fontWeight: 600, color: 'rgb(249,250,251)', fontVariantNumeric: 'tabular-nums' }}>{b.fmt}</span>
+            </span>
+            <span style={{ display: 'block', height: 3, borderRadius: 2, background: 'rgba(255,255,255,0.06)', overflow: 'hidden', width: '100%' }}>
+              <span style={{ display: 'block', width: `${Math.max(0, (Math.abs(b.bar != null ? b.bar : b.value || 0) / max) * 100)}%`, height: '100%', background: b.color || 'rgb(52,211,153)', borderRadius: 2 }} />
+            </span>
+            {b.sub && <span style={{ fontFamily: 'Inter', fontSize: 10, color: LVD_DIM, fontVariantNumeric: 'tabular-nums' }}>{b.sub}</span>}
+          </button>
+        ))}
+        {!items.length && <div style={{ fontFamily: 'Inter', fontSize: 11, color: LVD_DIM, padding: '14px 0', textAlign: 'center' }}>Nothing in this slice.</div>}
+      </div>
+    </div>
+  );
+}
+
+/* Territory Analytics rail — same buckets as the stat tiles. */
+const LV_RAIL_DIMS = ['city', 'vehicle', 'prodCategory', 'product', 'prodBand', 'productBand', 'firm', 'office', 'msa', 'state', 'channel', 'prodCat', 'compAdv', 'discretion'];
+function LvDimRail({ rows, measure, period, filters, setFilters, dims = LV_RAIL_DIMS, storageKey = 'amp_l2rail' }) {
+  const [dim, setDim] = React.useState(() => { try { const v = localStorage.getItem(storageKey); return dims.includes(v) ? v : dims[0]; } catch (e) { return dims[0]; } });
+  React.useEffect(() => { try { localStorage.setItem(storageKey, dim); } catch (e) {} }, [dim]);
+  const d = LV_DIMS[dim];
+  const pk = lvdPeriodKey(period);
+  const buckets = React.useMemo(() => {
+    const own = d.filter && (filters[d.filter] || []).length ? lvFilterRows(LV_ROWS, { ...filters, [d.filter]: [] }) : rows;
+    return lvDimBuckets(own, dim, { measure, pk, roles: filters.roles, filters });
+  }, [rows, dim, measure, pk, filters]);
+  const tot = buckets.reduce((a, b) => a + b.sales, 0) || 1;
+  const sel = (d.filter && filters[d.filter]) || [];
+  const items = buckets.filter(b => b.n || b.sales).map(b => ({
+    key: b.key, label: b.label, color: b.color, value: b.sales, fmt: lvFmtKs(b.sales, measure), on: sel.includes(b.key),
+    sub: `${b.n.toLocaleString()} FA/Teams · ${Math.round((b.sales / tot) * 100)}% of sales`,
+  }));
+  const toggle = (v) => d.filter && setFilters(s => ({ ...s, [d.filter]: s[d.filter].includes(v) ? s[d.filter].filter(x => x !== v) : [...s[d.filter], v] }));
+  return <LvRail picker={<LvDimPicker value={dim} dims={dims} onChange={setDim} />} note={sel.length ? `${sel.length} selected · tap to filter` : 'Tap a value to filter the page'} items={items} onToggle={toggle}
+    head={measure === 'AUM' ? 'AUM' : `${lvdPeriodShort(pk)} ${measure === 'Net Flows' ? 'net' : 'sales'}`} />;
+}
+
+Object.assign(window, { LvRail, LvDimRail, LV_RAIL_DIMS, lvInBucket, LV_DIMS, LV_DIMS_L2, LV_DIMS_L3, lvDimBuckets, LvDimTile, LvDimPicker, LvDimTileRow });

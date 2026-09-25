@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<title>Monthly Review · Morgan Vance</title>
+<style>
+@font-face{font-family:Inter;src:url("../fonts/Inter_18pt-Regular.ttf");font-weight:400}
+@font-face{font-family:Inter;src:url("../fonts/Inter_18pt-Medium.ttf");font-weight:500}
+@font-face{font-family:Inter;src:url("../fonts/Inter_18pt-SemiBold.ttf");font-weight:600}
+@font-face{font-family:Inter;src:url("../fonts/Inter_18pt-Bold.ttf");font-weight:700}
+body{margin:0;background:#0B1220;font-family:Inter,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif}
+a{color:#31C48D;text-decoration:none}a:hover{color:#0E9F6E}
+.em{width:640px;box-sizing:border-box;background:#111928;color:#fff;line-height:1.5;padding:40px 32px;display:flex;flex-direction:column;gap:32px}
+.row{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.lbl{font-size:12px;font-weight:600;color:#9CA3AF;text-transform:uppercase;letter-spacing:.06em}
+.mut{color:#9CA3AF}.sm{font-size:12px}.md{font-size:14px}
+.card{background:rgba(255,255,255,.051);border:1px solid #4B5563;border-radius:12px}
+.kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.kpi{padding:16px;display:flex;flex-direction:column;gap:6px}
+.kv{font-size:24px;font-weight:700;line-height:1.1}
+.sec{display:flex;flex-direction:column;gap:16px}
+.sec h2{margin:0;font-size:20px;font-weight:700}
+.sec>p{margin:-10px 0 0;font-size:14px;color:#9CA3AF}
+.item{padding:16px;display:flex;flex-direction:column;gap:8px;border-bottom:1px solid #374151}
+.item:last-child{border-bottom:0}
+.nm{font-size:16px;font-weight:700}
+.dot{flex-shrink:0;width:10px;height:10px;border-radius:9999px;margin-top:7px}
+.pill{flex-shrink:0;font-size:12px;font-weight:700;border-radius:9999px;padding:2px 10px;white-space:nowrap}
+.pg{color:#31C48D;background:rgba(49,196,141,.15);border:1px solid rgba(49,196,141,.5)}
+.pa{color:#E3A008;background:rgba(227,160,8,.15);border:1px solid rgba(227,160,8,.5)}
+.pr{color:#F98080;background:rgba(249,128,128,.12);border:1px solid rgba(249,128,128,.45)}
+.pb{color:#76A9FA;background:rgba(118,169,250,.12);border:1px solid rgba(118,169,250,.45)}
+.tag{font-size:12px;color:#D1D5DB;border:1px solid #4B5563;border-radius:4px;padding:1px 7px;white-space:nowrap}
+.tags{display:flex;flex-wrap:wrap;gap:6px}
+.rk{flex-shrink:0;width:28px;height:28px;border-radius:9999px;background:#0E9F6E;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.day{display:grid;grid-template-columns:92px minmax(0,1fr);gap:16px;padding:16px;border-bottom:1px solid #374151}
+.day:last-child{border-bottom:0}
+.mtg{display:flex;flex-direction:column;gap:4px}
+.mtg+.mtg{margin-top:12px;padding-top:12px;border-top:1px dashed #374151}
+.lead{font-size:14px;color:#E5E7EB}
+.lead b{color:#31C48D;font-weight:600}
+.add{background:rgba(14,159,110,.08);border:1px dashed rgba(49,196,141,.55);border-radius:8px;padding:10px 12px;margin-top:12px;display:flex;flex-direction:column;gap:2px}
+.btn{display:block;text-align:center;background:#0E9F6E;color:#fff;font-weight:600;font-size:15px;border-radius:8px;padding:12px}
+.btn:hover{background:#057A55;color:#fff}
+.bar{height:8px;border-radius:9999px;background:#374151;overflow:hidden}.bar>i{display:block;height:8px;border-radius:9999px;background:#0E9F6E}
+.tbl{display:grid;gap:0}.tr{display:grid;grid-template-columns:minmax(0,1.6fr) 44px minmax(0,1fr) 52px;gap:12px;align-items:center;padding:10px 16px;border-bottom:1px solid #374151;font-size:14px}.tr:last-child{border-bottom:0}.th{font-size:11px;font-weight:600;color:#9CA3AF;text-transform:uppercase;letter-spacing:.06em}
+.pr2{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr) 56px 48px;gap:12px;align-items:center;padding:10px 16px;border-bottom:1px solid #374151;font-size:14px}.pr2:last-child{border-bottom:0}
+.part{font-size:12px;font-weight:700;color:#31C48D;text-transform:uppercase;letter-spacing:.1em;border-top:1px solid #374151;padding-top:24px}
+.num{font-variant-numeric:tabular-nums;text-align:right}</style>
+<style>:root.embed{color-scheme:dark;background:transparent}.embed body{background:transparent}.embed .em{width:auto;max-width:880px;margin:0 auto;padding:32px;background:#111928;border:1px solid rgba(75,85,99,.5);border-radius:12px}.embed .em>.row:first-child,.embed .em>.btn,.embed .em>.row:last-child{display:none}</style>
+</head>
+<body>
+<div class="em">
+<div class="row"><div style="display:flex;align-items:center;gap:8px"><div style="width:28px;height:28px;border-radius:6px;background:#0E9F6E;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16px">F</div><div style="font-size:18px;font-weight:700;letter-spacing:-.01em">Field</div></div><div class="lbl" style="letter-spacing:.08em">Monthly Review · Thu, Oct 1</div></div>
+<div style="display:flex;flex-direction:column;gap:8px">
+<h1 data-role="ext" style="margin:0;font-size:30px;font-weight:700;letter-spacing:-.02em;line-height:1.2">September in review, Morgan.</h1>
+<h1 data-role="int" style="margin:0;font-size:30px;font-weight:700;letter-spacing:-.02em;line-height:1.2">September in review, Alex.</h1>
+<h1 data-role="spec" style="margin:0;font-size:30px;font-weight:700;letter-spacing:-.02em;line-height:1.2">September in review, Blair.</h1>
+<p data-role="int" style="margin:0;font-size:16px;color:#9CA3AF">You made <span style="color:#31C48D;font-weight:600">212 calls and booked 18 external meetings</span> for Morgan, 11 of them on an open signal. Meetings you booked on a signal converted at 2.1x. Webinar follow-up inside 48 hours slipped to 86%.</p>
+<p data-role="spec" style="margin:0;font-size:16px;color:#9CA3AF">Private Credit and Muni SMA sales reached <span style="color:#31C48D;font-weight:600">$19.1M, 106% to goal and up 26% on August</span>, across the Northeast and Southeast. Meetings you joined converted at 2.8x, against 1.6x without you.</p>
+<p data-role="ext" style="margin:0;font-size:16px;color:#9CA3AF">Sales reached <span style="color:#31C48D;font-weight:600">$41.8M, 101% to goal and up 18% on August</span>, led by Private Credit Fund II and Muni Ladder SMA. In-person meetings and fast webinar follow-up drove the most lift. Coverage is still spread too thin across Segment C.</p>
+<div id="hdr-scope" class="sm" style="display:none;color:#31C48D;font-weight:600"></div>
+</div>
+<div class="part">Part 1 · September</div>
+<div class="card" data-role="ext" data-go="sales" data-label="Sales to goal" style="padding:16px;display:flex;flex-direction:column;gap:12px;cursor:pointer"><div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px"><div class="lbl">Sales to goal</div><div class="sm mut">September closed · all products</div></div><div style="display:grid;grid-template-columns:130px minmax(0,1fr) 170px;gap:12px;align-items:center"><span class="md">September</span><div style="height:8px;border-radius:9999px;background:#374151;overflow:hidden"><i style="display:block;height:100%;width:100%;background:#31C48D"></i></div><span class="md num"><b style="color:#31C48D">101%</b> <span class="mut">$41.8M of $41.4M</span></span></div><div style="display:grid;grid-template-columns:130px minmax(0,1fr) 170px;gap:12px;align-items:center"><span class="md">Year to date</span><div style="height:8px;border-radius:9999px;background:#374151;overflow:hidden"><i style="display:block;height:100%;width:97%;background:#31C48D"></i></div><span class="md num"><b style="color:#E5E7EB">97%</b> <span class="mut">$152M of $157M</span></span></div></div>
+<div class="card" data-role="int" data-go="sales" data-label="Sales to goal" style="padding:16px;display:flex;flex-direction:column;gap:12px;cursor:pointer"><div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px"><div class="lbl">Sales to goal</div><div class="sm mut">Morgan Vance’s territory · September closed</div></div><div style="display:grid;grid-template-columns:130px minmax(0,1fr) 170px;gap:12px;align-items:center"><span class="md">September</span><div style="height:8px;border-radius:9999px;background:#374151;overflow:hidden"><i style="display:block;height:100%;width:100%;background:#31C48D"></i></div><span class="md num"><b style="color:#31C48D">101%</b> <span class="mut">$41.8M of $41.4M</span></span></div><div style="display:grid;grid-template-columns:130px minmax(0,1fr) 170px;gap:12px;align-items:center"><span class="md">Year to date</span><div style="height:8px;border-radius:9999px;background:#374151;overflow:hidden"><i style="display:block;height:100%;width:97%;background:#31C48D"></i></div><span class="md num"><b style="color:#E5E7EB">97%</b> <span class="mut">$152M of $157M</span></span></div></div>
+<div class="card" data-role="spec" data-go="sales" data-label="Sales to goal" style="padding:16px;display:flex;flex-direction:column;gap:12px;cursor:pointer"><div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px"><div class="lbl">Sales to goal</div><div class="sm mut">Private Credit & Muni SMA · September closed</div></div><div style="display:grid;grid-template-columns:130px minmax(0,1fr) 170px;gap:12px;align-items:center"><span class="md">September</span><div style="height:8px;border-radius:9999px;background:#374151;overflow:hidden"><i style="display:block;height:100%;width:100%;background:#31C48D"></i></div><span class="md num"><b style="color:#31C48D">106%</b> <span class="mut">$19.1M of $18.0M</span></span></div><div style="display:grid;grid-template-columns:130px minmax(0,1fr) 170px;gap:12px;align-items:center"><span class="md">Year to date</span><div style="height:8px;border-radius:9999px;background:#374151;overflow:hidden"><i style="display:block;height:100%;width:100%;background:#31C48D"></i></div><span class="md num"><b style="color:#31C48D">104%</b> <span class="mut">$96.2M of $92.5M</span></span></div></div>
+<div class="kpis" data-role="int" style="grid-template-columns:repeat(2,minmax(0,1fr))">
+<div class="card kpi" data-go="activity:calls" data-label="Calls"><div class="lbl">Calls</div><div class="kv">212</div><div class="sm mut">138 on an open signal · August 190</div></div>
+<div class="card kpi" data-go="activity:book" data-label="Meetings booked"><div class="lbl">Meetings booked</div><div class="kv" style="color:#31C48D">18</div><div class="sm mut">11 matched to an open signal</div></div>
+<div class="card kpi" data-go="activity:followup" data-label="Follow-up inside 48h"><div class="lbl">Follow-up inside 48h</div><div class="kv">86%</div><div class="sm mut">Target 95% · 4 webinar attendees missed</div></div>
+<div class="card kpi" data-go="sales" data-label="Sales from booked meetings"><div class="lbl">Sales from booked meetings</div><div class="kv">$9.8M</div><div class="sm mut">Within 30 days of the meeting</div></div>
+</div>
+<div class="kpis" data-role="spec" style="grid-template-columns:repeat(2,minmax(0,1fr))">
+<div class="card kpi" data-go="sales" data-label="Product sales"><div class="lbl">Product sales</div><div class="kv" style="color:#31C48D">$19.1M</div><div class="sm mut">Private Credit $14.8M · Muni SMA $4.3M</div></div>
+<div class="card kpi" data-go="activity:joint" data-label="Joint meetings"><div class="lbl">Joint meetings</div><div class="kv">14</div><div class="sm mut">With 6 wholesalers · 9 in person</div></div>
+<div class="card kpi" data-go="signal:Focus: Private Credit Fund" data-label="Product signals converted"><div class="lbl">Signals converted</div><div class="kv">9</div><div class="sm mut">$6.1M within 30 days</div></div>
+<div class="card kpi" data-go="activity:requests" data-label="Wholesaler requests"><div class="lbl">Requests closed</div><div class="kv">23</div><div class="sm mut">Median turnaround 1.4 days</div></div>
+</div>
+<div class="kpis" data-role="ext" style="grid-template-columns:repeat(2,minmax(0,1fr))">
+<div class="card kpi" data-go="sales" data-label="Sales"><div class="lbl">Sales</div><div class="kv" style="color:#31C48D">$41.8M</div><div class="sm mut">101% to goal · $1.99M/day · August $35.4M</div></div>
+<div class="card kpi" data-go="activity:meetings" data-label="External activities"><div class="lbl">External activities</div><div class="kv">22</div><div class="sm mut">12 in-person · 5 calls · 4 virtual · 1 event</div></div>
+<div class="card kpi" data-go="signals" data-label="Signals acted on"><div class="lbl">Signals acted on</div><div class="kv">46</div><div class="sm mut">18 converted within 30 days · $12.4M</div></div>
+<div class="card kpi" data-go="sales:new" data-label="New producers"><div class="lbl">New producers</div><div class="kv">2</div><div class="sm mut">Liberty Bell Advisors, Mark Smith</div></div>
+</div>
+<div class="sec" data-sec="sales">
+<h2><span data-go="sales" data-label="Sales by product">Sales by product</span></h2>
+<div class="card"><div class="pr2"><span>Private Credit Fund II</span><div class="bar"><i style="width:100%"></i></div><span class="num" style="font-weight:600">$14.8M</span><span class="num" style="color:#31C48D">+22%</span></div><div class="pr2"><span>Tax-Managed Equity SMA</span><div class="bar"><i style="width:44.59459459459459%"></i></div><span class="num" style="font-weight:600">$6.6M</span><span class="num" style="color:#31C48D">+9%</span></div><div class="pr2"><span>Global Opportunity Fund</span><div class="bar"><i style="width:30.405405405405407%"></i></div><span class="num" style="font-weight:600">$4.5M</span><span class="num" style="color:#F98080">−4%</span></div><div class="pr2"><span>Muni Ladder SMA</span><div class="bar"><i style="width:29.054054054054053%"></i></div><span class="num" style="font-weight:600">$4.3M</span><span class="num" style="color:#31C48D">+31%</span></div><div class="pr2"><span>Core Equity Fund</span><div class="bar"><i style="width:24.324324324324323%"></i></div><span class="num" style="font-weight:600">$3.6M</span><span class="num" style="color:#31C48D">+3%</span></div><div class="pr2"><span>Core Equity ETF</span><div class="bar"><i style="width:18.243243243243242%"></i></div><span class="num" style="font-weight:600">$2.7M</span><span class="num" style="color:#31C48D">+12%</span></div><div class="pr2"><span>3 other products</span><div class="bar"><i style="width:35.81081081081081%"></i></div><span class="num" style="font-weight:600">$5.3M</span><span class="num" style="color:#31C48D">+2%</span></div></div>
+</div>
+<div class="sec" data-sec="worked">
+<h2>What worked: sales lift by touch</h2>
+<p>Daily sales run rate in the 30 days after a touch versus the 30 days before, same FA/Team. Trailing 90 days.</p>
+<div class="card"><div class="tr th"><span>Touch type</span><span class="num">n</span><span></span><span class="num">Lift</span></div><div class="tr"><span>In-person meeting</span><span class="num mut">34</span><div class="bar"><i style="width:100%"></i></div><span class="num" style="font-weight:700;color:#31C48D">2.4x</span></div><div class="tr"><span>Conference / event</span><span class="num mut">6</span><div class="bar"><i style="width:79.16666666666666%"></i></div><span class="num" style="font-weight:700;color:#31C48D">1.9x</span></div><div class="tr"><span>Webinar + follow-up ≤48h</span><span class="num mut">11</span><div class="bar"><i style="width:75%"></i></div><span class="num" style="font-weight:700;color:#31C48D">1.8x</span></div><div class="tr"><span>Virtual meeting</span><span class="num mut">19</span><div class="bar"><i style="width:62.5%"></i></div><span class="num" style="font-weight:700;color:#31C48D">1.5x</span></div><div class="tr"><span>Phone call</span><span class="num mut">41</span><div class="bar"><i style="width:50%;background:#6B7280"></i></div><span class="num" style="font-weight:700;color:#9CA3AF">1.2x</span></div><div class="tr"><span>Webinar, no follow-up</span><span class="num mut">14</span><div class="bar"><i style="width:45.833333333333336%;background:#6B7280"></i></div><span class="num" style="font-weight:700;color:#9CA3AF">1.1x</span></div><div class="tr"><span>Email</span><span class="num mut">58</span><div class="bar"><i style="width:41.66666666666667%;background:#6B7280"></i></div><span class="num" style="font-weight:700;color:#9CA3AF">1.0x</span></div></div>
+<div class="sm mut">Webinars only paid off with a follow-up inside 48 hours. Without one, lift was close to email.</div>
+</div>
+<div class="sec" data-sec="signals">
+<h2>Which signals converted</h2>
+<p>Lift on meetings where you led with that signal.</p>
+<div class="card"><div class="tr" style="grid-template-columns:minmax(0,1.6fr) minmax(0,1fr) 52px"><span>Performance Advantage</span><div class="bar"><i style="width:100%"></i></div><span class="num" style="font-weight:700;color:#31C48D">2.6x</span></div><div class="tr" style="grid-template-columns:minmax(0,1.6fr) minmax(0,1fr) 52px"><span>Upsell</span><div class="bar"><i style="width:84.61538461538461%"></i></div><span class="num" style="font-weight:700;color:#31C48D">2.2x</span></div><div class="tr" style="grid-template-columns:minmax(0,1.6fr) minmax(0,1fr) 52px"><span>Focus: Muni Ladder SMA</span><div class="bar"><i style="width:73.07692307692307%"></i></div><span class="num" style="font-weight:700;color:#31C48D">1.9x</span></div><div class="tr" style="grid-template-columns:minmax(0,1.6fr) minmax(0,1fr) 52px"><span>Focus: Core Equity ETF</span><div class="bar"><i style="width:65.38461538461539%"></i></div><span class="num" style="font-weight:700;color:#31C48D">1.7x</span></div><div class="tr" style="grid-template-columns:minmax(0,1.6fr) minmax(0,1fr) 52px"><span>Fee Advantage</span><div class="bar"><i style="width:46.15384615384615%;background:#6B7280"></i></div><span class="num" style="font-weight:700;color:#9CA3AF">1.2x</span></div></div>
+<div class="card" style="padding:16px;display:flex;gap:24px">
+<div style="flex:1"><div class="kv" style="color:#31C48D">2.3x</div><div class="sm mut">Meetings where you led with the next best action (22)</div></div>
+<div style="flex:1"><div class="kv">1.3x</div><div class="sm mut">Meetings on another topic (31)</div></div>
+</div>
+</div>
+<div class="sec" data-sec="wins">
+<h2>Top wins</h2>
+<div class="card">
+<div class="item"><div class="row" style="align-items:flex-start"><div><div class="nm">The Doe Wealth Group</div><div class="md mut">Contoso Wealth · New York, NY</div></div><span class="pill pg">$7.2M</span></div><div class="lead">Tax-Managed Equity SMA and Core Equity ETF across the team, 6 days after an internal call on the Upsell signal.</div></div>
+<div class="item"><div class="row" style="align-items:flex-start"><div><div class="nm">The Smith Group</div><div class="md mut">Adatum Partners · Boston, MA</div></div><span class="pill pg">$2.9M</span></div><div class="lead">Core Equity ETF, 4 days after a specialist meeting on Performance Advantage.</div></div>
+<div class="item"><div class="row" style="align-items:flex-start"><div><div class="nm">Harbor Point Advisors</div><div class="md mut">Litware Advisors · Greenwich, CT</div></div><span class="pill pg">$2.9M</span></div><div class="lead">Muni Ladder SMA, 13 days after your in-person meeting on the focus signal.</div></div>
+</div>
+</div>
+<div class="sec" data-sec="attention">
+<h2>Needs attention</h2>
+<div class="card">
+<div class="item"><div class="row" style="align-items:flex-start"><div><div class="nm" data-go="activity:segA" data-label="Segment A coverage">Coverage is weighted to Segment C</div><div class="md mut">Rolling 12 · external activity</div></div><span class="pill pa">Coverage</span></div><div class="lead">Segment A (27 FA/Teams) produces 99% of your sales but took 36% of your external activity. Segment C (54 FA/Teams) took 37% for $1.1M of sales.</div></div>
+<div class="item"><div class="row" style="align-items:flex-start"><div><div class="nm" data-go="signal:Retention Risk" data-label="Retention Risk signals">Net redemptions at 9 FA/Teams</div><div class="md mut">Retention Risk signals</div></div><span class="pill pr">Risk</span></div><div class="lead">Largest at Sample Consulting ($6.2M exposed) and The Brown Group ($4.6M). Both are producers with open Upsell signals.</div></div>
+<div class="item"><div class="row" style="align-items:flex-start"><div><div class="nm" data-go="signal:Fallen Angel" data-label="Fallen Angels">19 Fallen Angels</div><div class="md mut">Production down 60%+ on prior 12</div></div><span class="pill pb">Recovery</span></div><div class="lead">Largest is Summit Advisory, down from $9.3M to $1.8M. No external meeting in 333 days.</div></div>
+</div>
+</div>
+<div class="part">Part 2 · October</div>
+<div class="card" data-role="ext" style="padding:16px;display:flex;flex-direction:column;gap:12px"><div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px"><div class="lbl">October goal</div><div class="sm mut">$5.0M behind year-to-date goal</div></div><div class="md">$41.0M for October closes the year-to-date gap by December at the current run rate.</div></div>
+<div class="kpis" data-role="ext">
+<div class="card kpi" data-go="activity:meetings" data-label="Booked meetings"><div class="lbl">Booked meetings</div><div class="kv">11</div><div class="sm mut">7 matched to open signals</div></div>
+<div class="card kpi" data-go="activity:cold" data-label="Re-engage"><div class="lbl">Re-engage</div><div class="kv">5</div><div class="sm mut">Segment A, no external meeting in 6+ months</div></div>
+<div class="card kpi" data-go="signals" data-label="Open signal opportunity"><div class="lbl">Open signal opp.</div><div class="kv">$440M</div><div class="sm mut">284 signals · 120 FA/Teams</div></div>
+</div>
+<div class="sec" data-sec="booked" data-role="ext">
+<h2>Booked meetings and what to lead with</h2>
+<p>From your October calendar.</p>
+<div class="card">
+<div class="item"><div class="row" style="align-items:flex-start"><div><div class="nm">The Brown Group · Tue, Oct 6</div><div class="md mut">Contoso Wealth · New York, NY · In-person</div></div><span class="pill pg">Focus · 82</span></div><div class="lead">Introduce <b>Private Credit Fund</b>, $7.1M expected. Address the $4.6M of net redemptions first.</div></div>
+<div class="item"><div class="row" style="align-items:flex-start"><div><div class="nm">Meridian Family Office · Wed, Oct 7</div><div class="md mut">Wingtip RIA · New York, NY · In-person</div></div><span class="pill pg">Upsell · 83</span></div><div class="lead">Expand <b>Core Equity ETF</b>, $3.3M. First external meeting in 222 days.</div></div>
+<div class="item"><div class="row" style="align-items:flex-start"><div><div class="nm">Alpine Partners · Tue, Oct 20</div><div class="md mut">Northwind Securities · Boston, MA · In-person</div></div><span class="pill pg">Focus · 88</span></div><div class="lead">Introduce <b>Muni Ladder SMA</b>, $9.4M. Bring the Performance Advantage case on Core Equity ETF.</div></div>
+<div class="item"><div class="row" style="align-items:flex-start"><div><div class="nm">Granite Ridge Partners · Thu, Oct 22</div><div class="md mut">Proseware Group · Pittsburgh, PA · Virtual</div></div><span class="pill pg">Focus · 76</span></div><div class="lead">Introduce <b>Muni Ladder SMA</b>, $2.0M. Fallen Angel: production down from $1.1M to $0.3M.</div></div>
+</div>
+<div class="card" style="background:rgba(227,160,8,.06);border-color:rgba(227,160,8,.5);padding:16px;display:flex;flex-direction:column;gap:6px">
+<div style="font-size:16px;font-weight:600">4 booked meetings have no signal above 60</div>
+<div class="md" style="color:#E5E7EB">Oakfield Wealth Management (Pittsburgh), Morgan Public (Melville), Alex Brown (Allentown) and Mary Brown (Wilmington) are all Segment C. Hand them to your internal partner and use the time for the Connecticut trip below.</div>
+</div>
+</div>
+<div class="sec" data-sec="trip" data-role="ext">
+<h2>Suggested trip: Connecticut</h2>
+<p>No meetings booked. Four Segment A FA/Teams within an hour of each other, $50M of open signal opportunity.</p>
+<div class="card">
+<div class="item"><div class="row" style="align-items:flex-start"><div><div class="nm">Summit Advisory</div><div class="md mut">Tailspin Capital · Stamford</div></div><span class="pill pa">333 days</span></div><div class="lead">Lead with <b>Core Equity ETF</b> performance (79). Fallen Angel.</div><div class="sm mut">Recommended touch: In-person · 2.4x</div></div>
+<div class="item"><div class="row" style="align-items:flex-start"><div><div class="nm">Charter Oak Advisors</div><div class="md mut">Litware Advisors · Hartford</div></div><span class="pill pa">305 days</span></div><div class="lead">Expand <b>Core Equity ETF</b> (77). $29.6M in your funds, uncovered.</div><div class="sm mut">Recommended touch: In-person · 2.4x</div></div>
+<div class="item"><div class="row" style="align-items:flex-start"><div><div class="nm">Doe &amp; Roe Advisors</div><div class="md mut">Proseware Group · Hartford</div></div><span class="pill pa">245 days</span></div><div class="lead">Introduce <b>Core Equity ETF</b> or <b>Muni Ladder SMA</b>, both at 81.</div><div class="sm mut">Recommended touch: In-person · 2.4x</div></div>
+<div class="item"><div class="row" style="align-items:flex-start"><div><div class="nm">Harbor Point Advisors</div><div class="md mut">Litware Advisors · Greenwich</div></div><span class="pill pg">13 days</span></div><div class="lead">Introduce <b>Core Equity ETF</b> (78) after September’s Muni Ladder SMA purchase.</div><div class="sm mut">Recommended touch: Follow-up call · 1.4x</div></div>
+</div>
+</div>
+<div class="sec" data-sec="focus">
+<h2>Focus products</h2>
+<div class="card">
+<div class="item"><div class="row" style="align-items:flex-start"><div><div class="nm" data-go="signal:Focus: Muni Ladder SMA">Muni Ladder SMA</div><div class="md mut">35 FA/Teams · $66M expected</div></div><span class="pill pg">Focus</span></div><div class="lead">Converted at 1.9x when you led with it. Top targets: The Doe Wealth Group, Alpine Partners, Blue Line Wealth.</div></div>
+<div class="item"><div class="row" style="align-items:flex-start"><div><div class="nm" data-go="signal:Focus: Core Equity ETF">Core Equity ETF</div><div class="md mut">53 focus signals · 14 Performance Advantage</div></div><span class="pill pg">Focus</span></div><div class="lead">Performance Advantage adds $79M and is your best-converting signal at 2.6x.</div></div>
+<div class="item"><div class="row" style="align-items:flex-start"><div><div class="nm" data-go="signal:Focus: Private Credit Fund">Private Credit Fund</div><div class="md mut">17 FA/Teams · $27.5M expected</div></div><span class="pill pg">Focus</span></div><div class="lead">Top targets: The Brown Group, The Smith Group II, Chris Brown.</div></div>
+</div>
+</div>
+
+<div class="sec" data-sec="booked" data-role="int">
+<h2>Your October plan</h2>
+<p>Where to spend the phone time, and what to book for Morgan.</p>
+<div class="card">
+<div class="item"><div class="row" style="align-items:flex-start"><div><div class="nm" data-go="activity:cold" data-label="Connecticut trip">Book the Connecticut day</div><div class="md mut">Summit Advisory, Charter Oak Advisors, Doe &amp; Roe Advisors, Harbor Point Advisors</div></div><span class="pill pa">4 meetings</span></div><div class="lead">$50M of open signal opportunity, no meetings booked. Aim for the week of Oct 12.</div></div>
+<div class="item"><div class="row" style="align-items:flex-start"><div><div class="nm" data-go="activity:segC" data-label="Segment C">Take over 4 Segment C meetings</div><div class="md mut">Oakfield Wealth, Morgan Public, Alex Brown, Mary Brown</div></div><span class="pill pb">Coverage</span></div><div class="lead">No signal above 60. Cover them by phone and free Morgan's calendar for Segment A.</div></div>
+<div class="item"><div class="row" style="align-items:flex-start"><div><div class="nm" data-go="signal:Meeting Opportunity" data-label="Webinar follow-up">Get webinar follow-up back to 95%</div><div class="md mut">Oct 8 Private Credit webinar · 41 registered</div></div><span class="pill pg">1.8x</span></div><div class="lead">Block the morning after for follow-up calls. Without one, webinar lift drops to 1.1x.</div></div>
+</div>
+</div>
+<div class="sec" data-sec="booked" data-role="spec">
+<h2>Joint meetings booked for October</h2>
+<div class="card">
+<div class="item"><div class="row" style="align-items:flex-start"><div><div class="nm">The Brown Group · Tue, Oct 6</div><div class="md mut">Contoso Wealth · with Morgan Vance · In-person</div></div><span class="pill pg">Focus · 82</span></div><div class="lead">Present <b>Private Credit Fund</b>, $7.1M expected. Address the $4.6M of redemptions with Morgan first.</div></div>
+<div class="item"><div class="row" style="align-items:flex-start"><div><div class="nm">Alpine Partners · Tue, Oct 20</div><div class="md mut">Northwind Securities · with Morgan Vance · In-person</div></div><span class="pill pg">Focus · 88</span></div><div class="lead">Lead the <b>Muni Ladder SMA</b> construction review, $9.4M expected.</div></div>
+</div>
+</div>
+<div class="sec" data-sec="trip" data-role="spec">
+<h2>Where wholesalers need product support</h2>
+<div class="card">
+<div class="item"><div class="row" style="align-items:flex-start"><div><div class="nm" data-go="lead:person:Taylor Brooks" data-label="Taylor Brooks">Taylor Brooks · Southeast</div><div class="md mut">11 Private Credit signals · no joint meetings in 60 days</div></div><span class="pill pa">Gap</span></div><div class="lead">Highest open Private Credit opportunity in your regions without specialist support. Offer two joint days.</div></div>
+<div class="item"><div class="row" style="align-items:flex-start"><div><div class="nm" data-go="lead:person:Casey Reed" data-label="Casey Reed">Casey Reed · Northeast</div><div class="md mut">Muni SMA signals converting at 0.9x</div></div><span class="pill pr">Coaching</span></div><div class="lead">Leading with the SMA without the tax-lot case. Share the Blue Line Wealth approach.</div></div>
+</div>
+</div>
+<a href="#" class="btn">Open your October plan</a>
+<div class="md mut" style="border-top:1px solid #374151;padding-top:16px"><b style="color:#E5E7EB">How this review was built:</b> your daily sales and CRM activity by meeting type, matched to the signals open at the time of each touch, plus your October calendar. Market holdings and competitor flows come from monthly data packs. Lift compares each FA/Team's daily sales run rate in the 30 days before and after a touch.</div>
+<div class="row sm mut"><span>Field · fieldwealth.ai</span><span style="display:flex;gap:16px"><a href="#" style="color:#9CA3AF">Preferences</a><a href="#" style="color:#9CA3AF">Unsubscribe</a></span></div>
+</div>
+<script>(function(){var p=new URLSearchParams(location.search),q=function(i){return document.getElementById(i)};(p.get('hide')||'').split(',').filter(Boolean).forEach(function(k){document.querySelectorAll('[data-sec="'+k+'"]').forEach(function(e){e.style.display='none'})});if(p.get('v')==='week'){q('hdr-lbl').textContent='Week Ahead · Mon, Sep 21';q('hdr-h1').textContent='Your week ahead, Morgan.';q('hdr-p').innerHTML='You have <span style="color:#31C48D;font-weight:600">4 meetings booked</span>, each matched to the signal to lead with, <span style="color:#31C48D;font-weight:600">2 open slots</span> near them and <span style="color:#E3A008;font-weight:600">3 Segment A relationships going cold</span>.'}var s={segA:'Scope: Segment A FA/Teams',filters:'Scope: current dashboard filters'}[p.get('scope')];if(s){var e=q('hdr-scope');e.textContent=s;e.style.display='block'}})();</script>
+<script>(function(){var p=new URLSearchParams(location.search);if(p.get('embed'))document.documentElement.className+=' embed';var t=p.get('scopeText');if(t){var e=document.getElementById('hdr-scope');if(e){e.textContent='Scope: '+t;e.style.display='block'}}})();</script>
+<script src="brief-links.js"></script>
+</body></html>

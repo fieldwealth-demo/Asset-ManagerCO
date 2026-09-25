@@ -44,7 +44,7 @@ function OnboardingApp() {
   const goDashboard = () => {
     dpSave({ phase:'dashboard', step, selected, tiers, uploads });
     try { localStorage.setItem('amp_active', 'home'); } catch(e) {}
-    window.location.href = 'Asset Manager Portal.html';
+    window.location.href = 'index.html';
   };
 
   return (

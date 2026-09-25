@@ -138,12 +138,19 @@ const LV_SIG_CALC = {
 
 /* ---- product catalogue (placeholder names) ---- */
 
+/* Focus strategies run across vehicles: Large Growth and Core Plus are each
+   offered as a mutual fund, ETF and SMA. Private Credit is private funds only. */
 const LV_CATALOG = [
+  { name: 'Field Large Growth Fund',       vehicle: 'Mutual Funds', cat: 'Large Growth' },
   { name: 'Field Core Equity Fund',        vehicle: 'Mutual Funds', cat: 'Large Blend' },
   { name: 'Field Strategic Income Fund',   vehicle: 'Mutual Funds', cat: 'Int. Core-Plus' },
   { name: 'Field Global Opportunity Fund', vehicle: 'Mutual Funds', cat: 'Foreign Large' },
+  { name: 'Field Large Growth ETF',        vehicle: 'ETFs',         cat: 'Large Growth' },
+  { name: 'Field Core Plus Bond ETF',      vehicle: 'ETFs',         cat: 'Int. Core-Plus' },
   { name: 'Field Core Equity ETF',         vehicle: 'ETFs',         cat: 'Large Blend' },
   { name: 'Field Short Duration ETF',      vehicle: 'ETFs',         cat: 'Short Term Bond' },
+  { name: 'Field Large Growth SMA',        vehicle: 'SMAs',         cat: 'Large Growth' },
+  { name: 'Field Core Plus SMA',           vehicle: 'SMAs',         cat: 'Int. Core-Plus' },
   { name: 'Field Muni Ladder SMA',         vehicle: 'SMAs',         cat: 'Muni National' },
   { name: 'Field Tax-Managed Equity SMA',  vehicle: 'SMAs',         cat: 'Large Blend' },
   { name: 'Field Private Credit Fund II',  vehicle: 'Privates',     cat: 'Private Credit' },
@@ -232,12 +239,16 @@ const LV_BOOK = (() => {
   const seen = new Set(out.map(x => x[0]));
   const r = lvRng(55501);
   let i = 0;
-  while (out.length < 120) {
+  const MID = ['A.', 'B.', 'C.', 'D.', 'E.', 'J.', 'L.', 'M.', 'R.', 'S.', 'T.', 'W.'];
+  const PLACE = ['North', 'South', 'East', 'West', 'Harbor', 'Summit', 'River', 'Park', 'Hill', 'Bay'];
+  while (out.length < 325 && i < 20000) {
     i += 1;
     const isTeam = r() < 0.38;
     let name = isTeam
       ? `${lvPick(r, LV_TEAM_WORDS)} ${lvPick(r, LV_TEAM_TAIL)}`
       : `${lvPick(r, LV_FIRST)} ${lvPick(r, LV_LAST)}`;
+    // Name pools are small; disambiguate repeats so the book can reach size.
+    if (seen.has(name)) name = isTeam ? `${lvPick(r, PLACE)} ${name}` : name.replace(' ', ` ${lvPick(r, MID)} `);
     if (seen.has(name)) continue;
     seen.add(name);
     const aum = Math.round(6 + Math.pow(r(), 1.7) * 68);
@@ -629,6 +640,20 @@ function lvActual(r, measure, pk) {
   return inflow;
 }
 const lvHoldActual = (h, measure) => (measure === 'AUM' ? h.aumM : measure === 'Net Flows' ? h.net[4] : h.inflow[4]) * 1000;
+/* Territory sales goal: annual, set from historical sales and opportunity,
+   prorated by days elapsed. Always read on the full book (all products). */
+const LV_YEAR_FRAC = (() => {
+  const n = new Date(), y = n.getFullYear(), day = 864e5;
+  const d = (from) => Math.floor((new Date(y, n.getMonth(), n.getDate()) - from) / day) + 1;
+  return { MTD: n.getDate() / 365, QTD: d(new Date(y, Math.floor(n.getMonth() / 3) * 3, 1)) / 365, YTD: d(new Date(y, 0, 1)) / 365, 'Rolling 12': 1 };
+})();
+function lvTerritoryGoal(pk) {
+  const ytd = LV_ROWS.reduce((a, r) => a + (r.sales.YTD || 0), 0);
+  const annual = Math.round(ytd / (0.97 * LV_YEAR_FRAC.YTD) / 5000) * 5000;
+  const act = LV_ROWS.reduce((a, r) => a + (r.sales[pk] || 0), 0);
+  const goal = annual * (LV_YEAR_FRAC[pk] || 1);
+  return { annual, goal, act, pct: goal ? act / goal : 0, frac: LV_YEAR_FRAC[pk] || 1 };
+}
 const lvActualLabel = (measure, pkShort) => (measure === 'AUM' ? 'Actual AUM' : measure === 'Net Flows' ? `${pkShort} actual net` : `${pkShort} actual`);
 const lvDaysColor = (d) => (d == null ? 'rgb(107,114,128)' : d <= 30 ? 'rgb(52,211,153)' : d <= 90 ? 'rgb(251,191,36)' : 'rgb(248,113,113)');
 
@@ -647,7 +672,7 @@ function lvActivity(row, roles) {
 }
 
 Object.assign(window, {
-  lvActual, lvHoldActual, lvActualLabel, lvFmtKs,
+  lvActual, lvHoldActual, lvActualLabel, lvFmtKs, lvTerritoryGoal, LV_YEAR_FRAC,
   LV_TERRITORY, LV_WHOLESALER, LV_CITIES, LV_CITY_META, LV_ROWS, LV_CATALOG, LV_BOOK,
   LV_PROD_CATS, LV_PROD_BANDS, LV_PROD_BAND_COLORS, LV_PROD_COUNT_BANDS, LV_VEHICLES, LV_DISCRETION,
   LV_COMP_ADV, LV_ADV_COLOR, LV_ROLES, LV_ACT_TYPES, LV_PROD_CATEGORIES, LV_CAT_OF_PRODUCT,

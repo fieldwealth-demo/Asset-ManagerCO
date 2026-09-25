@@ -6,7 +6,7 @@
 const LVU_LINE = 'rgba(75,85,99,0.4)';
 const LVU_INK = 'rgb(249,250,251)';
 const LVU_MUT = 'rgb(163,163,163)';
-const LVU_DIM = 'rgb(107,114,128)';
+const LVU_DIM = 'rgb(200,205,213)';
 
 const LV_FILTER_DEFAULT = {
   segments: [], prodCats: [], prodBands: [], productBands: [], compAdv: [],
@@ -59,7 +59,69 @@ function lvMatches(row, f) {
   return true;
 }
 
-const lvFilterRows = (rows, f) => rows.filter(r => lvMatches(r, f));
+/* Focus strategies only: each FA/Team re-cut to the focus categories.
+   Opportunity follows the category mix, your AUM / sales / production follow
+   the focus holdings, activity follows the activity logged against them, and
+   signals keep only focus-category products (relationship-level signals are
+   scaled to the focus share of the opportunity). FA/Teams with nothing in the
+   focus strategies drop out. */
+const lvFocusCats = () => new Set(LV_PROD_CATEGORIES.filter(c => window.isFocusCat && isFocusCat(c)));
+function lvSigCat(prod) {
+  if (!prod) return null;
+  const c = LV_CATALOG.find(x => { const n = x.name.replace(/^Field /, ''); return n === prod || n.startsWith(prod) || prod.startsWith(n); });
+  return c ? c.cat : null;
+}
+function lvFocusRow(p, fc) {
+  const mix = (p.catMix || []).filter(c => fc.has(c.cat));
+  const fw = mix.reduce((a, c) => a + c.w, 0);
+  const all = p.holdings || [];
+  const holdings = all.filter(h => fc.has(h.cat));
+  if (!fw && !holdings.length) return null;
+  const totA = all.reduce((a, h) => a + (h.aumM || 0), 0);
+  const hf = totA ? holdings.reduce((a, h) => a + (h.aumM || 0), 0) / totA : 0;
+  const totActs = all.reduce((a, h) => a + (h.acts || 0), 0);
+  const af = totActs ? holdings.reduce((a, h) => a + (h.acts || 0), 0) / totActs : fw;
+  const r2 = v => Math.round(v * 100) / 100;
+  const sales = {};
+  Object.keys(p.sales).forEach(k => { sales[k] = Math.round(p.sales[k] * hf); });
+  const act = {};
+  Object.keys(p.act).forEach(k => { const n = Math.round(p.act[k].r12 * af); act[k] = { r12: n, days: n ? p.act[k].days : null }; });
+  const signals = p.signals
+    .filter(s => (s.product ? fc.has(lvSigCat(s.product)) : fw > 0))
+    .map(s => (s.product ? s : { ...s, opp: r2(s.opp * fw), oppMin: r2(s.oppMin * fw), oppMax: r2(s.oppMax * fw) }));
+  const oppAum = Math.round(p.oppAum * fw), oppIn = r2(p.oppIn * fw), oppNet = r2(p.oppNet * fw);
+  const yoursAum = r2(p.yoursAum * hf), yoursIn = r2(p.yoursIn * hf), yoursNet = r2(p.yoursNet * hf);
+  const r12ProdK = Math.round(p.r12ProdK * hf);
+  const q = {
+    ...p, holdings, sales, act, signals,
+    catMix: fw ? mix.map(c => ({ cat: c.cat, w: c.w / fw })) : [],
+    oppAum, oppIn, oppNet, yoursAum, yoursIn, yoursNet,
+    shareAum: oppAum ? yoursAum / oppAum : 0, shareIn: oppIn ? yoursIn / oppIn : 0, shareNet: oppNet ? yoursNet / oppNet : 0,
+    r12ProdK, prior12K: Math.round(p.prior12K * hf),
+    lapsedK: p.lapsedK ? Math.round(p.lapsedK * fw) : p.lapsedK,
+    prodCat: r12ProdK === 0 ? 'Prospect' : r12ProdK < 400 ? 'Dabbler' : 'Producer',
+    prodBand: lvBand(r12ProdK), products: holdings.length, productBand: lvCountBand(holdings.length),
+    actTotal: Object.values(act).reduce((a, x) => a + x.r12, 0),
+    perfAdvAum: r2(p.perfAdvAum * fw), feeAdvAum: r2(p.feeAdvAum * fw),
+    perfAdvIn: r2(p.perfAdvIn * fw), feeAdvIn: r2(p.feeAdvIn * fw),
+    perfAdvNet: r2(p.perfAdvNet * fw), feeAdvNet: r2(p.feeAdvNet * fw),
+    addressable: p.addressable * fw,
+    signalOpp: signals.reduce((a, s) => a + s.oppMax, 0),
+    signalOppMin: signals.reduce((a, s) => a + s.oppMin, 0),
+    wtdConfidence: lvWtdConf(signals),
+  };
+  q.nba = signals.length && window.lvNextBest ? lvNextBest(q) : null;
+  return q;
+}
+let _lvFocusCache = null;
+function lvFocusRows(rows) {
+  if (_lvFocusCache && _lvFocusCache.src === rows && _lvFocusCache.ver === window.FOCUS_VER) return _lvFocusCache.out;
+  const fc = lvFocusCats();
+  const out = rows.map(r => lvFocusRow(r, fc)).filter(Boolean);
+  _lvFocusCache = { src: rows, out, ver: window.FOCUS_VER };
+  return out;
+}
+const lvFilterRows = (rows, f) => (f.focusStrat ? lvFocusRows(rows) : rows).filter(r => lvMatches(r, f));
 const lvCount = (f) => LV_FILTER_KEYS.reduce((n, k) =>
   n + (k === 'minConf' ? ((f.minConf || 50) > 50 ? 1 : 0) : Array.isArray(f[k]) ? f[k].length : (f[k] ? 1 : 0)), 0);
 
