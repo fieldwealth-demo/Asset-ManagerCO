@@ -230,6 +230,7 @@ function DetailHeader({ d }) {
         <div style={{ flex:1, minWidth:0 }}>
           <div style={{ display:'flex', alignItems:'baseline', gap:14, flexWrap:'wrap' }}>
             <div style={{ fontFamily:'Geist, Inter', fontWeight:700, fontSize:22, color:'rgb(249,250,251)', letterSpacing:-0.3 }}>{d.fullName}</div>
+            <div style={{ alignSelf:'center' }}><CrmLink name={d.fullName} kind="Account" size="lg" /></div>
           </div>
           <div style={{ fontFamily:'Inter', fontSize:12, color:'rgb(163,163,163)', marginTop:2 }}>{d.firm}</div>
           <div style={{ display:'flex', flexWrap:'wrap', gap:6, marginTop:10 }}>
@@ -275,6 +276,21 @@ function DetailHeader({ d }) {
         </div>
       </div>
     </div>
+  );
+}
+
+/* Dummy link to the CRM contact/account record. */
+const crmSlug = s => String(s || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+function CrmLink({ name, kind = 'Contact', label, size = 'sm' }) {
+  const lg = size === 'lg';
+  const href = `https://yourfirm.lightning.force.com/lightning/r/${kind}/${crmSlug(name)}/view`;
+  return (
+    <a href={href} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()} title={`Open ${name} in Salesforce`}
+      style={{ display:'inline-flex', alignItems:'center', gap:5, flexShrink:0, textDecoration:'none', color:'rgb(125,211,252)', fontFamily:'Inter', fontSize: lg ? 11.5 : 10.5, fontWeight:500,
+        padding:0, borderRadius:6 }}>
+      <img src="assets/sf-logo.png" alt="Salesforce" style={{ height: lg ? 24 : 16, width:'auto', display:'block' }} />
+      {label}
+    </a>
   );
 }
 
@@ -349,6 +365,7 @@ function TeamMemberCard({ m }) {
         <span style={{ display:'inline-flex', alignItems:'center', gap:5 }}><i className="fa-regular fa-envelope" style={{ fontSize:9 }} />Email</span>
         <span style={{ display:'inline-flex', alignItems:'center', gap:5 }}><i className="fa-solid fa-phone" style={{ fontSize:9 }} />{m.phone}</span>
         <span style={{ flex:1 }} />
+        <CrmLink name={m.name} />
         <i className="fa-solid fa-calendar" style={{ fontSize:11 }} />
       </div>
     </div>
@@ -382,7 +399,7 @@ function OtherAdvisorsCard({ d }) {
                     display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0,
                   }}>{o.init}</div>
                   <div style={{ minWidth:0 }}>
-                    <div style={{ color:'rgb(229,231,235)', fontWeight:500, fontSize:11.5 }}>{o.name}</div>
+                    <div style={{ display:'flex', alignItems:'center', gap:6, color:'rgb(229,231,235)', fontWeight:500, fontSize:11.5 }}>{o.name}<CrmLink name={o.name} /></div>
                     <div style={{ color:'rgb(107,114,128)', fontSize:10 }}>{o.role}</div>
                   </div>
                 </div>
