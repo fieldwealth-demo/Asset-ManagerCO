@@ -406,6 +406,49 @@ const LV_ROWS = LV_BOOK.map(([name, type, firm, channel, city, rawAum, q], i) =>
   return row;
 });
 
+/* Named FA/Teams the briefs, reviews and Ask Field write about. Their signals
+   are pinned so the FA/Team profile, grids and every brief tell the same story.
+   [type, product, expected $M, confidence, note] — highest confidence first. */
+const LV_PINNED = {
+  'The Doe Wealth Group': [['Focus: Muni Ladder SMA', 'Muni Ladder SMA', 15.2, 88, 'Largest producer in the territory with no Muni SMA position.'], ['Upsell', 'Tax-Managed Equity SMA', 6.8, 87], ['Fee Advantage', 'Core Plus Bond ETF', 3.9, 73]],
+  'Alpine Partners': [['Focus: Muni Ladder SMA', 'Muni Ladder SMA', 9.4, 88, 'Attended Thursday\'s Muni Ladder SMA webinar. No external meeting in 127 days.'], ['Meeting Opportunity', null, 2.1, 84, 'Attended the Muni Ladder SMA webinar. Follow up inside 48 hours.'], ['Performance Advantage', 'Core Equity ETF', 12.8, 83]],
+  'Keystone Wealth': [['Performance Advantage', 'Core Equity ETF', 9.6, 82, 'Core Equity ETF outperforms the competing hold. Bought Private Credit Fund II yesterday.'], ['Cross-sell', 'Muni Ladder SMA', 3.4, 74]],
+  'Robert Jones': [['Focus: Core Equity ETF', 'Core Equity ETF', 2.4, 75], ['Retention Risk', null, 1.0, 58, 'Net redemptions of $1.0M. Position the meeting as a portfolio check-in.']],
+  'Blue Line Wealth': [['Focus: Muni Ladder SMA', 'Muni Ladder SMA', 8.1, 80], ['Fallen Angel', null, 3.6, 68, 'Production fell from $7.2M to $1.0M over 12 months with no redemption event.']],
+  'The Brown Group': [['Focus: Private Credit Fund', 'Private Credit Fund', 7.1, 82], ['Retention Risk', null, 4.6, 71, 'Net redemptions of $4.6M. Address them before the product case.'], ['Meeting Opportunity', null, 1.2, 70, 'Attended the Muni Ladder SMA webinar. Follow up inside 48 hours.'], ['Upsell', 'Core Equity Fund', 2.2, 66]],
+  'Harbor Point Advisors': [['Focus: Core Equity ETF', 'Core Equity ETF', 5.6, 78, 'Bought Muni Ladder SMA 13 days after the Sep 9 meeting. Keep the momentum.'], ['Upsell', 'Muni Ladder SMA', 2.4, 72]],
+  'The Smith Group II': [['Focus: Private Credit Fund', 'Private Credit Fund', 5.6, 78, 'Webinar attendee. Asked for Private Credit Fund subscription documents.'], ['Focus: Core Equity ETF', 'Core Equity ETF', 4.2, 77], ['Meeting Opportunity', null, 1.0, 73, 'Attended the Muni Ladder SMA webinar. Follow up inside 48 hours.']],
+  'The Smith Group': [['Upsell', 'Core Equity ETF', 4.1, 83, 'Share of wallet is rising in the category with $6.6M of headroom against the peer median.'], ['Performance Advantage', 'Large Growth ETF', 5.2, 81]],
+  'John Doe': [['Upsell', 'Core Equity ETF', 2.6, 78, 'Bought Tax-Managed Equity SMA yesterday. R12 production is up 54% on the prior year.']],
+  'Sample Consulting': [['Upsell', 'Tax-Managed Equity SMA', 2.0, 64], ['Retention Risk', null, 6.2, 51, 'Second month of net redemptions. $6.2M of your AUM is exposed.']],
+  'Summit Advisory': [['Performance Advantage', 'Core Equity ETF', 6.4, 79, 'The reason to call. No external meeting in 333 days.'], ['Fallen Angel', null, 4.1, 72, 'Production fell from $9.3M to $1.8M over 12 months.']],
+  'Charter Oak Advisors': [['Upsell', 'Core Equity ETF', 3.8, 77, '$29.6M in your funds, still growing without coverage.']],
+  'Doe & Roe Advisors': [['Focus: Core Equity ETF', 'Core Equity ETF', 4.6, 81], ['Focus: Muni Ladder SMA', 'Muni Ladder SMA', 4.4, 81]],
+  'Meridian Family Office': [['Upsell', 'Core Equity ETF', 3.3, 83, 'First external meeting in 222 days is booked for Oct 7.']],
+  'Granite Ridge Partners': [['Focus: Muni Ladder SMA', 'Muni Ladder SMA', 2.0, 76], ['Fallen Angel', null, 0.8, 64, 'Production down from $1.1M to $0.3M.']],
+  'Chris Brown': [['Focus: Private Credit Fund', 'Private Credit Fund', 2.1, 74]],
+  'Jane Smith': [['Retention Risk', null, 3.1, 66, 'Two months of Core Plus redemptions. No external meeting in 5 months.'], ['Upsell', 'Core Plus Bond ETF', 1.4, 60]],
+};
+LV_ROWS.forEach(row => {
+  const pins = LV_PINNED[row.name];
+  if (!pins) return;
+  const when = t => (t.startsWith('Focus') || t === 'Cross-sell' ? 'Weekly · ML model' : t === 'Upsell' || t === 'Fallen Angel' ? 'Daily · your sales' : t === 'Meeting Opportunity' ? 'Daily · CRM' : 'Monthly · data packs');
+  const pinned = pins.map(([type, product, opp, confidence, note]) => {
+    const g = row.signals.find(s => s.type === type);
+    return { type, product, opp, oppMin: opp, oppMax: opp, confidence, strength: confidence >= 72 ? 'high' : 'medium',
+      desc: note || (g && g.desc) || `${type}${product ? ' on <strong>' + product + '</strong>' : ''} at <strong>${confidence}</strong> confidence.`, when: (g && g.when) || when(type) };
+  });
+  const floor = Math.min(...pinned.map(s => s.confidence));
+  const types = new Set(pinned.map(s => s.type)), prods = new Set(pinned.map(s => s.product).filter(Boolean));
+  const rest = row.signals.filter(s => !types.has(s.type) && !(s.product && prods.has(s.product)))
+    .map(s => ({ ...s, confidence: Math.max(50, Math.min(s.confidence, floor - 3)) })).slice(0, 2);
+  row.signals = pinned.concat(rest).sort((a, b) => b.confidence - a.confidence);
+  row.signalOpp = row.signals.reduce((a, s) => a + s.oppMax, 0);
+  row.signalOppMin = row.signals.reduce((a, s) => a + s.oppMin, 0);
+  row.wtdConfidence = lvWtdConf(row.signals);
+  row.nba = lvNextBest(row);
+});
+
 /* Segment by rank of addressable opportunity within the territory — the top
    fifth are the largest opportunities the wholesaler has, not an absolute cut. */
 (() => {

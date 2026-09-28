@@ -7,15 +7,15 @@
 const L2_PERIOD_KEY = (p) => (LV_ROWS[0] && LV_ROWS[0].sales[p] !== undefined ? p : 'Rolling 12');
 const L2_PERIOD_SHORT = (p) => (p === 'Rolling 12' ? 'R12' : p);
 const tightTh = { padding: '11px 4px 10px' };
-const advTh = { padding: '11px 6px 10px', width: '1%', whiteSpace: 'nowrap', background: 'rgba(96,165,250,0.05)' };
+const advTh = { padding: '11px 6px 10px', whiteSpace: 'nowrap', background: 'rgba(96,165,250,0.05)' };
 const tightTd = { padding: '9px 4px', fontFamily: 'Inter', fontSize: 11.5, textAlign: 'right', color: 'rgb(229,231,235)', fontVariantNumeric: 'tabular-nums', borderBottom: '1px solid rgba(75,85,99,0.16)', whiteSpace: 'nowrap' };
 const advTd = { ...tightTd, background: 'rgba(96,165,250,0.05)', color: 'rgb(191,219,254)' };
 // Even column rhythm: every data column shrinks to its content (width 1%) with
 // the same 6px inner padding, groups are separated by a wider GAP, and the
-// FA/Team column absorbs whatever width is left over.
+// FA/Team column is fixed to its content width; leftover space is shared by the data columns.
 const GAP = 14;
-const colTh = { padding: '11px 6px 10px', width: '1%', whiteSpace: 'nowrap' };
-const colTd = { ...tightTd, padding: '9px 6px', width: '1%' };
+const colTh = { padding: '11px 6px 10px', whiteSpace: 'nowrap' };
+const colTd = { ...tightTd, padding: '9px 6px' };
 
 /* ---------- book grid ---------- */
 
@@ -64,7 +64,7 @@ function L2BookTable({ rows, measure, period, roles, selected, onToggle, onViewC
         <thead>
           <tr>
             {th('Adv', 'adv', false, { padding: '11px 4px 10px 12px', width: '1%' })}
-            {th('FA / Team', 'name', false, { padding: '11px 10px 10px 6px' })}
+            {th('FA / Team', 'name', false, { padding: '11px 10px 10px 6px', width: wide ? 200 : 170 })}
             {th('Mkt opp.', 'opp', true, colTh)}
             {th(wide ? 'Yours' : 'Yours / share', 'yours', true, { ...colTh, paddingRight: wide ? 6 : GAP })}
             {wide && th('Share', 'share', true, { ...colTh, paddingRight: GAP })}
@@ -98,7 +98,7 @@ function L2BookTable({ rows, measure, period, roles, selected, onToggle, onViewC
                 <td style={{ ...lvTd, padding: '9px 4px 9px 12px', width: 26 }}>
                   <LvAdvDot grade={r.compAdv} row={r} />
                 </td>
-                <td style={{ ...lvTd, padding: '9px 10px 9px 6px', maxWidth: wide ? 240 : 190 }}>
+                <td style={{ ...lvTd, padding: '9px 10px 9px 6px', width: wide ? 200 : 170, maxWidth: wide ? 200 : 170 }}>
                   <div style={{ minWidth: 0 }}>
                     <div style={{ fontWeight: 500, fontSize: 12, color: 'rgb(249,250,251)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{r.name}</div>
                     <div style={{ fontSize: 10, color: 'rgb(107,114,128)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{r.firm} · {r.city}</div>
