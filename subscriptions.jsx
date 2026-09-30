@@ -54,7 +54,7 @@ const SUB_TYPES = {
     file: 'emails/Leadership Review.html',
     outlook: 'emails/Leadership Review - Outlook.html',
     subject: 'September leadership review & October plan',
-    sections: [['team', 'Results by salesperson'], ['focus', 'Focus categories'], ['worked', 'What worked and didn’t'], ['recognize', 'Recognize'], ['attention', 'Needs attention'], ['plan', 'October plan']],
+    sections: [['team', 'Results by salesperson'], ['scorecard', 'Wholesaler scorecard'], ['focus', 'Focus categories'], ['worked', 'What worked and didn’t'], ['recognize', 'Recognize'], ['attention', 'Needs attention'], ['plan', 'October plan']],
   },
   sabrief: {
     label: 'Strategic Account Brief', cadence: 'Daily', icon: 'building-columns', aud: 'lead',
@@ -132,7 +132,7 @@ function subLoad() {
 function subSave(subs) { try { localStorage.setItem(SUB_LS, JSON.stringify(subs)); } catch (e) {} }
 function subUrl(s, extra = '') {
   const t = SUB_TYPES[s.type];
-  const hide = t.sections.map(([k]) => k).filter(k => !s.sections[k]);
+  const hide = t.sections.map(([k]) => k).filter(k => s.sections && k in s.sections && !s.sections[k]);
   const lbl = subScopeLabel(s);
   return t.file + (t.file.includes('?') ? '&' : '?') + 'hide=' + hide.join(',') + (lbl !== 'My territory' ? '&scopeText=' + encodeURIComponent(lbl) : '') + extra;
 }

@@ -133,6 +133,24 @@ function BriefsPage({ subs, onEdit, audience = 'whole' }) {
     const subj = `${SUB_TYPES[shown.type].label}${mailWho ? ' · ' + mailWho : ''}`;
     emailOutlookDraft({ url: subOutlookUrl(...srcArgs), to: emailAddressOf(mailTo), subject: subj }).then(() => setDrafted(mailTo || 'draft')).catch(() => {});
   };
+  const [dl, setDl] = React.useState(false);
+  const [dlBusy, setDlBusy] = React.useState('');
+  const canDl = view === 'lmonthly' || view === 'monthly';
+  const dlTitle = `${SUB_TYPES[shown.type].label}${mailWho ? ' · ' + mailWho : ''}`;
+  const dlFile = `${SUB_TYPES[shown.type].label} - September${mailWho ? ' - ' + mailWho : ''}`;
+  const doDl = (kind) => {
+    setDl(false);
+    const cover = {
+      type: SUB_TYPES[shown.type].label, period: 'September 2026',
+      forWho: mailWho === 'National' ? 'National Sales Leadership' : (mailWho || 'Sales Team'),
+      forRole: P ? [P.role, P.region].filter(Boolean).join(' · ') : (region !== 'National' && BRF_MGR[region] ? BRF_MGR[region] + ' · Regional Sales Manager' : ''),
+      date: new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }),
+    };
+    if (kind === 'pdf') { briefPdf(ref.current, dlFile, cover); return; }
+    setDlBusy('Building PowerPoint…');
+    briefPptx(ref.current, { title: dlTitle, subtitle: `${SUB_TYPES[shown.type].label} · September${mailWho ? ' · ' + mailWho : ''}`, file: dlFile, cover })
+      .then(() => setDlBusy('')).catch(() => setDlBusy('Could not build the deck'));
+  };
   const status = !sub ? { c: 'rgb(107,114,128)', t: 'Not subscribed' }
     : !sub.active ? { c: 'rgb(107,114,128)', t: 'Paused' }
     : { c: 'rgb(52,211,153)', t: `Emailed ${subSchedule(sub)} ET · next ${subNextSend(sub).split(' · ')[0]}` };
@@ -146,6 +164,26 @@ function BriefsPage({ subs, onEdit, audience = 'whole' }) {
           <span style={{ width: 7, height: 7, borderRadius: 9999, background: status.c }} />{status.t}
         </span>
         {drafted && <span style={{ fontFamily: 'Inter', fontSize: 11.5, color: 'rgb(110,240,180)', display: 'inline-flex', alignItems: 'center', gap: 6 }}><i className="fa-solid fa-circle-check" />{EMAIL_DRAFT_MSG}{drafted !== 'draft' ? ` · to ${drafted}` : ''}</span>}
+        {dlBusy && <span style={{ fontFamily: 'Inter', fontSize: 11.5, color: 'rgb(209,213,219)', display: 'inline-flex', alignItems: 'center', gap: 6 }}><i className="fa-solid fa-spinner fa-spin" />{dlBusy}</span>}
+        {canDl && (
+          <span style={{ position: 'relative' }}>
+            <button onClick={() => setDl(o => !o)} title="Save this review as a PDF or PowerPoint" style={{
+              height: 32, padding: '0 12px', borderRadius: 8, cursor: 'pointer', border: '1px solid rgba(75,85,99,0.7)', background: dl ? 'rgba(255,255,255,0.06)' : 'transparent',
+              color: 'rgb(229,231,235)', fontFamily: 'Inter', fontSize: 12, fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: 7,
+            }}><i className="fa-solid fa-download" style={{ fontSize: 11 }} />Download<i className="fa-solid fa-chevron-down" style={{ fontSize: 9 }} /></button>
+            {dl && (
+              <div style={{ position: 'absolute', right: 0, top: 36, zIndex: 20, minWidth: 210, padding: 4, borderRadius: 10, background: 'rgb(31,41,55)', border: '1px solid rgba(75,85,99,0.7)', boxShadow: '0 10px 30px rgba(0,0,0,0.45)', display: 'flex', flexDirection: 'column', gap: 2 }}>
+                {[['pdf', 'file-pdf', 'PDF', 'Print layout, save as PDF'], ['ppt', 'file-powerpoint', 'PowerPoint', 'One slide per section']].map(([k, ic, l, d]) => (
+                  <button key={k} onClick={() => doDl(k)} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 10px', border: 'none', borderRadius: 7, background: 'transparent', cursor: 'pointer', textAlign: 'left' }}
+                    onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.06)')} onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
+                    <i className={`fa-solid fa-${ic}`} style={{ fontSize: 14, width: 16, color: 'rgb(52,211,153)' }} />
+                    <span style={{ display: 'flex', flexDirection: 'column' }}><span style={{ fontFamily: 'Inter', fontSize: 12.5, fontWeight: 600, color: 'rgb(249,250,251)' }}>{l}</span><span style={{ fontFamily: 'Inter', fontSize: 11, color: 'rgb(163,163,163)' }}>{d}</span></span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </span>
+        )}
         <button onClick={emailDraft} title="Open this brief as an Outlook draft" style={{
           height: 32, padding: '0 12px', borderRadius: 8, cursor: 'pointer', border: '1px solid rgba(75,85,99,0.7)', background: 'transparent',
           color: 'rgb(229,231,235)', fontFamily: 'Inter', fontSize: 12, fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: 7,
