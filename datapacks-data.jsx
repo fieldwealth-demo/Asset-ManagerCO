@@ -35,9 +35,9 @@ const DP_PACKS = [
     desc:'Advisor × account-platform grain across IBD, Hybrid RIA, credit union and bank channels. Custom asset classes.',
     stats:{ rows:118504, units:22930, unit:'advisors' },
     tiers:[
-      { n:1, name:'LEAP $100K', scope:'MF', price:100000, note:'Advisor + sponsor position only · quarterly' },
-      { n:2, name:'LEAP $300K', scope:'MF + ETF', price:250000, note:'Adds platform file context · quarterly' },
-      { n:3, name:'LEAP $500K', scope:'MF + ETF', price:500000, note:'Same scope, monthly cadence' },
+      { n:1, name:'LEAP Core', scope:'MF', price:100000, note:'Advisor + sponsor position only · quarterly' },
+      { n:2, name:'LEAP Plus', scope:'MF + ETF', price:250000, note:'Adds platform file context · quarterly' },
+      { n:3, name:'LEAP Plus Monthly', scope:'MF + ETF', price:500000, note:'Same scope, monthly cadence' },
     ] },
   { id:'broadridge', name:'Broadridge ETF', provider:'Broadridge', vendorType:'Aggregator', pattern:'B', grain:'Office', cadence:'Monthly', schema:'BROADRIDGE',
     desc:'ETF-only office-grain consortium across 1,567 offices — wirehouse, regional, IBD, bank & trust, RIA.',

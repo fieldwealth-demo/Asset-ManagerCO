@@ -57,7 +57,7 @@ function DataPacksPage() {
       <div style={{ display:'flex', alignItems:'center', gap:14, marginBottom:18 }}>
         <div>
           <div style={{ fontFamily:"'Inter Display'", fontSize:19, fontWeight:700, color:'rgb(249,250,251)' }}>Data Packs</div>
-          <div style={{ fontFamily:'Inter', fontSize:12, color:'rgb(163,163,163)', marginTop:3 }}>{selectedIds.length} subscription{selectedIds.length === 1 ? '' : 's'} · landing in {DP_DB}</div>
+          <div style={{ fontFamily:'Inter', fontSize:12, color:'rgb(163,163,163)', marginTop:3 }}>{selectedIds.length} subscription{selectedIds.length === 1 ? '' : 's'}</div>
         </div>
         <span style={{ flex:1 }}></span>
         <button onClick={restartOnboarding} style={{ height:34, padding:'0 14px', borderRadius:8, border:'1px solid rgba(75,85,99,0.7)', background:'rgba(0,0,0,0.25)', color:'rgb(209,213,219)', fontFamily:'Inter', fontSize:12, fontWeight:500, cursor:'pointer', display:'inline-flex', alignItems:'center', gap:8 }}><i className="fa-solid fa-rotate-left" style={{ fontSize:11 }}></i>Restart onboarding</button>

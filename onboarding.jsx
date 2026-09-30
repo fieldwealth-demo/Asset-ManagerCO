@@ -1,4 +1,4 @@
-/* Asset Manager Onboarding — 4-step wizard. Ends by navigating to Asset Manager Portal.html */
+/* Asset Manager Onboarding — 4-step wizard. Ends by navigating to index.html */
 function ObStepper({ step }) {
   const labels = ['Select packs', 'Choose tiers', 'Upload data', 'Go live'];
   return (
@@ -44,7 +44,7 @@ function OnboardingApp() {
   const goDashboard = () => {
     dpSave({ phase:'dashboard', step, selected, tiers, uploads });
     try { localStorage.setItem('amp_active', 'home'); } catch(e) {}
-    window.location.href = 'Asset Manager Portal.html';
+    window.location.href = 'index.html';
   };
 
   return (
