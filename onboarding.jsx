@@ -1,4 +1,4 @@
-/* Asset Manager Onboarding — 4-step wizard. Ends by navigating to index.html */
+/* Asset Manager Onboarding — 4-step wizard. Ends by navigating to Asset Manager Portal.html */
 function ObStepper({ step }) {
   const labels = ['Select packs', 'Choose tiers', 'Upload data', 'Go live'];
   return (
