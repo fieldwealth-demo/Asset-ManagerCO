@@ -69,6 +69,7 @@
   <script type="text/babel" src="lvl-ui.jsx"></script>
   <script type="text/babel" src="lvl-dimtile.jsx"></script>
   <script type="text/babel" src="lvl-detail.jsx"></script>
+  <script type="text/babel" src="mtg-prep.jsx"></script>
   <script type="text/babel" src="level2.jsx"></script>
   <script type="text/babel" src="level3.jsx"></script>
   <script type="text/babel" src="lead-data.jsx"></script>
@@ -90,11 +91,22 @@
   <script type="text/babel" src="briefs.jsx"></script>
   <script type="text/babel" src="brief-popup.jsx"></script>
   <script type="text/babel" src="ai-signal-answers.jsx"></script>
+  <script type="text/babel" src="tour.jsx"></script>
+  <script type="text/babel" src="mkt-data.jsx"></script>
+  <script type="text/babel" src="mkt-ui.jsx"></script>
+  <script type="text/babel" src="mkt-builder.jsx"></script>
+  <script type="text/babel" src="mkt-analytics.jsx"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script type="text/babel" src="explorer-data.jsx"></script>
+  <script type="text/babel" src="explorer-engine.jsx"></script>
+  <script type="text/babel" src="explorer-grid.jsx"></script>
+  <script type="text/babel" src="explorer-formula.jsx"></script>
+  <script type="text/babel" src="explorer.jsx"></script>
   <script type="text/babel">
     function App() {
       // Deep links from emails: #signals, #leadership, #sales, #briefs, #leadbriefs, #home, or any page id.
       const HASH_PAGES = { signals: 'l3intel', leadership: 'management', sales: 'l2sales', briefs: 'briefs', leadbriefs: 'leadbriefs', home: 'home' };
-      const HASH_IDS = ['home', 'leadbriefs', 'management', 'opportunity', 'briefs', 'l3intel', 'l2sales', 'advantage', 'reports'];
+      const HASH_IDS = ['home', 'leadbriefs', 'management', 'opportunity', 'briefs', 'l3intel', 'l2sales', 'advantage', 'reports', 'explorer', 'mktbuilder', 'mktanalytics'];
       const hashPage = () => { const h = decodeURIComponent(location.hash.slice(1)); return HASH_PAGES[h] || (HASH_IDS.includes(h) ? h : null); };
       const [active, setActive] = React.useState(() => {
         const h = hashPage(); if (h) return h;
@@ -110,6 +122,13 @@
       }, [active]);
 
       const [sbWidth, setSbWidth] = React.useState(56);
+      const tour = useTourState();
+      const noteAt = React.useRef(null);
+      React.useEffect(() => {
+        if (!tour.note) { noteAt.current = null; return; }
+        if (noteAt.current === null) noteAt.current = active;
+        else if (noteAt.current !== active) tour.closeNote();
+      }, [tour.note, active]);
 
       // Subscription level. Level 1 is the data-pack foundation the existing
       // dashboards run on; 2 adds sales + CRM, 3 adds segmentation and
@@ -118,29 +137,35 @@
         try { return Number(localStorage.getItem('amp_level')) || 3; } catch(e) { return 3; }
       });
       React.useEffect(() => { try { localStorage.setItem('amp_level', String(level)); } catch(e) {} }, [level]);
+      // Rollout phase drives signal availability everywhere (read by lvl-ui).
+      window.AMP_PHASE = level;
 
       const SECTIONS = [
         null,
         { id: 'lead', label: 'Sales Leadership' },
         { id: 'whole', label: 'Territory' },
-        { id: 'ins', label: 'Insights' },
+        { id: 'mkt', label: 'Marketing' },
+        { id: 'ins', label: 'Custom Reports' },
       ];
       // Grouped by who uses the view. The subscription level decides which
       // version opens (Leadership) or whether an item is available at all;
       // items above the subscribed level stay visible with a lock.
-      const ITEM_LEVEL = { l2sales: 2, l3intel: 3 };
+      const ITEM_LEVEL = { l2sales: 2, leadbriefs: 2, briefs: 2, mktbuilder: 3, mktanalytics: 3 };
       const ALL_NAV = [
         { id: 'home', label: 'Ask Field', icon: 'sparkles' },
         { id: 'leadbriefs', label: 'Leadership Brief & Review', icon: 'user-tie', section: 'lead' },
         { id: 'management', label: 'Leadership Dashboard', icon: 'chart-column', section: 'lead' },
         ...(level === 1 ? [{ id: 'opportunity', label: 'Opportunity', icon: 'bullseye', section: 'whole' }] : []),
         { id: 'briefs', label: 'Territory Brief & Review', icon: 'newspaper', section: 'whole' },
-        { id: 'l3intel', label: 'Segmentation & Signals', icon: 'wave-pulse', section: 'whole' },
+        { id: 'l3intel', label: level >= 3 ? 'Segmentation & Signals' : 'Signals', icon: 'wave-pulse', section: 'whole' },
         { id: 'l2sales', label: 'Territory Analytics', icon: 'handshake', section: 'whole' },
-        { id: 'advantage', label: 'Competitive Advantage', icon: 'trophy', section: 'ins' },
+        { id: 'advantage', label: 'Competitive Advantage', icon: 'trophy', section: 'whole' },
+        { id: 'mktbuilder', label: 'Campaign Signals & Builder', icon: 'bullhorn', section: 'mkt' },
+        { id: 'mktanalytics', label: 'Campaign Analytics', icon: 'chart-simple', section: 'mkt' },
         { id: 'reports', label: 'Custom Reports', icon: 'table-columns', section: 'ins' },
+        { id: 'explorer', label: 'Data Explorer', icon: 'table-cells', section: 'ins' },
       ];
-      const NAV = ALL_NAV.map(it => (ITEM_LEVEL[it.id] > level ? { ...it, locked: `L${ITEM_LEVEL[it.id]}` } : it));
+      const NAV = ALL_NAV.map(it => (ITEM_LEVEL[it.id] > level ? { ...it, locked: `P${ITEM_LEVEL[it.id]}` } : it));
       const VISIBLE_SECTIONS = SECTIONS;
       const locked = ITEM_LEVEL[active] > level;
       React.useEffect(() => {
@@ -298,12 +323,15 @@
           active === 'opportunity' ? '03 Opportunity' :
           active === 'advantage' ? '04 Competitive Advantage' :
           active === 'reports' ? '06 Custom Reports' :
+          active === 'explorer' ? '15 Data Explorer' :
           active === 'datapacks' ? '07 Data Packs' :
           active === 'l2sales' ? '08 Level 2 Territory Analytics' :
           active === 'l3intel' ? '09 Level 3 Segmentation & Signals' :
           active === 'lead' ? '10 Sales Leadership' :
           active === 'briefs' ? '11 Territory Brief & Review' :
-          active === 'leadbriefs' ? '12 Leadership Brief & Review' : active
+          active === 'leadbriefs' ? '12 Leadership Brief & Review' :
+          active === 'mktbuilder' ? '13 Campaign Signals & Builder' :
+          active === 'mktanalytics' ? '14 Campaign Analytics' : active
         }>
           <Sidebar
             items={NAV}
@@ -311,7 +339,8 @@
             footerItems={NAV_FOOTER}
             user={{ name: 'Morgan Vance', role: 'Distribution Lead' }}
             active={active}
-            onSelect={setActive}
+            onSelect={(id) => (id === 'help' ? tour.welcome() : setActive(id))}
+            forceExpanded={tour.running}
             brand="FIELD"
             signOutHref="https://claude.ai/design/p/019dd4c5-78f0-71ea-8229-0ec671ae00aa?file=Demo%20Landing%20Page.html&present=1"
             signOutLabel="Sign out"
@@ -386,19 +415,21 @@
             )}
             {locked && (
               <>
-                <TopBar levelSwitch={levelSw} title={active === 'l2sales' ? 'Territory Analytics' : 'Segmentation & Signals'} badge={<LvLevelBadge n={ITEM_LEVEL[active]} />} showSearch={false} />
+                <TopBar levelSwitch={levelSw} title={{ l2sales: 'Territory Analytics', leadbriefs: 'Leadership Brief & Review', briefs: 'Territory Brief & Review', mktbuilder: 'Campaign Signals & Builder', mktanalytics: 'Campaign Analytics' }[active] || active} badge={<LvLevelBadge n={ITEM_LEVEL[active]} />} showSearch={false} />
                 <main style={{ flex:1, display:'flex', alignItems:'center', justifyContent:'center', padding:40 }}>
                   <div style={{ maxWidth:460, textAlign:'center', display:'flex', flexDirection:'column', alignItems:'center', gap:12 }}>
                     <div style={{ width:48, height:48, borderRadius:12, background:'rgba(16,185,129,0.12)', border:'1px solid rgba(16,185,129,0.4)', display:'flex', alignItems:'center', justifyContent:'center' }}>
                       <i className="fa-solid fa-lock" style={{ color:'rgb(52,211,153)', fontSize:18 }} />
                     </div>
-                    <div style={{ fontFamily:'Inter', fontSize:18, fontWeight:600, color:'rgb(249,250,251)' }}>Available with Level {ITEM_LEVEL[active]}</div>
+                    <div style={{ fontFamily:'Inter', fontSize:18, fontWeight:600, color:'rgb(249,250,251)' }}>Turns on in Phase {ITEM_LEVEL[active]}</div>
                     <div style={{ fontFamily:'Inter', fontSize:13, lineHeight:1.55, color:'rgb(163,163,163)' }}>
-                      {active === 'l2sales'
-                        ? 'Adds your own sales and CRM activity to the opportunity view, so you can see actual production and coverage for every FA/Team.'
-                        : 'Adds segmentation and confidence-scored signals, with a next best action for every FA/Team.'}
+                      {active === 'leadbriefs' || active === 'briefs'
+                        ? 'The monthly brief and review are built on goals, actual sales, activity and what worked by activity type, which come with your sales and CRM data in Phase 2. In Phase 1, the Leadership Dashboard covers opportunity, market share and competitive advantage from the data packs.'
+                        : active === 'l2sales'
+                        ? 'Phase 2 integrates your sales and CRM data, so you can see actual production and coverage for every FA/Team next to the opportunity.'
+                        : 'Campaigns turn on with the ML models in Phase 3: signal-driven audiences, segments and confidence, then campaign analytics measuring lift against each FA/Team\'s run rate.'}
                     </div>
-                    <button onClick={() => setLevel(ITEM_LEVEL[active])} style={{ height:34, padding:'0 16px', borderRadius:8, border:'1px solid rgb(16,185,129)', background:'rgb(16,185,129)', color:'#fff', fontFamily:'Inter', fontSize:12.5, fontWeight:600, cursor:'pointer' }}>Preview Level {ITEM_LEVEL[active]}</button>
+                    <button onClick={() => setLevel(ITEM_LEVEL[active])} style={{ height:34, padding:'0 16px', borderRadius:8, border:'1px solid rgb(16,185,129)', background:'rgb(16,185,129)', color:'#fff', fontFamily:'Inter', fontSize:12.5, fontWeight:600, cursor:'pointer' }}>Preview Phase {ITEM_LEVEL[active]}</button>
                   </div>
                 </main>
               </>
@@ -430,14 +461,14 @@
             {active === 'l3intel' && !locked && (
               <>
                 <TopBar levelSwitch={levelSw} focusToggle={focusSw(() => setLvlFilterOpen(true))}
-                  title="Segmentation & Signals"
-                  badge={<LvLevelBadge n={3} />}
+                  title={level >= 3 ? 'Segmentation & Signals' : 'Signals'}
+                  badge={<LvLevelBadge n={level >= 3 ? 3 : level === 2 ? '1–2' : 1} />}
                   secondRow
                  
                   measureToggle={<TabPills options={['AUM', 'Inflows', 'Net Flows']} value={lvlMeasure} onChange={setLvlMeasure} />}
                   activeSelections={lvlSelections}
                   period={periodLvl3} onPeriod={setPeriodLvl3} showExport showFilter
-                  onSubscribeClick={() => sub.open('brief', { view: 'Segmentation & Signals', chips: lvlSelections.map(c => c.label) })} subscribed={sub.subscribed}
+                  onSubscribeClick={() => sub.open('brief', { view: level >= 3 ? 'Segmentation & Signals' : 'Signals', chips: lvlSelections.map(c => c.label) })} subscribed={sub.subscribed}
                   filterActive={lvCount(lvlFilters) > 0}
                   onFilterClick={() => setLvlFilterOpen(true)}
                   onClearAll={clearLvlSelections}
@@ -486,13 +517,19 @@
               </>
             )}
 
-            {active === 'briefs' && (
+            {active === 'explorer' && (
+              <>
+                <TopBar levelSwitch={levelSw} title="Data Explorer" badge={<LvLevelBadge n={level >= 3 ? '1–3' : level === 2 ? '1–2' : 1} />} dateStr={DATE} showSearch={false} onAiClick={() => setAiOpen(true)} />
+                <main style={{ flex:1, minHeight:0, overflow:'hidden', display:'flex', flexDirection:'column' }}><DataExplorerPage level={level} /></main>
+              </>
+            )}
+            {active === 'briefs' && !locked && (
               <>
                 <TopBar levelSwitch={levelSw} title="Territory Brief & Review" dateStr={DATE} showSearch={false} onAiClick={() => setAiOpen(true)} />
                 <main style={{ flex:1, minHeight:0, overflow:'auto' }}><BriefsPage subs={sub.subs} onEdit={sub.open} /></main>
               </>
             )}
-            {active === 'leadbriefs' && (
+            {active === 'leadbriefs' && !locked && (
               <>
                 <TopBar levelSwitch={levelSw} title="Leadership Brief & Review" dateStr={DATE} showSearch={false} onAiClick={() => setAiOpen(true)} />
                 <main style={{ flex:1, minHeight:0, overflow:'auto' }}><BriefsPage audience="lead" subs={sub.subs} onEdit={sub.open} /></main>
@@ -510,7 +547,19 @@
                 <main style={{ flex:1, minHeight:0, overflow:'auto' }}><DataPacksPage /></main>
               </>
             )}
-            {!['home','management','opportunity','advantage','distribution','datapacks','reports','l2sales','l3intel','lead','settings','briefs','leadbriefs'].includes(active) && (
+            {active === 'mktbuilder' && !locked && (
+              <>
+                <TopBar levelSwitch={levelSw} title="Campaign Signals & Builder" badge={<LvLevelBadge n={3} />} dateStr={DATE} showSearch={false} onAiClick={() => setAiOpen(true)} />
+                <main style={{ flex:1, minHeight:0, overflow:'auto' }}>{locked ? <div style={{ padding: 40, color:'rgb(163,163,163)', fontFamily:'Inter' }}>Campaign signals need Level 3 segmentation and signals.</div> : <CampaignBuilderPage onGo={setActive} onViewClient={(row) => setClientDetail(row)} />}</main>
+              </>
+            )}
+            {active === 'mktanalytics' && !locked && (
+              <>
+                <TopBar levelSwitch={levelSw} title="Campaign Analytics" dateStr={DATE} showSearch={false} onAiClick={() => setAiOpen(true)} />
+                <main style={{ flex:1, minHeight:0, overflow:'auto' }}>{locked ? <div style={{ padding: 40, color:'rgb(163,163,163)', fontFamily:'Inter' }}>Campaign Analytics needs Level 2 sales and CRM data.</div> : <CampaignAnalyticsPage key={active} />}</main>
+              </>
+            )}
+            {!['home','management','opportunity','advantage','distribution','datapacks','reports','explorer','l2sales','l3intel','lead','settings','briefs','leadbriefs','mktbuilder','mktanalytics'].includes(active) && (
               <>
                 <TopBar levelSwitch={levelSw} title={active.charAt(0).toUpperCase() + active.slice(1)} dateStr={DATE} />
                 <div style={{ padding: 40, color:'rgb(163,163,163)' }}>
@@ -545,7 +594,7 @@
             arrayKeys={LV_FILTER_KEYS.filter(k => Array.isArray(LV_FILTER_DEFAULT[k]))}
             chipLabel={lvChipLabel}
             renderSections={({ local, toggle, setMany }) => (
-              <LvDrawerSections local={local} toggle={toggle} setMany={setMany} level={active === 'l3intel' ? 3 : 2} />
+              <LvDrawerSections local={local} toggle={toggle} setMany={setMany} level={active === 'l3intel' && level >= 3 ? 3 : 2} />
             )}
             onChange={setLvlFilters}
             onApply={() => setLvlFilterOpen(false)}
@@ -568,6 +617,16 @@
             {...focusDrawer}
           />
           {sub.ui}
+          {tour.phase === 'welcome' && <TourWelcome onSkip={tour.end} onStart={tour.begin} />}
+          {tour.running && (
+            <GuidedTour step={tour.step} setStep={tour.setStep} onEnd={() => { tour.end(); setClientDetail(null); }}
+              onNav={(p) => { if (level < 3) setLevel(3); setActive(p); }}
+              onClient={(on) => {
+                if (!on) return setClientDetail(null);
+                if (!document.querySelector('[data-tour="fa-team"]')) window.postMessage({ ampGo: 'team:' + on }, '*');
+              }} />
+          )}
+          {tour.note && tour.phase === 'off' && <TourNote left={sbWidth + 16} onTour={tour.welcome} onClose={tour.closeNote} />}
           <ExportPanel
             open={exportOpen}
             onClose={() => setExportOpen(false)}
