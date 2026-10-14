@@ -132,7 +132,7 @@ const MF_ITEMS = [
     title:'12 top producers in NY metro have no meeting logged this quarter',
     body:'Together they hold $310M in categories you compete in. Three sit inside an hour of a rep already travelling to the city next week.',
     stats:[{ k:'Producers', v:'12' }, { k:'Addressable AUM', v:'$310M' }, { k:'Reps in market', v:'3' }],
-    meta:['Level 2','NY metro','RIA + Wirehouse','No touch 90d+'],
+    meta:['Sales & CRM','NY metro','RIA + Wirehouse','No touch 90d+'],
     action:'Open Territory Analytics', go:'l2sales' },
 
   { kind:'flow', id:'mkt-share', when:'Today', initials:'M★',
@@ -153,7 +153,7 @@ const MF_ITEMS = [
     title:'38 FA/Teams carry a focus-product signal above 70 confidence',
     body:'Ranked by holdings fit, recent rotation and engagement momentum. 14 have never been contacted about the product they score highest on.',
     stats:[{ k:'FA/Teams', v:'38' }, { k:'Signal opp.', v:'$96M' }, { k:'Never contacted', v:'14' }],
-    meta:['Level 3','3 focus products','Confidence ≥ 70','All channels'],
+    meta:['ML models','3 focus products','Confidence ≥ 70','All channels'],
     action:'Open Segmentation & Signals', go:'l3intel' },
 
   { kind:'advantage', id:'adv-fee', when:'3d ago', initials:'SG',
@@ -169,7 +169,7 @@ const MF_ITEMS = [
     title:'Segment A absorbs a third of your coverage and 80% of the signal opportunity',
     body:'27 FA/Teams in Segment A took 226 of 680 logged activities in the rolling 12. The 54 in Segment C took 265 for $2.4M of actual sales.',
     stats:[{ k:'R12 actual', v:'$363M' }, { k:'Market share', v:'2.1%' }, { k:'Acts per FA', v:'5.7' }],
-    meta:['Level 2','Northeast territory','Rolling 12'],
+    meta:['Sales & CRM','Northeast territory','Rolling 12'],
     action:'Open Territory Analytics', go:'l2sales' },
 
   { kind:'advantage', id:'l3-nba', when:'This morning', initials:'NBA',
@@ -177,7 +177,7 @@ const MF_ITEMS = [
     title:'298 signals refreshed overnight across 120 FA/Teams',
     body:'Meeting Opportunity is the largest family at $106M, ahead of Performance Advantage. Asset-weighted confidence across the territory holds at 69.',
     stats:[{ k:'Signal opp.', v:'$333–619M' }, { k:'Signals', v:'298' }, { k:'Wtd conf.', v:'69' }],
-    meta:['Level 3','Northeast territory','Nightly model run'],
+    meta:['ML models','Northeast territory','Nightly model run'],
     action:'Open Segmentation & Signals', go:'l3intel' },
 
   { kind:'data', id:'data-ubs', when:'This morning', initials:'DB',

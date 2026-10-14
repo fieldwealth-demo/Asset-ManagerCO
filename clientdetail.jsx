@@ -146,7 +146,7 @@ function ClientDetailPage({ clientRow, onBack }) {
   const d = buildClientDetail(clientRow);
 
   return (
-    <div onClick={onBack} style={{
+    <div data-tour-scroll="" onClick={onBack} style={{
       position:'fixed', inset:0, background:'rgba(5,10,18,0.78)', backdropFilter:'blur(8px)',
       display:'flex', alignItems:'flex-start', justifyContent:'center', zIndex:200,
       padding:'32px 24px', overflow:'auto',
@@ -157,7 +157,7 @@ function ClientDetailPage({ clientRow, onBack }) {
         @keyframes cdFade  { from{opacity:0} to{opacity:1} }
         @keyframes cdScale { from{opacity:0; transform:translateY(10px) scale(.985)} to{opacity:1; transform:none} }
       `}</style>
-      <div onClick={(e) => e.stopPropagation()} style={{
+      <div data-tour="fa-team" onClick={(e) => e.stopPropagation()} style={{
         width:'min(1400px, 96vw)',
         background:'rgb(11,17,28)',
         border:'1px solid rgba(75,85,99,0.5)',
@@ -175,7 +175,7 @@ function ClientDetailPage({ clientRow, onBack }) {
           color:'rgb(209,213,219)', cursor:'pointer',
           display:'inline-flex', alignItems:'center', justifyContent:'center', fontSize:14,
         }}><i className="fa-solid fa-xmark" /></button>
-        <DetailHeader d={d} />
+        <DetailHeader d={d} extra={window.MeetingPrepLauncher && <MeetingPrepLauncher row={clientRow.lvRow || (window.LV_ROWS || []).find(x => x.name === clientRow.name)} d={d} />} />
       <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:16 }}>
         <div style={{ gridColumn:'span 2', minWidth:0, display:'flex' }}><TeamMembersCard d={d} /></div>
         <OtherAdvisorsCard d={d} />
@@ -216,7 +216,7 @@ function DetailBackBar({ onBack }) {
 /* ===================================================== */
 /* HEADER CARD                                            */
 /* ===================================================== */
-function DetailHeader({ d }) {
+function DetailHeader({ d, extra }) {
   return (
     <div style={cardStyle}>
       <div style={{ display:'flex', alignItems:'flex-start', gap:14, padding:'18px 20px' }}>
@@ -247,7 +247,8 @@ function DetailHeader({ d }) {
         </div>
 
         {/* Address card + active-since */}
-        <div style={{ display:'flex', flexDirection:'column', gap:6, minWidth:280 }}>
+        <div style={{ display:'flex', flexDirection:'column', gap:6, minWidth:280, marginRight:40 }}>
+          {extra}
           <div style={{
             padding:'10px 14px',
             background:'rgba(255,255,255,0.03)',
@@ -487,7 +488,7 @@ function VehicleAllocationCard({ d }) {
       <DonutCardHeader title="Vehicle Allocation" tab={tab} setTab={setTab} />
       <div style={{ display:'flex', flexDirection:'column', alignItems:'stretch', gap:10, padding:'4px 16px 16px' }}>
         <div style={{ display:'flex', justifyContent:'center' }}>
-          <Donut size={170} total={fmtM(totalM)} segments={rows.map(r => ({ pct:r.pct, fill:r.fill, dot:r.dot }))} />
+          <Donut size={170} total={fmtM(totalM)} segments={rows.map(r => ({ name:r.name, pct:r.pct, fill:r.fill, dot:r.dot }))} />
         </div>
         <DonutTable compact headers={['ASSET CLASS','MKT OPP','YOURS','MKT SHARE']} rows={rows.map(r => [
           { type:'label', text:r.name, c:r.dot },
@@ -520,7 +521,7 @@ function PlatformBreakdownCard({ d }) {
       <DonutCardHeader title="Platform Breakdown" tab={tab} setTab={setTab} />
       <div style={{ display:'flex', flexDirection:'column', alignItems:'stretch', gap:10, padding:'4px 16px 16px' }}>
         <div style={{ display:'flex', justifyContent:'center' }}>
-          <Donut size={170} total={fmtM(totalM)} segments={rows.map(r => ({ pct:r.pct, fill:r.fill, dot:r.dot }))} />
+          <Donut size={170} total={fmtM(totalM)} segments={rows.map(r => ({ name:r.name, pct:r.pct, fill:r.fill, dot:r.dot }))} />
         </div>
         <DonutTable compact headers={['PLATFORM','MKT OPP','YOURS','MKT SHARE']} rows={rows.map(r => [
           { type:'label', text:r.name, c:r.dot, tag:r.tag },
@@ -557,7 +558,7 @@ function CategoryAllocationCard({ d }) {
       <DonutCardHeader title="Category Allocation" tab={tab} setTab={setTab} />
       <div style={{ display:'flex', flexDirection:'column', alignItems:'stretch', gap:10, padding:'4px 16px 16px' }}>
         <div style={{ display:'flex', justifyContent:'center' }}>
-          <Donut size={170} total={fmtM(totalM)} segments={rows.map(r => ({ pct:r.pct, fill:r.fill, dot:r.dot }))} />
+          <Donut size={170} total={fmtM(totalM)} segments={rows.map(r => ({ name:r.name, pct:r.pct, fill:r.fill, dot:r.dot }))} />
         </div>
         <DonutTable compact headers={['CATEGORY','MKT OPP','YOURS','MKT SHARE']} rows={rows.map(r => [
           { type:'label', text:r.name, c:r.dot },
@@ -597,7 +598,7 @@ function Donut({ total, segments, size = 200 }) {
     chart: { type: 'pie', height: size, width: size, backgroundColor: 'transparent',
              spacing: [0,0,0,0], margin: [0,0,0,0] },
     title: { text: '' },
-    tooltip: { pointFormat: '<b>{point.percentage:.1f}%</b>' },
+    tooltip: { headerFormat: '', pointFormat: '{point.name}: <b>{point.percentage:.1f}%</b>' },
     plotOptions: {
       pie: {
         innerSize: '68%',
@@ -615,7 +616,7 @@ function Donut({ total, segments, size = 200 }) {
         const saturated = s.dot || s.fill;
         const washed = wash(saturated, 0.32);
         return {
-          name: `Segment ${i+1}`,
+          name: s.name || `Slice ${i+1}`,
           y: Math.max(s.pct, 0.0001),
           color: washed.color,
           borderColor: washed.borderColor,
@@ -717,7 +718,7 @@ function CompetitiveAdvantageCard({ d }) {
               <th style={caThR}>Asst Wtd Perf</th>
               <th style={caThR}>Perf Variance</th>
               <th style={caThR}>Fee Adv AUM</th>
-              <th style={caThR}>Fee</th>
+              <th style={caThR}>Fee (BPs)</th>
               <th style={caThR}>Fee Variance</th>
               <th style={caThR}>Inflows</th>
               <th style={caThR}>Total Outflows</th>
@@ -749,7 +750,7 @@ function CompetitiveAdvantageCard({ d }) {
                 </td>
                 <td style={caTdR}>{r.var}</td>
                 <td style={caTdR}>{r.vsc}</td>
-                <td style={caTdR}>{r.fee}<br/><span style={{ fontSize:9, color:'rgb(107,114,128)' }}>bp</span></td>
+                <td style={caTdR}>{r.fee}</td>
                 <td style={caTdR}>{r.feeVar}</td>
                 <td style={caTdR}>{r.inflows}</td>
                 <td style={caTdR}>{r.outflows}</td>

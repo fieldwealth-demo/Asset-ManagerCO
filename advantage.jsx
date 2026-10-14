@@ -539,7 +539,7 @@ function WideAdvTable({ sel, onRowClick, onViewClient }) {
           <tr style={thTr}>
             <th style={wTh}>TEAM/FA</th><th style={wThN}>VEHICLE</th><th style={wTh}>CATEGORY</th>
             <th style={wThN}>AUM</th><th style={wThN}>PERF ADV AUM</th><th style={wThN}>ASST WTD PERF</th><th style={wThN}>PERF VARIANCE</th>
-            <th style={wThN}>FEE ADV AUM</th><th style={wThN}>FEE</th><th style={wThN}>FEE VARIANCE</th>
+            <th style={wThN}>FEE ADV AUM</th><th style={wThN}>FEE (BPS)</th><th style={wThN}>FEE VARIANCE</th>
             <th style={wThN}>INFLOWS</th><th style={wThN}>OUTFLOWS</th><th style={wThN}>NET FLOWS</th>
             <th style={wThN}># MGRS</th><th style={wThN}>RANK</th>
           </tr>
@@ -601,7 +601,7 @@ function WideAdvTable({ sel, onRowClick, onViewClient }) {
               <td style={wTdN}><span style={{ color: wtdColor }}>● </span><span style={{ color:'rgb(249,250,251)' }}>{r.wtd}</span></td>
               <td style={wTdN}><span style={{ color: perfVarColor }}>{r.perfVar}</span></td>
               <td style={wTdN}>{r.feeAdv}</td>
-              <td style={wTdN}><span style={{ color:'rgb(249,250,251)' }}>{r.fee}</span><span style={{ color:'rgb(107,114,128)', fontSize:9, marginLeft:2 }}>bps</span></td>
+              <td style={wTdN}><span style={{ color:'rgb(249,250,251)' }}>{r.fee}</span></td>
               <td style={wTdN}><span style={{ color: feeVarColor }}>{r.feeVar}</span></td>
               <td style={wTdN}>{r.infl}</td>
               <td style={wTdN}><span style={{ color:'rgb(249,115,22)' }}>{r.outfl}</span></td>
