@@ -370,7 +370,7 @@ function LeadershipPage({ level, measure, period, role, onSelectionsChange, xf, 
           <div className="ml-rail-in"><MlDimRail level={level} rowsAll={base} xf={xf} ctx={ctx} M={M} onToggle={toggle} /></div>
         </div>
         <Tile title="Sales team"
-          subtitle={`All ${ML_ROLE_LABEL[role].toLowerCase()} in one sortable list · click a row to filter the page${L3 ? ' · shaded columns are Level 3' : ''}`}
+          subtitle={`All ${ML_ROLE_LABEL[role].toLowerCase()} in one sortable list · click a row to filter the page${L3 ? ' · shaded columns need Phase 3 ML models' : ''}`}
           pad={0} style={{ flex: '999 1 520px', minWidth: 0 }}>
           <MlTeamGrid rows={gridRows} ctx={ctx} xf={xf} level={level} onToggle={toggle} M={M} actualLabel={actualLabel} />
         </Tile>

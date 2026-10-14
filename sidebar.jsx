@@ -89,8 +89,9 @@ function Sidebar({
   persistAccordionKey,
   onWidthChange,
   onExpandedChange,
+  forceExpanded = false,
 }) {
-  const [expanded, setExpanded] = React.useState(() => {
+  const [expandedSt, setExpanded] = React.useState(() => {
     if (!persistKey) return defaultExpanded;
     try {
       const v = localStorage.getItem(persistKey);
@@ -99,10 +100,11 @@ function Sidebar({
       return defaultExpanded;
     } catch (e) { return defaultExpanded; }
   });
+  const expanded = !!forceExpanded || expandedSt;
   React.useEffect(() => {
-    if (persistKey) { try { localStorage.setItem(persistKey, expanded ? '1' : '0'); } catch (e) {} }
+    if (persistKey) { try { localStorage.setItem(persistKey, expandedSt ? '1' : '0'); } catch (e) {} }
     if (onExpandedChange) onExpandedChange(expanded);
-  }, [expanded, persistKey, onExpandedChange]);
+  }, [expanded, expandedSt, persistKey, onExpandedChange]);
 
   // Accordion open groups (expanded view only) ------------------------------
   const [openGroups, setOpenGroups] = React.useState(() => {
@@ -356,6 +358,7 @@ function SBItem({ item, expanded, isActive, activeChildId, isAccordionOpen, onTo
     <React.Fragment>
       <button
         ref={btnRef}
+        data-tour={`nav-${item.id}`}
         onClick={handleClick}
         onMouseEnter={onEnter}
         onMouseLeave={onLeave}

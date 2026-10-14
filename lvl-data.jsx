@@ -397,6 +397,7 @@ const LV_ROWS = LV_BOOK.map(([name, type, firm, channel, city, rawAum, q], i) =>
     dormant, q,
   };
   row.holdings = lvHoldings(row, lvRng(7717 + i * 401));
+  lvTieHoldings(row);
   row.signals = lvGenSignals(row, lvRng(4211 + i * 613))
     .sort((a, b) => b.confidence - a.confidence);
   row.signalOpp = row.signals.reduce((a, s) => a + s.oppMax, 0);
@@ -514,6 +515,58 @@ function lvHoldings(p, r) {
     };
   });
 }
+
+/* Make product-level flows tie to the FA/Team totals: the latest year's
+   inflows sum to R12 sales and the prior year's to prior-12 sales, to the $1K.
+   Redemptions scale with inflows; net is recomputed. */
+/* Share of last calendar year inside the rolling-12 window: the months after
+   the current month (Oct → Nov and Dec = 2/12). */
+function lvR12F() { return (11 - new Date().getMonth()) / 12; }
+function lvHashStr(s) { let h = 2166136261; for (let i = 0; i < s.length; i++) h = Math.imul(h ^ s.charCodeAt(i), 16777619); return h >>> 0; }
+function lvTieHoldings(row) {
+  const hs = row.holdings || [];
+  if (!hs.length) return;
+  const r3 = (v) => Math.round(v * 1000) / 1000;
+  const fit = (y, targetM) => {
+    if (!targetM) return;
+    let tot = hs.reduce((a, h) => a + h.inflow[y], 0);
+    if (!tot) {
+      // Positions too small to register: weight by a stable per-product draw so
+      // sales still vary across products, with redemptions at 15–60% of sales.
+      const rr = lvRng(lvHashStr(row.name + ':' + y));
+      hs.forEach(h => { const w = Math.pow(0.15 + rr(), 1.8); h.inflow[y] = w; h.redemption[y] = w * (0.15 + rr() * 0.45); });
+      tot = hs.reduce((s, h) => s + h.inflow[y], 0);
+    }
+    const f = targetM / tot;
+    // Round each product, then put the rounding residual on the largest so no
+    // product can go negative.
+    const vs = hs.map(h => Math.max(0, r3(h.inflow[y] * f)));
+    let big = 0; vs.forEach((v, i) => { if (v > vs[big]) big = i; });
+    vs[big] = Math.max(0, r3(vs[big] + targetM - vs.reduce((s, v) => s + v, 0)));
+    hs.forEach((h, i) => {
+      const v = vs[i];
+      h.redemption[y] = Math.max(0, r3(h.redemption[y] * (h.inflow[y] ? v / h.inflow[y] : 0)));
+      h.inflow[y] = v;
+      h.net[y] = r3(v - h.redemption[y]);
+    });
+  };
+  /* Years are calendar: [4] is YTD, [3] last full year, [2] the year before.
+     Rolling 12 = YTD + the trailing months of last year (LV_R12_F of it), so
+     YTD and R12 differ. Solve the yearly totals from R12 and prior-12. */
+  const F = lvR12F(), R12 = row.r12ProdK / 1000, P = (row.prior12K || 0) / 1000;
+  const fy1 = F ? Math.min(P || R12, 0.7 * R12 / F) : 0;
+  const ytd = R12 - F * fy1;
+  const fy2 = F ? Math.max(0, (P - (1 - F) * fy1) / F) : P;
+  fit(4, ytd); fit(3, fy1); fit(2, fy2);
+  if (row.sales) {
+    row.sales.YTD = Math.round(hs.reduce((a, h) => a + h.inflow[4], 0) * 1000);
+    row.sales.QTD = Math.min(row.sales.QTD, row.sales.YTD);
+    row.sales.MTD = Math.min(row.sales.MTD, row.sales.QTD);
+  }
+}
+/* Rolling-12 and prior-12 per product from the calendar-year arrays. */
+function lvR12(h, k = 'inflow') { return h[k][4] + lvR12F() * h[k][3]; }
+function lvP12(h, k = 'inflow') { const f = lvR12F(); return (1 - f) * h[k][3] + f * h[k][2]; }
 
 /* ---- signal generation -------------------------------------------------- */
 
@@ -715,6 +768,7 @@ function lvActivity(row, roles) {
 }
 
 Object.assign(window, {
+  lvR12, lvP12, lvR12F,
   lvActual, lvHoldActual, lvActualLabel, lvFmtKs, lvTerritoryGoal, LV_YEAR_FRAC,
   LV_TERRITORY, LV_WHOLESALER, LV_CITIES, LV_CITY_META, LV_ROWS, LV_CATALOG, LV_BOOK,
   LV_PROD_CATS, LV_PROD_BANDS, LV_PROD_BAND_COLORS, LV_PROD_COUNT_BANDS, LV_VEHICLES, LV_DISCRETION,

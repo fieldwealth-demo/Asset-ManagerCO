@@ -86,11 +86,12 @@ function ActualSalesCard({ row }) {
   }, []);
 
   const monthly = React.useMemo(() => groups.map((g, gi) => {
-    const annual = g[flowKey][4];
-    // Deterministic monthly shape that sums back to the annual figure.
+    // Rolling 12 by month: this year's months share YTD, last year's trailing
+    // months take their twelfths of the prior calendar year, so the bars sum to R12.
+    const nPrev = 11 - new Date().getMonth();
     const w = months.map((_, i) => 0.6 + (((i * 7 + gi * 5) % 9) / 9) * 0.9);
-    const tot = w.reduce((a, x) => a + x, 0);
-    return { name: g.name, data: w.map(x => Math.round((annual * x / tot) * 100) / 100) };
+    const wCur = w.slice(nPrev).reduce((a, x) => a + x, 0) || 1;
+    return { name: g.name, data: w.map((x, i) => Math.round((i < nPrev ? g[flowKey][3] / 12 : g[flowKey][4] * x / wCur) * 100) / 100) };
   }), [groups, flowKey, months]);
 
   const options = React.useMemo(() => ({
@@ -142,7 +143,8 @@ function ActualSalesCard({ row }) {
               <th style={asTh}>{grain}</th>
               {grain === 'Product' && <th style={asTh}>Veh.</th>}
               <th style={asThR}>Current AUM</th>
-              {years.map(y => <th key={y} style={asThR}>{y}</th>)}
+              {years.map((y, i) => <th key={y} style={asThR}>{i === 4 ? `${y} YTD` : y}</th>)}
+              <th style={{ ...asThR, borderLeft: '1px solid rgba(75,85,99,0.35)' }}>R12</th>
             </tr>
           </thead>
           <tbody>
@@ -152,8 +154,9 @@ function ActualSalesCard({ row }) {
                 {grain === 'Product' && <td style={asTd}><VehicleBadge v={g.vehicle === 'Mutual Funds' ? 'MF' : g.vehicle === 'ETFs' ? 'ETF' : g.vehicle === 'SMAs' ? 'SMA' : 'Privates'} /></td>}
                 <td style={{ ...asTdR, color: 'rgb(249,250,251)', fontWeight: 600 }}>{lvFmtM(g.aumM)}</td>
                 {g[flowKey].map((v, i) => (
-                  <td key={i} style={{ ...asTdR, color: v < 0 ? 'rgb(248,113,113)' : i === 4 ? 'rgb(52,211,153)' : 'rgb(209,213,219)', fontWeight: i === 4 ? 600 : 400 }}>{fmt(v)}</td>
+                  <td key={i} style={{ ...asTdR, color: v < 0 ? 'rgb(248,113,113)' : 'rgb(209,213,219)' }}>{fmt(v)}</td>
                 ))}
+                <td style={{ ...asTdR, borderLeft: '1px solid rgba(75,85,99,0.35)', color: lvR12(g, flowKey) < 0 ? 'rgb(248,113,113)' : 'rgb(52,211,153)', fontWeight: 600 }}>{fmt(lvR12(g, flowKey))}</td>
               </tr>
             ))}
             <tr>
@@ -164,6 +167,7 @@ function ActualSalesCard({ row }) {
                 const t = groups.reduce((a, g) => a + g[flowKey][i], 0);
                 return <td key={y} style={{ ...asTdR, fontWeight: 600, color: 'rgb(249,250,251)', borderTop: '1px solid rgba(75,85,99,0.35)' }}>{fmt(t)}</td>;
               })}
+              <td style={{ ...asTdR, fontWeight: 600, color: 'rgb(52,211,153)', borderTop: '1px solid rgba(75,85,99,0.35)', borderLeft: '1px solid rgba(75,85,99,0.35)' }}>{fmt(groups.reduce((a, g) => a + lvR12(g, flowKey), 0))}</td>
             </tr>
           </tbody>
         </table>

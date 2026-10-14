@@ -215,25 +215,31 @@ function HomePage({ onNav, onAIAction, subs, onSubscribe, onReadEmail, level }) 
    firm's own sales and CRM activity, Level 3 adds segmentation and the
    predictive / prescriptive signal models. */
 const HOME_SIGNALS = {
-  1: { note: 'Opportunity and competitive advantage', items: [
+  1: { note: 'Data packs: opportunity, market share, competitive advantage', items: [
     ['trophy', 'Where do we have a Strong competitive advantage but under 10% share?'],
     ['bullseye', 'Top 10 FA/Teams by opportunity where our market share is lowest'],
     ['arrow-trend-up', 'Which categories are taking flows where our funds rank top quartile?'],
     ['building-columns', 'Which firms hold the most opportunity in our focus categories?'],
   ] },
-  2: { note: 'Opportunity, plus your sales and CRM activity', items: [
+  2: { note: 'Adds your sales and CRM activity, rule-based signals', items: [
     ['user-clock', 'Which top-opportunity FA/Teams have had no meeting in 90 days?'],
-    ['arrow-trend-down', 'Which producers slowed their sales this quarter?'],
-    ['video', 'Which webinar attendees have not had a follow-up inside 48 hours?'],
+    ['shield-exclamation', 'Where are my Retention Risk signals, and how much AUM is exposed?'],
+    ['arrow-trend-down', 'Which former producers have gone quiet (fallen angels)?'],
     ['handshake', 'Where is activity high but sales lift low?'],
   ] },
-  3: { note: 'Full signals with predictive and prescriptive models', items: [
+  3: { note: 'Adds segmentation, ML signals and next best actions', items: [
     ['phone', 'Who should I call first today, and what should I lead with?'],
-    ['shield-exclamation', 'Where are my Retention Risk signals, and how much AUM is exposed?'],
+    ['bullhorn', 'Which FA/Teams should go into a Muni Ladder SMA campaign?'],
     ['wave-pulse', 'Which Segment A prospects are most likely to buy Core Plus?'],
     ['wand-magic-sparkles', 'Which next best actions are most likely to convert this month?'],
   ] },
 };
+const HOME_POPULAR_P1 = [
+  ['fire', 'What are my top client opportunities in Large Blend?'],
+  ['chart-pie', 'Where am I losing share in Intermediate Core-Plus?'],
+  ['building', 'Which firms hold the most opportunity where we have a fee advantage?'],
+  ['map-location-dot', 'Which cities have the largest opportunity in our focus categories?'],
+];
 const HOME_POPULAR = [
   ['fire', 'What are my top client opportunities in Large Blend?'],
   ['users', "Who are my top producers I haven't met this quarter?"],
@@ -267,8 +273,8 @@ function HomeSuggestions({ onPick, level = 3 }) {
   return (
     <div style={{ width: 860, maxWidth: '100%', display: 'flex', flexDirection: 'column', gap: 24 }}>
       <style>{`.home-sugg:hover{background:rgba(16,185,129,0.08)!important;border-color:rgba(16,185,129,0.45)!important;color:rgb(249,250,251)!important}`}</style>
-      {row(`Signals · Level ${level}`, 'satellite-dish', sig.note, sig.items, 'rgb(52,211,153)')}
-      {row('Popular in your company', 'fire', null, HOME_POPULAR, 'rgb(156,163,175)')}
+      {row(`Suggested · Phase ${level}`, 'satellite-dish', sig.note, sig.items, 'rgb(52,211,153)')}
+      {row('Popular in your company', 'fire', null, level < 2 ? HOME_POPULAR_P1 : HOME_POPULAR, 'rgb(156,163,175)')}
     </div>
   );
 }

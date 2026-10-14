@@ -245,7 +245,7 @@ const L3_FAM_ICONS = { Advantage: 'chart-line', 'Focus product': 'bullseye', Gro
 
 function L3SignalTiles({ rows, selected, onToggle, compact }) {
   const [sort, setSort] = React.useState({ k: 'opp', d: -1 });
-  const stats = LV_SIG_TYPES.map(type => {
+  const stats = LV_SIG_TYPES.filter(lvPhaseSigOk).map(type => {
     const sigs = rows.flatMap(p => p.signals.filter(s => s.type === type));
     const meta = LV_SIG_META[type];
     return {
@@ -334,6 +334,7 @@ function L3SummaryTable({ rows, sigTypes, period, measure = 'Inflows', roles, on
   const pk = LV_ROWS[0] && LV_ROWS[0].sales[period] !== undefined ? period : 'Rolling 12';
   const pkShort = pk === 'Rolling 12' ? 'R12' : pk;
   const wide = wrapW >= 1000;
+  const p1 = lvPhase() < 2, p3 = lvPhase() >= 3;
   const l3Th = { padding: '11px 4px' };
   const nbaTh = { padding: '11px 4px', background: 'rgba(167,139,250,0.06)' };
   const nbaTd = { ...lvTdR, padding: '9px 4px', background: 'rgba(167,139,250,0.06)' };
@@ -362,15 +363,17 @@ function L3SummaryTable({ rows, sigTypes, period, measure = 'Inflows', roles, on
             {th('FA / Team', 'name', false, { padding: '11px 6px 10px 12px' })}
             {lvThPlain('Next best action', false, { padding: '11px 6px' })}
             {wide ? th('NBA opp.', 'nbaOpp', true, nbaTh) : th('NBA opp. / conf.', 'nbaOpp', true, nbaTh)}
-            {wide && th('Conf.', 'nbaConf', true, nbaTh)}
+            {wide && th(p3 ? 'Conf.' : 'Basis', 'nbaConf', true, nbaTh)}
             {wide ? th('Signal opp.', 'opp', true, { ...nbaTh, paddingLeft: 10 }) : th('Signal opp. / # · wtd conf.', 'opp', true, { ...nbaTh, paddingLeft: 10, paddingRight: 12 })}
             {wide && th('# · Wtd conf.', 'sigs', true, { ...nbaTh, paddingRight: 12 })}
+            {!p1 && <>
             {wide ? th(lvActualLabel(measure, pkShort), 'sales', true, { padding: '11px 6px 10px 12px' }) : th(`${lvActualLabel(measure, pkShort)} / trend · # prod`, 'sales', true, { padding: '11px 12px 10px 12px' })}
             {wide && th('Trend', 'trend', true, { padding: '11px 6px' })}
             {wide && th('# Prod', 'prods', true, { padding: '11px 12px 10px 6px' })}
             {wide ? th('Act', 'acts', true, { padding: '11px 6px 10px 12px' }) : th('Act / days', 'acts', true, { padding: '11px 4px 10px 12px' })}
             {wide && th('Days', 'days', true, { padding: '11px 4px 10px 6px' })}
             {lvThPlain('Engagement', false, { padding: '11px 8px' })}
+            </>}
             {lvThPlain('', true, { padding: '11px 10px 10px 4px' })}
           </tr>
         </thead>
@@ -415,11 +418,13 @@ function L3SummaryTable({ rows, sigTypes, period, measure = 'Inflows', roles, on
                   <td style={nbaTd}>{nba ? <div style={{ display: 'flex', justifyContent: 'flex-end' }}><LvConfBar value={nba.confidence} width={28} /></div> : '—'}</td>
                   <td style={{ ...nbaTd, paddingLeft: 10 }}>{distFmtM(opp)}</td>
                   <td style={{ ...nbaTd, paddingRight: 12 }}><div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 6 }}><span style={{ fontSize: 11, color: 'rgb(209,213,219)' }}>{sigs.length}</span><LvConfBar value={lvWtdConf(sigs)} color="rgb(167,139,250)" width={28} /></div></td>
+                  {!p1 && <>
                   <td style={{ ...lvTdR, padding: '9px 6px 9px 12px', color: lvActual(p, measure, pk) < 0 ? 'rgb(248,113,113)' : lvActual(p, measure, pk) ? 'rgb(249,250,251)' : 'rgb(107,114,128)', fontWeight: 600 }}>{lvFmtKs(lvActual(p, measure, pk), measure)}</td>
                   <td style={{ ...lvTdR, padding: '9px 6px' }}><div style={{ display: 'flex', justifyContent: 'flex-end' }}><LvTrend value={p.salesTrend} compact /></div></td>
                   <td style={{ ...lvTdR, padding: '9px 12px 9px 6px' }}>{p.products || '—'}</td>
                   <td style={{ ...lvTdR, padding: '9px 6px 9px 12px' }}>{act.r12}</td>
                   <td style={{ ...lvTdR, padding: '9px 4px 9px 6px', color: lvDaysColor(act.days), fontWeight: 600 }}>{act.days == null ? '—' : `${act.days}d`}</td>
+                  </>}
                   </>) : (<>
                   <td style={nbaTd}>
                     <div style={{ color: 'rgb(52,211,153)', fontWeight: 600 }}>{nba ? distFmtM(nba.oppMax) : '—'}</div>
@@ -429,13 +434,15 @@ function L3SummaryTable({ rows, sigTypes, period, measure = 'Inflows', roles, on
                     <div>{distFmtM(opp)}</div>
                     <div style={{ marginTop: 3, display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 6 }}><span style={{ fontSize: 10, color: 'rgb(176,182,192)' }}>{sigs.length} ·</span><LvConfBar value={lvWtdConf(sigs)} color="rgb(167,139,250)" width={28} /></div>
                   </td>
+                  {!p1 && <>
                   <td style={{ ...lvTdR, padding: '9px 12px 9px 12px', color: lvActual(p, measure, pk) < 0 ? 'rgb(248,113,113)' : lvActual(p, measure, pk) ? 'rgb(249,250,251)' : 'rgb(107,114,128)', fontWeight: 600 }}>{lvFmtKs(lvActual(p, measure, pk), measure)}<div style={{ marginTop: 2, fontWeight: 400, display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 5 }}><LvTrend value={p.salesTrend} compact /><span style={{ fontSize: 10, color: 'rgb(176,182,192)' }}>· {p.products || 0}p</span></div></td>
                   <td style={{ ...lvTdR, padding: '9px 4px 9px 12px' }}>
                     <div>{act.r12}</div>
                     <div style={{ ...{ fontSize: 10, fontWeight: 400, color: 'rgb(176,182,192)', marginTop: 2 }, color: lvDaysColor(act.days), fontWeight: 600 }}>{act.days == null ? '—' : `${act.days}d`}</div>
                   </td>
+                  </>}
                   </>)}
-                  <td style={{ ...lvTd, padding: '9px 8px' }}><LvEngIcons keys={p.engagement} max={3} /></td>
+                  {!p1 && <td style={{ ...lvTd, padding: '9px 8px' }}><LvEngIcons keys={p.engagement} max={3} /></td>}
                   <td style={{ ...lvTdR, padding: '7px 10px 7px 4px' }}><LvEyeButton onClick={() => onViewClient(lvClientRow(p))} /></td>
                 </tr>
                 {open && (
@@ -463,7 +470,7 @@ function L3SummaryTable({ rows, sigTypes, period, measure = 'Inflows', roles, on
                                 dangerouslySetInnerHTML={{ __html: s.desc }} />
                               <div style={{ display: 'flex', gap: 18, flexWrap: 'wrap' }}>
                                 <L3Stat label="Signal opp." value={distFmtM(s.oppMax)} color="rgb(52,211,153)" />
-                                <L3Stat label="Confidence" value={s.confidence} />
+                                <L3Stat label={p3 ? 'Confidence' : 'Basis'} value={p3 ? s.confidence : 'Rule-based'} />
                                 {s.product && <L3Stat label="Product" value={s.product} />}
                               </div>
                               <div style={{ marginTop: 9, paddingTop: 9, borderTop: '1px solid rgba(75,85,99,0.25)', fontFamily: 'Inter', fontSize: 10.5, lineHeight: 1.5, color: 'rgb(140,148,160)' }}>
@@ -526,6 +533,7 @@ function L3SignalOppCard({ oppMin, oppMax, wtdConf, sigCount, faCount, rows, mea
   const acts = rows.reduce((a, r) => a + lvActivity(r, roles).r12, 0);
   const TG = lvTerritoryGoal(pk);
   const goal = TG.goal, goalPct = TG.pct;
+  const p1 = lvPhase() < 2, p3 = lvPhase() >= 3;
   return (
     <div style={{
       background: 'rgba(255,255,255,0.035)', border: '1px solid rgba(75,85,99,0.35)', borderRadius: 12,
@@ -547,16 +555,18 @@ function L3SignalOppCard({ oppMin, oppMax, wtdConf, sigCount, faCount, rows, mea
           </div>
           <L3BigStat label="Signals" value={sigCount.toLocaleString()} size={19} />
           <L3BigStat label="FA/Teams" value={faCount.toLocaleString()} size={19} />
-          <L3BigStat label="Wtd conf." value={wtdConf || '—'} size={19} color="rgb(167,139,250)" />
+          {p3 ? <L3BigStat label="Wtd conf." value={wtdConf || '—'} size={19} color="rgb(167,139,250)" /> : <L3BigStat label="Signal basis" value="Rules" size={19} color="rgb(140,148,160)" />}
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, minmax(0,1fr))', gap: 12, alignItems: 'end' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: `repeat(${p1 ? 3 : 7}, minmax(0,1fr))`, gap: 12, alignItems: 'end' }}>
           <L3BigStat label="Mkt opp." value={M.fmt(opp)} size={19} />
           <L3BigStat label="Yours" value={M.fmt(yours)} size={19} color="rgb(52,211,153)" />
           <L3BigStat label="Share" value={opp ? lvFmtPct(yours / opp) : '—'} size={19} />
+          {!p1 && <>
           <L3BigStat label={lvActualLabel(measure, pkShort)} value={lvFmtKs(sales, measure)} size={19} />
           <L3BigStat label={`${pkShort} goal`} value={lvFmtKs(goal, 'Inflows')} size={19} />
           <L3BigStat label="% to goal" value={`${Math.round(goalPct * 100)}%`} size={19} color={goalPct >= 1 ? 'rgb(52,211,153)' : goalPct < 0.85 ? 'rgb(251,191,36)' : undefined} />
           <L3BigStat label="Activities" value={acts.toLocaleString()} size={19} />
+          </>}
         </div>
       </div>
     </div>
@@ -729,6 +739,13 @@ function Level3Page({ onSelectionsChange, onViewClient, filters, setFilters, per
 
   return (
     <div style={{ padding: 20, display: 'flex', flexDirection: 'column', gap: 16 }}>
+      {lvPhase() < 3 && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '9px 14px', borderRadius: 10, border: '1px solid rgba(75,85,99,0.4)', background: 'rgba(255,255,255,0.025)', fontFamily: 'Inter', fontSize: 12, color: 'rgb(200,205,213)', lineHeight: 1.5 }}>
+          <i className="fa-solid fa-circle-info" style={{ color: 'rgb(52,211,153)', fontSize: 12 }} />
+          <span style={{ flex: 1, minWidth: 0 }}>{lvPhase() === 1 ? 'Phase 1 signals are rule-based, from data-pack opportunity, market share and competitive advantage: fee and performance advantage.' : 'Phase 2 adds rule-based retention risk and fallen angel signals from your sales and CRM data.'} <b style={{ color: 'rgb(249,250,251)', fontWeight: 600 }}>Segmentation (A/B/C)</b>, ML signals (focus, cross-sell, upsell), confidence scores and next best action ranking turn on in Phase 3.</span>
+          <span style={{ fontSize: 10, fontWeight: 700, color: 'rgb(52,211,153)', border: '1px solid rgba(52,211,153,0.5)', borderRadius: 4, padding: '1px 6px', whiteSpace: 'nowrap' }}>PHASE {lvPhase()} OF 3</span>
+        </div>
+      )}
       <L3SignalOppCard oppMin={oppMin} oppMax={oppMax} wtdConf={wtdConf}
         sigCount={allSigs.length} faCount={tableRows.length}
         rows={tableRows} measure={measure} period={period} roles={filters.roles} />
@@ -750,13 +767,21 @@ function Level3Page({ onSelectionsChange, onViewClient, filters, setFilters, per
           </div>
           <Tile
             title="FA/Team Summary"
-            subtitle="Ranked by next best action · click a row to expand its signals, highest confidence first"
+            subtitle={lvPhase() >= 3 ? 'Ranked by next best action · click a row to expand its signals, highest confidence first' : lvPhase() === 2 ? 'Rule-based signals from data packs and your sales · click a row to expand' : 'Rule-based signals from data-pack opportunity and competitive advantage · click a row to expand'}
             pad={0} style={{ flex: '999 1 600px', minWidth: 0 }}>
             <L3SummaryTable rows={tableRows} sigTypes={filters.sigTypes} period={period} measure={measure} roles={filters.roles} onViewClient={onViewClient} />
           </Tile>
         </div>
       </div>
 
+      {lvPhase() < 3 ? (
+        <Tile title={`${LV_TERRITORY} territory by segment`} subtitle="Turns on in Phase 3">
+          <div style={{ padding: '18px 4px', display: 'flex', alignItems: 'center', gap: 12, fontFamily: 'Inter', fontSize: 12.5, color: 'rgb(163,163,163)', lineHeight: 1.55 }}>
+            <i className="fa-solid fa-lock" style={{ color: 'rgb(52,211,153)', fontSize: 14 }} />
+            <span>Segmentation (A/B/C) and the segment map turn on in Phase 3 with the ML models, along with focus, cross-sell and upsell signals, confidence scores and next best action ranking.</span>
+          </div>
+        </Tile>
+      ) : (
       <Tile title={`${LV_TERRITORY} territory`}
         subtitle="Bubble size = signal opportunity · colour = the segment holding most of it"
         right={<L3GeoPicker value={geoKey} onChange={setGeoKey} />}
@@ -764,6 +789,7 @@ function Level3Page({ onSelectionsChange, onViewClient, filters, setFilters, per
         <L3TerritoryMap rows={rows} geo={geo} selected={filters[geo.filter] || []}
           onPick={v => tog(geo.filter, v)} />
       </Tile>
+      )}
     </div>
   );
 }

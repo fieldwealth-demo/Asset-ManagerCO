@@ -7,7 +7,7 @@ const ML_LINE = 'rgba(75,85,99,0.35)';
 const ML_L3_BG = 'rgba(167,139,250,0.06)';
 
 function MlL3Tag() {
-  return <span title="Level 3 · Segmentation & Signals" style={{ padding: '1px 6px', borderRadius: 4, background: 'rgba(167,139,250,0.14)', border: '1px solid rgba(167,139,250,0.45)', color: 'rgb(196,181,253)', fontFamily: 'Inter', fontSize: 9, fontWeight: 700, letterSpacing: 0.4 }}>L3</span>;
+  return <span title="Phase 3 · Segmentation & Signals" style={{ padding: '1px 6px', borderRadius: 4, background: 'rgba(167,139,250,0.14)', border: '1px solid rgba(167,139,250,0.45)', color: 'rgb(196,181,253)', fontFamily: 'Inter', fontSize: 9, fontWeight: 700, letterSpacing: 0.4 }}>L3</span>;
 }
 
 function MlPicker({ value, options, onChange, title }) {

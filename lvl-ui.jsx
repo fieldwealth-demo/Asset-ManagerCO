@@ -91,13 +91,17 @@ function lvFocusRow(p, fc) {
     .map(s => (s.product ? s : { ...s, opp: r2(s.opp * fw), oppMin: r2(s.oppMin * fw), oppMax: r2(s.oppMax * fw) }));
   const oppAum = Math.round(p.oppAum * fw), oppIn = r2(p.oppIn * fw), oppNet = r2(p.oppNet * fw);
   const yoursAum = r2(p.yoursAum * hf), yoursIn = r2(p.yoursIn * hf), yoursNet = r2(p.yoursNet * hf);
-  const r12ProdK = Math.round(p.r12ProdK * hf);
+  // R12 sales follow the filtered products' own inflows so totals tie to the product rows.
+  const tied = all.length && all.every(h => h.inflow);
+  const r12ProdK = tied ? Math.round(holdings.reduce((a, h) => a + lvR12(h), 0) * 1000) : Math.round(p.r12ProdK * hf);
+  const prior12Q = tied ? Math.round(holdings.reduce((a, h) => a + lvP12(h), 0) * 1000) : Math.round(p.prior12K * hf);
+  if (tied) { const sf = p.r12ProdK ? r12ProdK / p.r12ProdK : 0; Object.keys(p.sales).forEach(k => { sales[k] = k === 'Rolling 12' ? r12ProdK : k === 'YTD' ? Math.round(holdings.reduce((a, h) => a + h.inflow[4], 0) * 1000) : Math.round(p.sales[k] * sf); }); }
   const q = {
     ...p, holdings, sales, act, signals,
     catMix: fw ? mix.map(c => ({ cat: c.cat, w: c.w / fw })) : [],
     oppAum, oppIn, oppNet, yoursAum, yoursIn, yoursNet,
     shareAum: oppAum ? yoursAum / oppAum : 0, shareIn: oppIn ? yoursIn / oppIn : 0, shareNet: oppNet ? yoursNet / oppNet : 0,
-    r12ProdK, prior12K: Math.round(p.prior12K * hf),
+    r12ProdK, prior12K: prior12Q, salesTrend: prior12Q ? (r12ProdK - prior12Q) / prior12Q : 0,
     lapsedK: p.lapsedK ? Math.round(p.lapsedK * fw) : p.lapsedK,
     prodCat: r12ProdK === 0 ? 'Prospect' : r12ProdK < 400 ? 'Dabbler' : 'Producer',
     prodBand: lvBand(r12ProdK), products: holdings.length, productBand: lvCountBand(holdings.length),
@@ -121,7 +125,27 @@ function lvFocusRows(rows) {
   _lvFocusCache = { src: rows, out, ver: window.FOCUS_VER };
   return out;
 }
-const lvFilterRows = (rows, f) => (f.focusStrat ? lvFocusRows(rows) : rows).filter(r => lvMatches(r, f));
+/* Rollout phase gates which signals exist. Phase 1 (data packs): fee and
+   performance advantage from opportunity + competitive advantage data.
+   Phase 2 (+ sales & CRM): adds rule-based retention risk and fallen angel.
+   Phase 3 (+ ML models): every signal, ML confidence, segments, NBA ranking. */
+const LV_PHASE_SIGS = { 1: ['Fee Advantage', 'Performance Advantage'], 2: ['Fee Advantage', 'Performance Advantage', 'Retention Risk', 'Fallen Angel'] };
+const lvPhase = () => window.AMP_PHASE || 3;
+const lvPhaseSigOk = (t) => lvPhase() >= 3 || LV_PHASE_SIGS[lvPhase()].includes(t);
+let _lvPhaseCache = new Map(), _lvPhaseKey = null;
+function lvPhaseRow(r) {
+  const ph = lvPhase();
+  if (ph >= 3) return r;
+  if (_lvPhaseKey !== ph) { _lvPhaseCache = new Map(); _lvPhaseKey = ph; }
+  const hit = _lvPhaseCache.get(r);
+  if (hit) return hit;
+  const signals = r.signals.filter(s => lvPhaseSigOk(s.type));
+  const q = { ...r, signals, signalOpp: signals.reduce((a, s) => a + s.oppMax, 0), signalOppMin: signals.reduce((a, s) => a + s.oppMin, 0), wtdConfidence: lvWtdConf(signals) };
+  q.nba = signals.length && window.lvNextBest ? lvNextBest(q) : null;
+  _lvPhaseCache.set(r, q);
+  return q;
+}
+const lvFilterRows = (rows, f) => (f.focusStrat ? lvFocusRows(rows) : rows).map(lvPhaseRow).filter(r => lvMatches(r, f));
 const lvCount = (f) => LV_FILTER_KEYS.reduce((n, k) =>
   n + (k === 'minConf' ? ((f.minConf || 50) > 50 ? 1 : 0) : Array.isArray(f[k]) ? f[k].length : (f[k] ? 1 : 0)), 0);
 
@@ -468,6 +492,7 @@ function LvAdvDot({ grade, row }) {
 }
 
 function LvSegBadge({ seg, size = 20 }) {
+  if (lvPhase() < 3) return null;
   const m = LV_SEG_META[seg];
   return (
     <span title={m.label} style={{
@@ -547,6 +572,7 @@ function LvRoleToggle({ roles, onChange }) {
 }
 
 function LvConfBar({ value, color = 'rgb(96,165,250)', width = 44 }) {
+  if (lvPhase() < 3) return <span title="Rule-based signal. ML confidence scores turn on in Phase 3." style={{ fontFamily: 'Inter', fontSize: 9.5, fontWeight: 600, color: 'rgb(140,148,160)', border: '1px solid rgba(75,85,99,0.5)', borderRadius: 4, padding: '1px 5px', whiteSpace: 'nowrap' }}>Rule</span>;
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 7, justifyContent: 'flex-end' }}>
       <div style={{ width, height: 5, borderRadius: 3, background: 'rgba(255,255,255,0.07)', overflow: 'hidden' }}>
@@ -605,13 +631,13 @@ function LvEyeButton({ onClick, title = 'Open FA/Team profile' }) {
 /* Subscription-level switcher. */
 function LvLevelSwitch({ level, onChange }) {
   const defs = [
-    { n: 1, label: 'L1', title: 'Level 1 — Distribution Intelligence' },
-    { n: 2, label: 'L2', title: 'Level 2 — Sales & CRM' },
-    { n: 3, label: 'L3', title: 'Level 3 — Segmentation & Predictive' },
+    { n: 1, label: 'Data packs', title: 'Phase 1 — data pack unification: opportunity, competitive advantage, rule-based advantage signals' },
+    { n: 2, label: '+ Sales & CRM', title: 'Phase 2 — adds your sales and CRM data, territory analytics and rule-based retention / fallen angel signals' },
+    { n: 3, label: '+ ML models', title: 'Phase 3 — adds segmentation, ML signals with confidence, next best action ranking and marketing campaigns' },
   ];
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
-      <span style={{ fontFamily: 'Inter', fontSize: 9.5, fontWeight: 600, color: LVU_DIM, textTransform: 'uppercase', letterSpacing: 0.7, whiteSpace: 'nowrap' }}>Subscribed</span>
+      <span style={{ fontFamily: 'Inter', fontSize: 9.5, fontWeight: 600, color: LVU_DIM, textTransform: 'uppercase', letterSpacing: 0.7, whiteSpace: 'nowrap' }}>Rollout phase</span>
       <div style={{ display: 'inline-flex', padding: 2, borderRadius: 7, background: 'rgba(0,0,0,0.35)', border: `1px solid ${LVU_LINE}` }}>
         {defs.map(d => (
           <button key={d.n} title={d.title} onClick={() => onChange(d.n)} style={{
@@ -626,13 +652,15 @@ function LvLevelSwitch({ level, onChange }) {
   );
 }
 
+/* Header chip: the data that powers the view, not a subscription level. */
+const LV_PHASE_CHIP = { 1: 'DATA PACKS', 2: 'SALES & CRM', 3: 'ML MODELS', '2 + 3': 'SALES & CRM · ML', '1–2': 'DATA PACKS · SALES & CRM', '1–3': 'DATA PACKS · SALES & CRM · ML' };
 function LvLevelBadge({ n }) {
   return (
     <span style={{
       padding: '2px 7px', borderRadius: 5, background: 'rgba(16,185,129,0.14)',
       border: '1px solid rgba(16,185,129,0.4)', color: 'rgb(52,211,153)',
       fontFamily: 'Inter', fontSize: 9.5, fontWeight: 700, letterSpacing: 0.4, whiteSpace: 'nowrap',
-    }}>LEVEL {n}</span>
+    }}>{LV_PHASE_CHIP[n] || n}</span>
   );
 }
 
@@ -653,7 +681,7 @@ function lvClientRow(p) {
   };
 }
 
-Object.assign(window, {
+Object.assign(window, { lvPhase, lvPhaseSigOk, lvPhaseRow, LV_PHASE_SIGS, LV_PHASE_CHIP,
   LvConfFilter, lvRowVehicles, LV_FILTER_DEFAULT, LV_FILTER_KEYS, lvFilterRows, lvMatches, lvCount, lvSelectionChips,
   LvDrawerSections, lvChipLabel, LvChip, LvToggle, LvKpi, LvTriKpi, LvBreakdownKpi,
   LvAdvDot, LvSegBadge, LvProdCatTag, LvTrend, LvEngIcons, LvRoleToggle, LvConfBar,
