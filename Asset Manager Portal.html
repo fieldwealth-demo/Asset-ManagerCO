@@ -102,11 +102,12 @@
   <script type="text/babel" src="explorer-grid.jsx"></script>
   <script type="text/babel" src="explorer-formula.jsx"></script>
   <script type="text/babel" src="explorer.jsx"></script>
+  <script type="text/babel" src="roi.jsx"></script>
   <script type="text/babel">
     function App() {
       // Deep links from emails: #signals, #leadership, #sales, #briefs, #leadbriefs, #home, or any page id.
       const HASH_PAGES = { signals: 'l3intel', leadership: 'management', sales: 'l2sales', briefs: 'briefs', leadbriefs: 'leadbriefs', home: 'home' };
-      const HASH_IDS = ['home', 'leadbriefs', 'management', 'opportunity', 'briefs', 'l3intel', 'l2sales', 'advantage', 'reports', 'explorer', 'mktbuilder', 'mktanalytics'];
+      const HASH_IDS = ['roi', 'home', 'leadbriefs', 'management', 'opportunity', 'briefs', 'l3intel', 'l2sales', 'advantage', 'reports', 'explorer', 'mktbuilder', 'mktanalytics'];
       const hashPage = () => { const h = decodeURIComponent(location.hash.slice(1)); return HASH_PAGES[h] || (HASH_IDS.includes(h) ? h : null); };
       const [active, setActive] = React.useState(() => {
         const h = hashPage(); if (h) return h;
@@ -153,6 +154,7 @@
       const ITEM_LEVEL = { l2sales: 2, leadbriefs: 2, briefs: 2, mktbuilder: 3, mktanalytics: 3 };
       const ALL_NAV = [
         { id: 'home', label: 'Ask Field', icon: 'sparkles' },
+        { id: 'roi', label: 'ROI Center', icon: 'sack-dollar', section: 'lead' },
         { id: 'leadbriefs', label: 'Leadership Brief & Review', icon: 'user-tie', section: 'lead' },
         { id: 'management', label: 'Leadership Dashboard', icon: 'chart-column', section: 'lead' },
         ...(level === 1 ? [{ id: 'opportunity', label: 'Opportunity', icon: 'bullseye', section: 'whole' }] : []),
@@ -319,6 +321,7 @@
       return (
         <div style={{ display:'flex', height:'100vh', overflow:'hidden', background:'transparent' }} data-screen-label={
           active === 'home' ? '01 Home' :
+          active === 'roi' ? '00 ROI Center' :
           active === 'management' ? '02 Sales Leadership' :
           active === 'opportunity' ? '03 Opportunity' :
           active === 'advantage' ? '04 Competitive Advantage' :
@@ -355,12 +358,18 @@
                 <HomePage level={level} onNav={setActive} onAIAction={handleAIAction} subs={sub.subs} onSubscribe={sub.open} onReadEmail={() => setActive('briefs')} />
               </>
             )}
+            {active === 'roi' && (
+              <>
+                <TopBar levelSwitch={levelSw} title="ROI Center" badge={<LvLevelBadge n={level >= 3 ? '1–3' : level === 2 ? '1–2' : 1} />} dateStr={DATE} showSearch={false} onAiClick={() => setAiOpen(true)} />
+                <main style={{ flex:1, minHeight:0, overflow:'auto' }}><RoiPage level={level} /></main>
+              </>
+            )}
             {active === 'management' && level === 1 && (
               <>
                 <TopBar levelSwitch={levelSw} focusToggle={focusSw(() => setFilterOpen(true))} title="Sales Leadership" badge={<LvLevelBadge n={1} />} dateStr={DATE} activeSelections={mgmtSelections} period={periodMgmt} onPeriod={setPeriodMgmt} showExport showFilter onClearAll={clearMgmtSelections}
                   onExportClick={() => setExportOpen(true)}
                   onFilterClick={() => setFilterOpen(true)} filterActive={filterActive} onAiClick={() => setAiOpen(true)} />
-                <main style={{ flex:1, display:'flex', flexDirection:'column', minHeight:0, overflow:'auto' }}><ManagementPage filters={filters} focus={focusKey} onSelectionsChange={setMgmtSelections} /></main>
+                <main style={{ flex:1, display:'flex', flexDirection:'column', minHeight:0, overflow:'auto' }}><RoiBanner level={level} scope="lead" onOpen={() => setActive('roi')} /><ManagementPage filters={filters} focus={focusKey} onSelectionsChange={setMgmtSelections} /></main>
               </>
             )}
             {active === 'opportunity' && (
@@ -452,6 +461,7 @@
                   onAiClick={() => setAiOpen(true)}
                 />
                 <main style={{ flex:1, minHeight:0, overflow:'auto' }}>
+                  <RoiBanner level={level} scope="territory" onOpen={() => setActive('roi')} />
                   <Level2Page filters={lvlF2} setFilters={setLvlF2} period={periodLvl2} measure={lvlMeasure}
                     onSelectionsChange={setLvlSelections}
                     onViewClient={(row) => setClientDetail(row)} />
@@ -490,7 +500,7 @@
                   secondRow
                  
                   measureToggle={<TabPills options={['AUM', 'Inflows', 'Net Flows']} value={lvlMeasure} onChange={setLvlMeasure} />}
-                  onSubscribeClick={() => sub.open('brief', { view: 'Sales Leadership', chips: leadSelections.map(c => c.label).filter(x => typeof x === 'string') })} subscribed={sub.subscribed}
+                  onSubscribeClick={() => sub.open('lbrief', { view: 'Sales Leadership', chips: leadSelections.map(c => c.label).filter(x => typeof x === 'string') })} subscribed={sub.subscribed}
                   activeSelections={leadSelections}
                   period={periodLead} onPeriod={setPeriodLead} showExport showFilter
                   filterActive={ML_XF_KEYS.some(k => leadXf[k].length)}
@@ -500,6 +510,7 @@
                   onAiClick={() => setAiOpen(true)}
                 />
                 <main style={{ flex:1, minHeight:0, overflow:'auto' }}>
+                  <RoiBanner level={level} scope="lead" onOpen={() => setActive('roi')} />
                   <LeadershipPage focus={focusKey} level={level} measure={lvlMeasure} period={periodLead} role={leadRole} xf={leadXf} setXf={setLeadXf} onSelectionsChange={setLeadSelections} />
                 </main>
               </>
@@ -559,7 +570,7 @@
                 <main style={{ flex:1, minHeight:0, overflow:'auto' }}>{locked ? <div style={{ padding: 40, color:'rgb(163,163,163)', fontFamily:'Inter' }}>Campaign Analytics needs Level 2 sales and CRM data.</div> : <CampaignAnalyticsPage key={active} />}</main>
               </>
             )}
-            {!['home','management','opportunity','advantage','distribution','datapacks','reports','explorer','l2sales','l3intel','lead','settings','briefs','leadbriefs','mktbuilder','mktanalytics'].includes(active) && (
+            {!['roi','home','management','opportunity','advantage','distribution','datapacks','reports','explorer','l2sales','l3intel','lead','settings','briefs','leadbriefs','mktbuilder','mktanalytics'].includes(active) && (
               <>
                 <TopBar levelSwitch={levelSw} title={active.charAt(0).toUpperCase() + active.slice(1)} dateStr={DATE} />
                 <div style={{ padding: 40, color:'rgb(163,163,163)' }}>

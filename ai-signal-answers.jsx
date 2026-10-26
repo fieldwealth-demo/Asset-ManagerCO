@@ -1,5 +1,5 @@
 /* Ask Field answers for the Level 2 / Level 3 suggested prompts. Content comes
-   from the same sources the wholesaler sees elsewhere: the Morning Brief, the
+   from the same sources the wholesaler sees elsewhere: the Territory Brief, the
    Monthly Review & Plan, and the live Segmentation & Signals book. */
 
 const AIS_TONE = {
@@ -9,11 +9,11 @@ const AIS_TONE = {
   b: ['rgb(96,165,250)', 'rgba(96,165,250,0.13)', 'rgba(96,165,250,0.45)'],
   p: ['rgb(167,139,250)', 'rgba(167,139,250,0.13)', 'rgba(167,139,250,0.45)'],
 };
-const AIS_BRIEF = { label: 'Morning Brief · Tue, Sep 22', icon: 'sun' };
+const AIS_BRIEF = { label: 'Territory Brief · Tue, Sep 22', icon: 'sun' };
 const AIS_MONTHLY = { label: 'Monthly Review & Plan · September', icon: 'chart-line' };
 const AIS_LIVE = { label: 'Segmentation & Signals · live book', icon: 'wave-pulse' };
 const aisCta = {
-  brief: { label: 'Open Morning Brief', icon: 'sun', nav: 'briefs', briefView: 'brief' },
+  brief: { label: 'Open Territory Brief', icon: 'sun', nav: 'briefs', briefView: 'brief' },
   monthly: { label: 'Open Monthly Review & Plan', icon: 'chart-line', nav: 'briefs', briefView: 'monthly' },
   l3: { label: 'Open Segmentation & Signals', icon: 'wave-pulse', nav: 'l3intel' },
   l2: { label: 'Open Territory Analytics', icon: 'handshake', nav: 'l2sales' },

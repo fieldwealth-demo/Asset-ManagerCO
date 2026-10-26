@@ -129,7 +129,7 @@ function MlThresholds({ rows, ctx }) {
     };
   }, [rows, by, ctx.role]);
   return (
-    <Tile title="Production thresholds" subtitle="Share of producing FA/Teams in each rolling-12 production band"
+    <Tile title="Rolling 12 production" subtitle="Share of producing FA/Teams in each rolling-12 production band"
       right={<TabPills options={['Region', ML_ROLE_ONE[ctx.role]]} value={by === 'Region' ? 'Region' : ML_ROLE_ONE[ctx.role]} onChange={v => setBy(v === 'Region' ? 'Region' : 'Person')} />}>
       <HC options={options} style={{ height: Math.max(240, (by === 'Region' ? 5 : 16) * 26 + 90) }} />
     </Tile>
@@ -154,7 +154,7 @@ function MlSignalPipeline({ rows, ctx, xf }) {
     };
   }, [rows, ctx, xf, by]);
   return (
-    <Tile title={<span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>Signal pipeline <MlL3Tag /></span>}
+    <Tile title={<span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>Signal pipeline</span>}
       subtitle="Open signal opportunity by signal family" style={{ height: '100%', boxSizing: 'border-box' }}
       right={<TabPills options={['Region', ML_ROLE_ONE[ctx.role]]} value={by === 'Region' ? 'Region' : ML_ROLE_ONE[ctx.role]} onChange={v => setBy(v === 'Region' ? 'Region' : 'Person')} />}>
       <HC options={options} style={{ height: Math.max(260, (by === 'Region' ? 5 : 16) * 24 + 90) }} />
@@ -171,7 +171,7 @@ function MlSignalFunnel({ agg, bySeg }) {
   ];
   const top = Math.max(1, agg.sigN);
   return (
-    <Tile title={<span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>Signal conversion <MlL3Tag /></span>}
+    <Tile title={<span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>Signal conversion</span>}
       subtitle="How far the team takes the signals it is given" style={{ height: '100%', boxSizing: 'border-box' }}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
         {steps.map((s, i) => (
@@ -245,7 +245,8 @@ function MlDrawerSections({ local, toggle, setMany, level, role, onRole }) {
       <SearchMultiSelect label="Product" placeholder="All products" options={LV_CATALOG.map(p => p.name)} selected={local.product} onChange={v => setMany('product', v)} />
       <FilterGroupLabel>Sales</FilterGroupLabel>
       <FilterSection label="Producer category" options={LV_PROD_CATS} selected={local.prodCat} onToggle={v => toggle('prodCat', v)} />
-      <SearchMultiSelect label="Production threshold (R12)" placeholder="All thresholds" options={LV_PROD_BANDS} selected={local.prodBand} onChange={v => setMany('prodBand', v)} />
+      <SearchMultiSelect label="Rolling 12 production" placeholder="All production bands" options={LV_PROD_BANDS} selected={local.prodBand} onChange={v => setMany('prodBand', v)} />
+      <FilterSection label="# of products" options={['0', '1', '2', '3', '4', '5+']} selected={local.nprod || []} onToggle={v => toggle('nprod', v)} />
       {level >= 3 && (
         <>
           <FilterGroupLabel>Segmentation &amp; signals</FilterGroupLabel>
@@ -283,7 +284,7 @@ function LeadershipPage({ level, measure, period, role, onSelectionsChange, xf, 
 
   React.useEffect(() => {
     if (!onSelectionsChange) return;
-    const icons = { region: 'map', person: 'user-tie', firm: 'building-columns', channel: 'sitemap', vehicle: 'cube', cat: 'layer-group', product: 'box', prodCat: 'chart-simple', prodBand: 'coins', segment: 'layer-group' };
+    const icons = { region: 'map', person: 'user-tie', firm: 'building-columns', channel: 'sitemap', vehicle: 'cube', cat: 'layer-group', product: 'box', prodCat: 'chart-simple', prodBand: 'coins', nprod: 'cubes', segment: 'layer-group' };
     const chips = [];
     ML_XF_KEYS.forEach(k => xf[k].forEach(v => chips.push({
       key: `${k}:${v}`, icon: icons[k], label: ML_DIMS[k].label_ ? ML_DIMS[k].label_(v) : v,
@@ -317,7 +318,6 @@ function LeadershipPage({ level, measure, period, role, onSelectionsChange, xf, 
         <div style={{ background: 'rgba(167,139,250,0.05)', border: '1px solid rgba(167,139,250,0.28)', borderRadius: 12, padding: '12px 18px 14px', display: 'flex', flexDirection: 'column', gap: 10 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
             <span style={{ fontFamily: 'Inter', fontSize: 11, fontWeight: 600, color: ML_INK }}>Segmentation & signals</span>
-            <MlL3Tag />
             <span style={{ flex: 1 }} />
             <MlConfPills value={minConf} onChange={setMinConf} />
           </div>

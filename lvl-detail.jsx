@@ -13,8 +13,6 @@ function NbaCard({ row }) {
     <div style={{ background: 'rgba(255,255,255,0.035)', border: '1px solid rgba(167,139,250,0.35)', borderRadius: 12, padding: '14px 18px 16px', display: 'flex', flexDirection: 'column', gap: 12 }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
         <span style={{ fontFamily: 'Inter', fontSize: 14, fontWeight: 600, color: 'rgb(249,250,251)' }}>Next best actions</span>
-        <MlL3Tag />
-        {row.segment && row.segment !== 'N' && <LvSegBadge seg={row.segment} size={18} />}
         <span style={{ flex: 1 }} />
         <span style={{ fontFamily: 'Inter', fontSize: 11.5, color: 'rgb(163,163,163)' }}>{sigs.length} applicable · {distFmtM(tot)} signal opp. · ranked by confidence</span>
       </div>

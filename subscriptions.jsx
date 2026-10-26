@@ -9,7 +9,7 @@ const SUB_INK = 'rgb(249,250,251)';
 const SUB_INK2 = 'rgb(209,213,219)';
 const SUB_MUTED = 'rgb(163,163,163)';
 const SUB_DIM = 'rgb(107,114,128)';
-const SUB_LS = 'amp_subs_v1';
+const SUB_LS = 'amp_subs_v2';
 const SUB_ME = 'morgan.vance@fieldwealth.ai';
 const SUB_TEAM = ['John Doe', 'Jane Smith', 'Mary Roe', 'Robert Sample', 'Linda Public'];
 const SUB_TIMES = ['6:00 AM', '6:30 AM', '7:00 AM', '7:30 AM', '8:00 AM'];
@@ -17,12 +17,12 @@ const SUB_DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
 const SUB_TYPES = {
   brief: {
-    label: 'Morning Brief', cadence: 'Daily', icon: 'sun',
-    desc: "Overnight sales, this week's meetings and today's priority calls",
+    label: 'Territory Brief', cadence: 'Daily or weekly', freqs: ['Daily', 'Weekly'], icon: 'sun',
+    desc: "What changed, this week's meetings and priority calls",
     file: 'emails/Morning Brief v2.html',
     outlook: 'emails/Morning Brief v2 - Outlook.html',
-    subject: 'Morning Brief · 4 meetings this week, 5 priority calls',
-    sections: [['overnight', 'What changed overnight'], ['meetings', 'Your meetings this week'], ['calls', "Today's priority calls"], ['cold', 'Relationships going cold'], ['followup', 'Follow up within 48 hours']],
+    subject: 'Territory Brief · 4 meetings this week, 5 priority calls',
+    sections: [['overnight', 'What changed'], ['meetings', 'Your meetings this week'], ['calls', "Priority calls"], ['cold', 'Relationships going cold'], ['followup', 'Follow up within 48 hours']],
   },
   week: {
     label: 'Week Ahead', cadence: 'Weekly', icon: 'calendar-week',
@@ -41,12 +41,12 @@ const SUB_TYPES = {
     sections: [['sales', 'Sales by product'], ['worked', 'Sales lift by touch'], ['signals', 'Signals that converted'], ['wins', 'Top wins'], ['attention', 'Needs attention'], ['booked', 'Booked meetings'], ['trip', 'Suggested trip'], ['focus', 'Focus products']],
   },
   lbrief: {
-    label: 'Leadership Brief', cadence: 'Daily', icon: 'user-tie', aud: 'lead',
+    label: 'Leadership Brief', cadence: 'Daily or weekly', freqs: ['Daily', 'Weekly'], icon: 'user-tie', aud: 'lead',
     desc: 'Team sales against plan, who to recognize, what to monitor and act on',
     file: 'emails/Leadership Brief.html',
     outlook: 'emails/Leadership Brief - Outlook.html',
     subject: 'Leadership Brief · Northeast at 104% of plan, 3 items to act on',
-    sections: [['overnight', 'What changed overnight'], ['recognize', 'Recognize'], ['monitor', 'Monitor'], ['act', 'Act on today'], ['team', 'Team scorecard']],
+    sections: [['overnight', 'What changed'], ['recognize', 'Recognize'], ['monitor', 'Monitor'], ['act', 'Act on next'], ['team', 'Team scorecard']],
   },
   lmonthly: {
     label: 'Leadership Monthly Review', cadence: 'Monthly', icon: 'chart-column', aud: 'lead',
@@ -57,12 +57,12 @@ const SUB_TYPES = {
     sections: [['team', 'Results by salesperson'], ['scorecard', 'Wholesaler scorecard'], ['focus', 'Focus categories'], ['worked', 'What worked and didn’t'], ['recognize', 'Recognize'], ['attention', 'Needs attention'], ['plan', 'October plan']],
   },
   sabrief: {
-    label: 'Strategic Account Brief', cadence: 'Daily', icon: 'building-columns', aud: 'lead',
+    label: 'Strategic Account Brief', cadence: 'Daily, weekly or monthly', freqs: ['Daily', 'Weekly', 'Monthly'], icon: 'building-columns', aud: 'lead',
     desc: 'One firm across every region: sales, coverage, signals and what to act on',
     file: 'emails/Strategic Account Brief.html',
     outlook: 'emails/Strategic Account Brief - Outlook.html',
     subject: 'Strategic Account Brief · Contoso Wealth up 9% MTD, 3 items to act on',
-    sections: [['overnight', 'What changed overnight'], ['regions', 'By region'], ['teams', 'Top FA/Teams'], ['signals', 'Open signals'], ['act', 'Act on today']],
+    sections: [['overnight', 'What changed'], ['regions', 'By region'], ['teams', 'Top FA/Teams'], ['signals', 'Open signals'], ['act', 'Act on next']],
   },
   dash: {
     label: 'Current dashboard', cadence: 'Custom', icon: 'table-cells-large', dash: true,
@@ -72,10 +72,19 @@ const SUB_TYPES = {
 };
 const SUB_SEGS = ['A', 'B', 'C'];
 const SUB_FREQ_EFF = { Daily: 'brief', Weekly: 'week', Monthly: 'monthly' };
-const subEff = s => (s.type === 'dash' ? SUB_FREQ_EFF[s.freq] || 'week' : s.type === 'lbrief' || s.type === 'sabrief' ? 'brief' : s.type === 'lmonthly' ? 'monthly' : s.type);
-const subEmptyScope = () => ({ segments: [], firms: [], focus: [] });
+/* Briefs with a choice of frequency (Territory, Leadership, Strategic Account)
+   default to weekly; s.freq picks Daily / Weekly / Monthly. */
+const subFreqs = s => (SUB_TYPES[s.type] && SUB_TYPES[s.type].freqs) || null;
+const subFreqOf = s => s.freq || ((s.days || []).length > 1 ? 'Daily' : 'Weekly');
+const subEff = s => (s.type === 'dash' ? SUB_FREQ_EFF[s.freq] || 'week' : subFreqs(s) ? SUB_FREQ_EFF[subFreqOf(s)] : s.type === 'lmonthly' ? 'monthly' : s.type);
+const subEmptyScope = () => ({ segments: [], firms: [], focus: [], region: 'National' });
+/* Which briefs each audience edits: territory briefs go to wholesalers, leadership
+   briefs to sales leaders. Week Ahead stays for existing subscriptions only. */
+const SUB_GROUPS = { whole: ['brief', 'monthly'], lead: ['lbrief', 'lmonthly', 'sabrief'] };
+const subAud = type => (SUB_TYPES[type] && SUB_TYPES[type].aud) || 'whole';
+const SUB_LEADS = () => Object.values(window.BRF_MGR || { Northeast: 'Dana Price', Southeast: 'Lee Ortega', Midwest: 'Pat Morrow', Southwest: 'Sam Rivers', West: 'Jess Lyle' });
 function subScopeNorm(sc) {
-  if (sc && typeof sc === 'object') return { segments: sc.segments || [], firms: sc.firms || [], focus: sc.focus || [] };
+  if (sc && typeof sc === 'object') return { segments: sc.segments || [], firms: sc.firms || [], focus: sc.focus || [], region: sc.region || 'National' };
   return { ...subEmptyScope(), segments: sc === 'segA' ? ['A'] : [] };
 }
 function subRows() { return window.LV_ROWS || []; }
@@ -93,6 +102,9 @@ function subScopeCount(sc) {
 function subScopeLabel(s) {
   if (s.type === 'dash') return s.dash && s.dash.chips.length ? `${s.dash.chips.length} dashboard filter${s.dash.chips.length === 1 ? '' : 's'}` : 'Whole dashboard';
   const sc = subScopeNorm(s.scope), parts = [];
+  if (SUB_GROUPS.whole.includes(s.type) || s.type === 'week') return 'My territory';
+  if (s.type === 'sabrief') return sc.firms.length ? (sc.firms.length === 1 ? sc.firms[0] : `${sc.firms.length} strategic accounts`) : 'My territory';
+  if (s.type === 'lbrief' || s.type === 'lmonthly') return sc.region && sc.region !== 'National' ? `${sc.region} region` : 'National';
   if (sc.segments.length) parts.push(`Segment ${sc.segments.join(', ')}`);
   if (sc.firms.length) parts.push(sc.firms.length === 1 ? sc.firms[0] : `${sc.firms.length} firms`);
   if (sc.focus.length) parts.push(sc.focus.length === 1 ? sc.focus[0] : `${sc.focus.length} focus products`);
@@ -105,18 +117,19 @@ function subNew(type, ctx) {
   SUB_TYPES[type].sections.forEach(([k]) => { sections[k] = true; });
   return {
     id: null, type, active: true, time: type === 'monthly' || type === 'lmonthly' ? '7:00 AM' : '6:30 AM',
-    days: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'], weekday: 'Mon', monthDay: '1st business day',
-    skipQuiet: false, inApp: true, sections, scope: subEmptyScope(), recipients: ['me'],
+    days: SUB_TYPES[type].freqs ? ['Mon'] : ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'], weekday: 'Mon', monthDay: '1st business day',
+    ...(SUB_TYPES[type].freqs ? { freq: 'Weekly' } : {}),
+    skipQuiet: false, inApp: true, sections, scope: type === 'sabrief' ? { ...subEmptyScope(), firms: [(window.LV_ALL_FIRMS || ['Contoso Wealth'])[0]] } : subEmptyScope(), recipients: ['me'],
     ...(type === 'dash' ? { freq: 'Weekly', dash: ctx || { view: 'Dashboard', chips: [] } } : {}),
   };
 }
-/* Wholesalers are subscribed to the Morning Brief and the Monthly Review by
+/* Wholesalers are subscribed to the Territory Brief and the Monthly Review by
    default, so neither needs any set-up. */
 function subLoad() {
   let v = null;
   try { v = JSON.parse(localStorage.getItem(SUB_LS)); } catch (e) {}
-  if (!Array.isArray(v)) return [{ ...subNew('brief'), id: 'brief' }, { ...subNew('monthly'), id: 'monthly' }, { ...subNew('lbrief'), id: 'lbrief' }, { ...subNew('lmonthly'), id: 'lmonthly' }];
-  v = v.map(s => ({ ...s, scope: subScopeNorm(s.scope) }));
+  if (!Array.isArray(v)) return [{ ...subNew('brief'), id: 'brief' }, { ...subNew('monthly'), id: 'monthly' }, { ...subNew('lbrief'), id: 'lbrief' }, { ...subNew('lmonthly'), id: 'lmonthly' }, { ...subNew('sabrief'), id: 'sabrief' }];
+  v = v.map(s => ({ ...s, scope: subScopeNorm(s.scope), ...(SUB_TYPES[s.type] && SUB_TYPES[s.type].freqs && !s.freq ? { freq: subFreqOf(s), weekday: (s.days || [])[0] || 'Mon' } : {}) }));
   try {
     if (!localStorage.getItem('amp_subs_mig2')) {
       localStorage.setItem('amp_subs_mig2', '1');
@@ -126,6 +139,10 @@ function subLoad() {
       localStorage.setItem('amp_subs_mig3', '1');
       ['lbrief', 'lmonthly'].forEach(t => { if (!v.some(s => s.type === t)) v.push({ ...subNew(t), id: t }); });
     }
+    if (!localStorage.getItem('amp_subs_mig4')) {
+      localStorage.setItem('amp_subs_mig4', '1');
+      if (!v.some(s => s.type === 'sabrief')) v.push({ ...subNew('sabrief'), id: 'sabrief' });
+    }
   } catch (e) {}
   return v;
 }
@@ -134,7 +151,8 @@ function subUrl(s, extra = '') {
   const t = SUB_TYPES[s.type];
   const hide = t.sections.map(([k]) => k).filter(k => s.sections && k in s.sections && !s.sections[k]);
   const lbl = subScopeLabel(s);
-  return t.file + (t.file.includes('?') ? '&' : '?') + 'hide=' + hide.join(',') + (lbl !== 'My territory' ? '&scopeText=' + encodeURIComponent(lbl) : '') + extra;
+  const showLbl = lbl !== 'My territory' && s.type === 'dash';
+  return t.file + (t.file.includes('?') ? '&' : '?') + 'hide=' + hide.join(',') + (showLbl ? '&scopeText=' + encodeURIComponent(lbl) : '') + extra;
 }
 // Same settings as subUrl, pointed at the Outlook build (embed is preview-only).
 function subOutlookUrl(s, extra = '') {
@@ -286,10 +304,15 @@ function SubEmailPreview({ sub }) {
   const t = SUB_TYPES[sub.type];
   const onLoad = () => { try { setH(ref.current.contentDocument.documentElement.scrollHeight); } catch (e) {} };
   if (t.dash) return <SubDashPreview sub={sub} />;
+  const sc = subScopeNorm(sub.scope), enc = m => (Object.keys(m).length ? '&sub=' + encodeURIComponent(JSON.stringify(m)) : '');
+  let extra = '';
+  if (sub.type === 'lbrief' || sub.type === 'lmonthly') extra = sc.region !== 'National' && window.brfRegionMap ? `&scope=region${enc(brfRegionMap(sc.region))}` : '&scope=national';
+  if (sub.type === 'sabrief' && sc.firms[0] && sc.firms[0] !== 'Contoso Wealth') extra = enc({ 'Contoso Wealth': sc.firms[0], Contoso: sc.firms[0].split(' ')[0] });
+  const src = subUrl(sub, extra);
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12, alignItems: 'center' }}>
       <SubMailHeader sub={sub} subject={t.subject} />
-      <iframe ref={ref} key={subUrl(sub)} src={subUrl(sub)} onLoad={onLoad} title="Email preview"
+      <iframe ref={ref} key={src} src={src} onLoad={onLoad} title="Email preview"
         style={{ width: 640, maxWidth: '100%', height: h, border: 0, borderRadius: 8, background: '#111928', boxShadow: '0 10px 40px rgba(0,0,0,0.45)' }} />
     </div>
   );
@@ -313,11 +336,14 @@ function SubscribeDrawer({ open, initial, ctx, onClose, onSave, onDelete }) {
   const set = (patch) => setS(prev => ({ ...prev, ...patch }));
   const t = SUB_TYPES[s.type];
   const isNew = !s.id;
+  const aud = subAud(initial ? initial.type : 'brief');
+  const listTypes = [...SUB_GROUPS[aud], ...(s.type === 'week' ? ['week'] : []), ...(ctx ? ['dash'] : [])];
+  const firmList = window.LV_ALL_FIRMS || subFirmList();
   const pickType = (type) => {
     if (type === s.type) return;
     if (type === 'dash' && !ctx) return;
     const base = subNew(type, ctx);
-    setS({ ...base, id: s.id && s.type === type ? s.id : null, recipients: s.recipients, scope: subScopeNorm(s.scope), inApp: s.inApp });
+    setS({ ...base, id: s.id && s.type === type ? s.id : null, recipients: s.recipients, scope: type === 'sabrief' && !subScopeNorm(s.scope).firms.length ? base.scope : subScopeNorm(s.scope), inApp: s.inApp });
   };
   const eff = subEff(s);
   const scope = subScopeNorm(s.scope);
@@ -326,7 +352,7 @@ function SubscribeDrawer({ open, initial, ctx, onClose, onSave, onDelete }) {
   const toggleDay = (d) => set({ days: s.days.includes(d) ? s.days.filter(x => x !== d) : SUB_DAYS.filter(x => x === d || s.days.includes(x)) });
   const toggleRecip = (r) => set({ recipients: s.recipients.includes(r) ? s.recipients.filter(x => x !== r) : [...s.recipients, r] });
   const secOn = t.sections.filter(([k]) => s.sections[k]).length;
-  const canSave = s.recipients.length > 0 && secOn > 0 && (eff !== 'brief' || s.days.length > 0);
+  const canSave = s.recipients.length > 0 && secOn > 0 && (eff !== 'brief' || s.days.length > 0) && (s.type !== 'sabrief' || scope.firms.length > 0);
 
   return (
     <>
@@ -355,7 +381,7 @@ function SubscribeDrawer({ open, initial, ctx, onClose, onSave, onDelete }) {
             <div>
               <div style={subLabel}>Email</div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                {Object.entries(SUB_TYPES).map(([k, v]) => {
+                {listTypes.map(k => [k, SUB_TYPES[k]]).map(([k, v]) => {
                   const on = s.type === k;
                   const off = v.dash && !ctx;
                   const dc = on ? s.dash : ctx;
@@ -370,7 +396,7 @@ function SubscribeDrawer({ open, initial, ctx, onClose, onSave, onDelete }) {
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                           <span style={{ fontFamily: 'Inter', fontSize: 12.5, fontWeight: 600, color: SUB_INK }}>{v.label}</span>
-                          <span style={{ fontFamily: 'Inter', fontSize: 9, fontWeight: 700, letterSpacing: 0.5, textTransform: 'uppercase', color: on ? SUB_GREEN_TXT : SUB_DIM, border: `1px solid ${on ? 'rgba(16,185,129,0.5)' : SUB_LINE}`, borderRadius: 4, padding: '1px 5px' }}>{v.dash && on ? s.freq : v.cadence}</span>
+                          <span style={{ fontFamily: 'Inter', fontSize: 9, fontWeight: 700, letterSpacing: 0.5, textTransform: 'uppercase', color: on ? SUB_GREEN_TXT : SUB_DIM, border: `1px solid ${on ? 'rgba(16,185,129,0.5)' : SUB_LINE}`, borderRadius: 4, padding: '1px 5px' }}>{(v.dash || v.freqs) && on ? (v.freqs ? subFreqOf(s) : s.freq) : v.cadence}</span>
                         </div>
                         <div style={{ fontFamily: 'Inter', fontSize: 10.5, color: SUB_MUTED, marginTop: 2 }}>{desc}</div>
                       </div>
@@ -388,12 +414,22 @@ function SubscribeDrawer({ open, initial, ctx, onClose, onSave, onDelete }) {
                     {Object.keys(SUB_FREQ_EFF).map(f => <SubChip key={f} on={s.freq === f} onClick={() => set({ freq: f, weekday: 'Mon', time: '6:30 AM' })}>{f}</SubChip>)}
                   </div>
                 )}
+                {t.freqs && (
+                  <div style={{ display: 'flex', gap: 6 }}>
+                    {t.freqs.map(f => <SubChip key={f} on={subFreqOf(s) === f} onClick={() => set(f === 'Daily' ? { freq: f, days: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'], time: '6:30 AM' } : f === 'Weekly' ? { freq: f, weekday: 'Mon', days: ['Mon'], time: '6:30 AM' } : { freq: f, monthDay: '1st business day', time: '7:00 AM' })}>{f}{f === 'Weekly' ? ' (default)' : ''}</SubChip>)}
+                  </div>
+                )}
+                {t.freqs && eff === 'week' && (
+                  <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' }}>
+                    {SUB_DAYS.map(d => <SubChip key={d} on={s.weekday === d} onClick={() => set({ weekday: d, days: [d] })}>{d}</SubChip>)}
+                  </div>
+                )}
                 {eff === 'brief' && (
                   <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' }}>
                     {SUB_DAYS.map(d => <SubChip key={d} on={s.days.includes(d)} onClick={() => toggleDay(d)}>{d}</SubChip>)}
                   </div>
                 )}
-                {eff === 'week' && (
+                {!t.freqs && eff === 'week' && (
                   <div style={{ display: 'flex', gap: 6 }}>
                     {[['Sun', 'Sunday evening'], ['Mon', 'Monday morning']].map(([d, l]) => <SubChip key={d} on={s.weekday === d} onClick={() => set({ weekday: d, time: d === 'Sun' ? '6:00 PM' : '6:30 AM' })}>{l}</SubChip>)}
                   </div>
@@ -408,7 +444,7 @@ function SubscribeDrawer({ open, initial, ctx, onClose, onSave, onDelete }) {
                   <SubSelect value={s.time} options={eff === 'week' && s.weekday === 'Sun' ? ['5:00 PM', '6:00 PM', '7:00 PM'] : SUB_TIMES} onChange={v => set({ time: v })} />
                   <span style={{ fontFamily: 'Inter', fontSize: 11, color: SUB_DIM }}>ET</span>
                 </div>
-                {s.type === 'brief' && <SubToggleRow on={s.skipQuiet} onClick={() => set({ skipQuiet: !s.skipQuiet })} title="Skip days with no meetings or new signals" />}
+                {t.freqs && eff === 'brief' && <SubToggleRow on={s.skipQuiet} onClick={() => set({ skipQuiet: !s.skipQuiet })} title="Skip days with no meetings or new signals" />}
                 <SubToggleRow on={s.inApp} onClick={() => set({ inApp: !s.inApp })} title="Also show on Ask Field home" sub="Read it in the portal as well as your inbox" />
               </div>
             </div>
@@ -421,7 +457,7 @@ function SubscribeDrawer({ open, initial, ctx, onClose, onSave, onDelete }) {
             </div>
 
             <div>
-              <div style={{ ...subLabel, display: 'flex' }}><span style={{ flex: 1 }}>Scope</span>{s.type !== 'dash' && scopeAny && <button onClick={() => set({ scope: subEmptyScope() })} style={{ border: 'none', background: 'transparent', padding: 0, cursor: 'pointer', color: SUB_GREEN_TXT, fontFamily: 'Inter', fontSize: 10.5, textTransform: 'none', letterSpacing: 0 }}>Clear</button>}</div>
+              <div style={{ ...subLabel, display: 'flex' }}><span style={{ flex: 1 }}>Scope</span>{s.type === 'sabrief' && scope.firms.length > 0 && <button onClick={() => set({ scope: { ...scope, firms: [] } })} style={{ border: 'none', background: 'transparent', padding: 0, cursor: 'pointer', color: SUB_GREEN_TXT, fontFamily: 'Inter', fontSize: 10.5, textTransform: 'none', letterSpacing: 0 }}>Clear</button>}</div>
               {s.type === 'dash' ? (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                   <div style={{ fontFamily: 'Inter', fontSize: 12, color: SUB_INK2 }}>Uses the filters on {s.dash.view} when you subscribed.</div>
@@ -429,15 +465,21 @@ function SubscribeDrawer({ open, initial, ctx, onClose, onSave, onDelete }) {
                     {s.dash.chips.length ? s.dash.chips.map(c => <SubChip key={c} on disabled>{c}</SubChip>) : <span style={{ fontFamily: 'Inter', fontSize: 11.5, color: SUB_DIM }}>No filters · whole territory</span>}
                   </div>
                 </div>
+              ) : s.type === 'sabrief' ? (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  <div style={{ fontFamily: 'Inter', fontSize: 11.5, color: SUB_INK2, lineHeight: 1.5 }}>Pick the strategic accounts to follow. Each firm gets its own brief, across every region.</div>
+                  <SubScopeGroup label="Strategic accounts" options={firmList} value={scope.firms} onToggle={v => togScope('firms', v)} />
+                  {!scope.firms.length && <div style={{ fontFamily: 'Inter', fontSize: 10.5, color: 'rgb(227,160,8)' }}>Pick at least one firm.</div>}
+                </div>
+              ) : aud === 'lead' ? (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  <div style={{ fontFamily: 'Inter', fontSize: 11.5, color: SUB_INK2, lineHeight: 1.5 }}>The team the brief covers. Regional managers in Recipients get their own region's version.</div>
+                  <SubScopeGroup label="Region" options={['National', ...(window.ML_REGIONS || [])]} value={[scope.region]} onToggle={v => set({ scope: { ...scope, region: v } })} />
+                </div>
               ) : (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                  <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, padding: '8px 10px', borderRadius: 8, border: '1px solid rgba(75,85,99,0.35)' }}>
-                    <span style={{ flex: 1, fontFamily: 'Inter', fontSize: 12, color: SUB_INK }}>{window.LV_TERRITORY || 'My'} territory{scopeAny ? ', filtered' : ''}</span>
-                    <span style={{ fontFamily: 'Inter', fontSize: 11, color: scopeAny ? SUB_GREEN_TXT : SUB_DIM, fontVariantNumeric: 'tabular-nums' }}>{subScopeCount(scope)} of {subRows().length} FA/Teams</span>
-                  </div>
-                  <SubScopeGroup label="Segment" options={SUB_SEGS} value={scope.segments} onToggle={v => togScope('segments', v)} fmt={v => `Segment ${v}`} />
-                  <SubScopeGroup label="Focus categories" options={subFocusList()} value={scope.focus} onToggle={v => togScope('focus', v)} />
-                  <SubScopeGroup label="Firms" options={subFirmList()} value={scope.firms} onToggle={v => togScope('firms', v)} />
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, padding: '8px 10px', borderRadius: 8, border: '1px solid rgba(75,85,99,0.35)' }}>
+                  <span style={{ flex: 1, fontFamily: 'Inter', fontSize: 12, color: SUB_INK }}>{window.LV_TERRITORY || 'Your'} territory</span>
+                  <span style={{ fontFamily: 'Inter', fontSize: 11, color: SUB_DIM, fontVariantNumeric: 'tabular-nums' }}>{subRows().length} FA/Teams</span>
                 </div>
               )}
             </div>
@@ -446,9 +488,9 @@ function SubscribeDrawer({ open, initial, ctx, onClose, onSave, onDelete }) {
               <div style={subLabel}>Recipients</div>
               <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
                 <SubChip on={s.recipients.includes('me')} onClick={() => toggleRecip('me')}><i className="fa-solid fa-user" style={{ fontSize: 9 }} />Me</SubChip>
-                {SUB_TEAM.map(n => <SubChip key={n} on={s.recipients.includes(n)} onClick={() => toggleRecip(n)}>{n}</SubChip>)}
+                {(aud === 'lead' ? SUB_LEADS() : SUB_TEAM).map(n => <SubChip key={n} on={s.recipients.includes(n)} onClick={() => toggleRecip(n)}>{n}</SubChip>)}
               </div>
-              <div style={{ fontFamily: 'Inter', fontSize: 10.5, color: SUB_DIM, marginTop: 8, lineHeight: 1.5 }}>Each wholesaler gets a version built from their own territory, meetings and signals.</div>
+              <div style={{ fontFamily: 'Inter', fontSize: 10.5, color: SUB_DIM, marginTop: 8, lineHeight: 1.5 }}>{s.type === 'sabrief' ? 'Everyone gets the same brief for each firm you follow.' : aud === 'lead' ? 'Regional managers get a version built for their own region and team.' : 'Each wholesaler gets a version built from their own territory, meetings and signals.'}</div>
             </div>
           </div>
 
@@ -463,11 +505,11 @@ function SubscribeDrawer({ open, initial, ctx, onClose, onSave, onDelete }) {
         </div>
 
         <div style={{ padding: '14px 22px', borderTop: '1px solid rgba(75,85,99,0.4)', display: 'flex', gap: 10, alignItems: 'center' }}>
-          <button onClick={() => { if (s.type === 'dash') { setTested(true); return; } emailOutlookDraft({ url: subOutlookUrl(s), to: SUB_ME, subject: `[Test] ${t.subject}`, filename: `Test - ${t.label}` }).then(() => setTested(true)); }} style={{
+          <button onClick={() => { if (s.type === 'dash') { setTested(true); return; } emailOutlookDraft({ url: subOutlookUrl(s), to: SUB_ME, subject: `[Test] ${t.subject}`, filename: `Test - ${t.label}` }).then(m => setTested(m || false)).catch(() => setTested('Could not build the test email')); }} style={{
             height: 38, padding: '0 14px', borderRadius: 8, border: `1px solid ${SUB_LINE}`, background: 'transparent',
             color: SUB_INK2, fontFamily: 'Inter', fontSize: 13, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 8,
           }}><i className="fa-solid fa-paper-plane" style={{ fontSize: 11 }} />Send me a test</button>
-          {tested && <span style={{ fontFamily: 'Inter', fontSize: 11.5, color: 'rgb(110,240,180)', display: 'inline-flex', alignItems: 'center', gap: 6 }}><i className="fa-solid fa-circle-check" />{s.type === 'dash' ? `Test sent to ${SUB_ME}` : EMAIL_DRAFT_MSG}</span>}
+          {tested && <span style={{ fontFamily: 'Inter', fontSize: 11.5, color: 'rgb(110,240,180)', display: 'inline-flex', alignItems: 'center', gap: 6 }}><i className="fa-solid fa-circle-check" />{s.type === 'dash' ? `Test sent to ${SUB_ME}` : (typeof tested === 'string' ? tested : EMAIL_DRAFT_MSG)}</span>}
           {!isNew && <button onClick={() => onDelete(s)} style={{ height: 38, padding: '0 10px', border: 'none', background: 'transparent', color: 'rgb(249,128,128)', fontFamily: 'Inter', fontSize: 12.5, cursor: 'pointer' }}>Unsubscribe</button>}
           <div style={{ flex: 1 }} />
           <button onClick={onClose} style={{ height: 38, padding: '0 16px', borderRadius: 8, border: '1px solid rgba(75,85,99,0.6)', background: 'transparent', color: SUB_INK2, fontFamily: 'Inter', fontSize: 13, cursor: 'pointer' }}>Cancel</button>
@@ -512,15 +554,15 @@ function HomeBriefCard({ subs, onRead, onSubscribe }) {
       <div style={{ ...box, flexDirection: 'row', alignItems: 'center', gap: 14 }}>
         <i className="fa-solid fa-sun" style={{ fontSize: 16, color: SUB_GREEN_TXT }} />
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontFamily: 'Inter', fontSize: 13, fontWeight: 600, color: SUB_INK }}>Start each day with a Morning Brief</div>
-          <div style={{ fontFamily: 'Inter', fontSize: 11.5, color: SUB_MUTED, marginTop: 2 }}>Overnight sales, this week's meetings with the signal to lead with, and today's priority calls.</div>
+          <div style={{ fontFamily: 'Inter', fontSize: 13, fontWeight: 600, color: SUB_INK }}>Start each week with a Territory Brief</div>
+          <div style={{ fontFamily: 'Inter', fontSize: 11.5, color: SUB_MUTED, marginTop: 2 }}>What changed in your territory, this week's meetings with the signal to lead with, and priority calls.</div>
         </div>
         <button onClick={() => onSubscribe('brief')} style={{ height: 32, padding: '0 14px', borderRadius: 8, border: `1px solid ${SUB_GREEN}`, background: SUB_GREEN, color: '#fff', fontFamily: 'Inter', fontSize: 12, fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap' }}>Subscribe</button>
       </div>
     );
   }
   const items = [
-    ['circle', 'rgb(49,196,141)', '$2.35M in sales yesterday from 4 FA/Teams'],
+    ['circle', 'rgb(49,196,141)', '$2.35M in sales since your last brief, from 4 FA/Teams'],
     ['circle', 'rgb(167,139,250)', '4 meetings this week, each matched to a signal'],
     ['circle', 'rgb(227,160,8)', '3 Segment A relationships going cold'],
   ];
@@ -528,7 +570,7 @@ function HomeBriefCard({ subs, onRead, onSubscribe }) {
     <div style={box}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
         <i className="fa-solid fa-sun" style={{ fontSize: 13, color: SUB_GREEN_TXT }} />
-        <span style={{ fontFamily: 'Inter', fontSize: 13, fontWeight: 600, color: SUB_INK }}>Your Morning Brief is ready</span>
+        <span style={{ fontFamily: 'Inter', fontSize: 13, fontWeight: 600, color: SUB_INK }}>Your Territory Brief is ready</span>
         <span style={{ fontFamily: 'Inter', fontSize: 11, color: SUB_MUTED }}>Delivered {sub.time} · also in your inbox</span>
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
@@ -685,7 +727,7 @@ function useSubscriptions() {
   const open = (type = 'brief', c = null) => {
     const ex = type === 'dash' && c ? subs.find(s => s.id === `dash:${c.view}`) : subs.find(s => s.type === type);
     setCtx(c);
-    setEditing(ex ? { ...ex, scope: subScopeNorm(ex.scope) } : subNew(type, c));
+    setEditing(ex ? { ...ex, scope: subScopeNorm(ex.scope), ...(SUB_TYPES[ex.type].freqs && !ex.freq ? { freq: subFreqOf(ex), weekday: (ex.days || [])[0] || 'Mon' } : {}) } : subNew(type, c));
     setReading(null);
     setDrawerOpen(true);
   };

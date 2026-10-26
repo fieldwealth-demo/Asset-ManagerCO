@@ -175,7 +175,7 @@ function CampaignAnalyticsPage() {
           { label: 'Attributed sales', value: mkMoney(sum('attributed')), sub: `vs ${mkMoney(base)} run rate` },
           { label: sel && sel.basis === 'net' ? 'Net flow lift' : 'Sales lift', value: mkMoney(liftD), sub: `+${mkPct(base ? liftD / base : 0, 1)} over run rate${!sel && liveE.length > live.length ? ` · ${liveE.length - live.length} excluded` : ''}`, strong: liftD > 0 },
           { label: 'Revenue lift', value: mkRevMoney(rev), sub: `+${mkPct(baseRev ? rev / baseRev : 0, 1)} annual fees over run rate`, strong: rev > 0 },
-          { label: 'ROI', value: mkPct(roiAll), sub: `Contribution over ${MK_HOLD_YRS}-yr hold on ${mkMoney(cost / 1000)} cost to date`, strong: roiAll > 0 },
+          { label: 'ROI', value: mkPct(roiAll), sub: `Revenue value over the asset life on ${mkMoney(cost / 1000)} cost to date`, strong: roiAll > 0 },
           ]),
         ]} />
 
@@ -241,7 +241,7 @@ function CampaignAnalyticsPage() {
               </tbody>
             </table>
           </div>
-          <div style={{ padding: '8px 18px 6px', fontFamily: 'Inter', fontSize: 11, color: MKB.mut, lineHeight: 1.5 }}>Attributed: sales from members within 26 weeks of first send; lift typically builds over the first 90 days, then tapers. Sales lift: attributed sales above each member's pre-campaign run rate (trailing 12-month sales, scaled to the same window). Retention campaigns measure lift on net flows: redemptions avoided against the members' pre-campaign net-flow run rate. Revenue lift: sales lift × the product's annual management fee (book average for multi-product campaigns). Lift: attributed sales less each campaign's pre-campaign average daily run rate × days live. ROI: revenue lift × 40% contribution margin over a 3-year hold (20% a year redeeming, 8% cost of capital), less cost, over cost. Cost is direct spend plus $5K setup and content, prorated to days live for active campaigns.</div>
+          <div style={{ padding: '8px 18px 6px', fontFamily: 'Inter', fontSize: 11, color: MKB.mut, lineHeight: 1.5 }}>Attributed: sales from members within 26 weeks of first send; lift typically builds over the first 90 days, then tapers. Sales lift: attributed sales above each member's pre-campaign run rate (trailing 12-month sales, scaled to the same window). Retention campaigns measure lift on net flows: redemptions avoided against the members' pre-campaign net-flow run rate. Revenue lift: sales lift × the product's annual net management fee, gross less waivers (book average for multi-product campaigns). Lift: attributed sales less each campaign's pre-campaign average daily run rate × days live. ROI: revenue lift carried over the life of the assets (redemption by vehicle: MF/ETF 30%, SMA 20%, private funds 12% a year; 8% discount rate), less cost, over cost. Same method as the ROI Center. Cost is direct spend plus $5K setup and content, prorated to days live for active campaigns.</div>
         </MkCard>
 
         {detail && (<div ref={detailRef} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>

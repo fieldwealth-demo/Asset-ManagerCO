@@ -175,13 +175,17 @@ function ClientDetailPage({ clientRow, onBack }) {
           color:'rgb(209,213,219)', cursor:'pointer',
           display:'inline-flex', alignItems:'center', justifyContent:'center', fontSize:14,
         }}><i className="fa-solid fa-xmark" /></button>
-        <DetailHeader d={d} extra={window.MeetingPrepLauncher && <MeetingPrepLauncher row={clientRow.lvRow || (window.LV_ROWS || []).find(x => x.name === clientRow.name)} d={d} />} />
+        {(() => { const lr = clientRow.lvRow || (window.LV_ROWS || []).find(x => x.name === clientRow.name); let lv = 3; try { lv = Number(localStorage.getItem('amp_level')) || 3; } catch (e) {} return <DetailHeader d={d} seg={lv >= 3 && lr ? lr.segment : null} extra={window.MeetingPrepLauncher && <MeetingPrepLauncher row={lr} d={d} />} />; })()}
       <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:16 }}>
         <div style={{ gridColumn:'span 2', minWidth:0, display:'flex' }}><TeamMembersCard d={d} /></div>
         <OtherAdvisorsCard d={d} />
       </div>
       {(() => { const lr = clientRow.lvRow || (window.LV_ROWS || []).find(x => x.name === clientRow.name); let lv = 3; try { lv = Number(localStorage.getItem('amp_level')) || 3; } catch (e) {} return lr && lv >= 3 ? <NbaCard row={lr} /> : null; })()}
       {clientRow.lvRow && <ActualSalesCard row={clientRow.lvRow} />}
+      <div style={{ display:'flex', alignItems:'baseline', gap:12, flexWrap:'wrap', marginTop:6, paddingTop:14, borderTop:'1px solid rgba(75,85,99,0.35)' }}>
+        <span style={{ fontFamily:'Inter', fontSize:15, fontWeight:700, color:'rgb(249,250,251)', display:'inline-flex', alignItems:'center', gap:8 }}><i className="fa-solid fa-chart-pie" style={{ fontSize:12, color:'rgb(96,165,250)' }} />Market opportunity</span>
+        <span style={{ fontFamily:'Inter', fontSize:12, color:'rgb(163,163,163)' }}>From your data packs: this FA/Team's total AUM and flows across all asset managers, your share, and the breakdown by vehicle, platform and category</span>
+      </div>
       <KpiRowCards d={d} />
       <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:16 }}>
         <VehicleAllocationCard d={d} />
@@ -216,7 +220,7 @@ function DetailBackBar({ onBack }) {
 /* ===================================================== */
 /* HEADER CARD                                            */
 /* ===================================================== */
-function DetailHeader({ d, extra }) {
+function DetailHeader({ d, extra, seg }) {
   return (
     <div style={cardStyle}>
       <div style={{ display:'flex', alignItems:'flex-start', gap:14, padding:'18px 20px' }}>
@@ -231,6 +235,7 @@ function DetailHeader({ d, extra }) {
           <div style={{ display:'flex', alignItems:'baseline', gap:14, flexWrap:'wrap' }}>
             <div style={{ fontFamily:'Geist, Inter', fontWeight:700, fontSize:22, color:'rgb(249,250,251)', letterSpacing:-0.3 }}>{d.fullName}</div>
             <div style={{ alignSelf:'center' }}><CrmLink name={d.fullName} kind="Account" size="lg" /></div>
+            {seg && seg !== 'N' && window.LvSegBadge && <div style={{ alignSelf:'center', display:'inline-flex', alignItems:'center', gap:6, fontFamily:'Inter', fontSize:11.5, color:'rgb(163,163,163)' }}><LvSegBadge seg={seg} size={20} />Segment {seg}</div>}
           </div>
           <div style={{ fontFamily:'Inter', fontSize:12, color:'rgb(163,163,163)', marginTop:2 }}>{d.firm}</div>
           <div style={{ display:'flex', flexWrap:'wrap', gap:6, marginTop:10 }}>

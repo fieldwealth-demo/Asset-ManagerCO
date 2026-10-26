@@ -8,7 +8,7 @@ const ML_LIFT_PERIODS = { T30: { label: 'Trailing 30 days', nx: 0.34, lx: 0.94, 
 const ML_LIFT_DATA = {
   touch: { label: 'Activity type', rows: [
     ['In-person meeting', 340, 2.4, 42], ['Conference / event', 60, 1.9, 38], ['Webinar + follow-up ≤48h', 110, 1.8, 30],
-    ['Virtual meeting', 190, 1.5, 34], ['Phone call', 410, 1.2, 26], ['Webinar, no follow-up', 140, 1.1, 22], ['Email', 580, 1.0, 18]] },
+    ['Virtual meeting', 190, 1.5, 34], ['Connected call', 410, 1.2, 26], ['Webinar, no follow-up', 140, 1.1, 22], ['1:1 sales email', 380, 1.1, 18], ['Voicemail · not acted on', 240, 1.0, 14], ['Mass email · not acted on', 200, 1.0, 12]] },
   signal: { label: 'Signals', rows: [
     ['Performance Advantage', 150, 2.6, 46], ['Upsell', 120, 2.2, 40], ['Focus: Muni Ladder SMA', 90, 1.9, 36],
     ['Focus: Core Equity ETF', 105, 1.7, 32], ['Recovery', 70, 1.4, 30], ['Fee Advantage', 85, 1.2, 28]] },
@@ -132,13 +132,13 @@ function MlSalesLift({ rows, level }) {
         </MlLiftPanel>
         {!L3 && confPanel}
         {L3 && (
-          <MlLiftPanel title={<span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>Signals & segments <MlL3Tag /></span>} tabs={[{ key: 'signal', label: 'Signals' }, { key: 'segment', label: 'Segmentation' }]} value={right} onChange={setRight}>
+          <MlLiftPanel title={<span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>Signals & segments</span>} tabs={[{ key: 'signal', label: 'Signals' }, { key: 'segment', label: 'Segmentation' }]} value={right} onChange={setRight}>
             <MlLiftTable items={R.items} total={R.total} firstLabel={right === 'signal' ? 'Signal acted on' : 'Segment tier'} cols={baseCols} />
           </MlLiftPanel>
         )}
       </div>
       <div style={{ padding: '12px 18px 16px', borderTop: `1px solid ${ML_LINE}`, fontFamily: 'Inter', fontSize: 11, lineHeight: 1.55, color: ML_MUT, textWrap: 'pretty' }}>
-        <strong style={{ color: 'rgb(209,213,219)', fontWeight: 600 }}>Sales lift</strong> compares actual sales since the activity with expected sales, where expected = the FA/Team's daily run rate over the 12 months before the activity (12-month sales ÷ 365) × days elapsed since the activity. Lift = actual ÷ expected; Lift $ = actual − expected. Conference lift is measured across the FA/Teams reached.
+        <strong style={{ color: 'rgb(209,213,219)', fontWeight: 600 }}>Sales lift</strong> compares actual sales since the activity with expected sales, where expected = the FA/Team's daily run rate over the 12 months before the activity (12-month sales ÷ 365) × days elapsed since the activity. Days are capped at the ROI measurement window (180 days by default). Lift = actual ÷ expected; Lift $ = actual − expected. Conference lift is measured across the FA/Teams reached. Acted on = meeting, event, connected call or 1:1 sales email; voicemails and mass or marketing email are tracked but don't count toward signal ROI.
       </div>
     </Tile>
   );

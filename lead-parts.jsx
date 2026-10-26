@@ -40,7 +40,6 @@ function MlPicker({ value, options, onChange, title }) {
             }}>
               <i className="fa-solid fa-check" style={{ fontSize: 9, opacity: value === o.key ? 1 : 0 }} />
               <span style={{ flex: 1 }}>{o.label}</span>
-              {o.l3 && <MlL3Tag />}
             </button>
           ))}
         </div>
@@ -133,6 +132,11 @@ function MlTeamGrid({ rows, ctx, xf, level, onToggle, M, actualLabel }) {
         s: a => `${Math.round(mlPct(a.sigAct, a.sigN) * 100)}% actioned` },
       { k: 'wonK', label: 'Signal won / Seg A cov.', v: a => a.wonK, f: mlFmtK, l3: true,
         s: a => `${Math.round(mlPct(a.segAcov, a.segA) * 100)}% Seg A` },
+    ] : []),
+    ...(level >= 2 && role === 'ext' && window.roiFor ? [
+      { k: 'roi', label: 'ROI / sales lift R12', end: true, tip: 'Distribution Intelligence ROI, trailing 12 months: revenue value ÷ Intelligence cost. Data packs and the Field fee split evenly across wholesalers; campaigns and events by members.',
+        v: a => { const x = window.roiFor(a.key || null, level); return x ? x.roiTotal : 0; }, f: v => `${v.toFixed(1)}x`, c: v => (v >= 1 ? 'rgb(52,211,153)' : 'rgb(251,191,36)'), b: true,
+        s: a => { const x = window.roiFor(a.key || null, level); return x ? `+${(x.liftPct * 100).toFixed(1)}% lift` : ''; } },
     ] : []),
   ];
   const col = cols.find(c => c.k === sort.k);
@@ -292,7 +296,7 @@ function mlRank(vals) {
   return v => { if (s.length < 2) return 0.5; let lo = 0; while (lo < s.length && s[lo] < v) lo++; let hi = lo; while (hi < s.length && s[hi] === v) hi++; return ((lo + hi - 1) / 2) / (s.length - 1); };
 }
 
-const ML_HEAT_DIMS = ['vehicle', 'cat', 'channel', 'prodBand', 'prodCat', 'firm', 'product', 'segment'];
+const ML_HEAT_DIMS = ['vehicle', 'cat', 'channel', 'prodBand', 'prodCat', 'nprod', 'firm', 'product', 'segment'];
 
 function MlHeatmap({ rowsAll, xf, ctx, M, level, onPick, modeSwitch }) {
   const [dim, setDim] = React.useState('vehicle');

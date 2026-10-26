@@ -517,18 +517,14 @@ function WideAdvTable({ sel, onRowClick, onViewClient }) {
     rows = sel.clients.flatMap(n => buildClientBreakdown(n));
     if (sel.cats.length) rows = rows.filter(r => sel.cats.includes(r.cat));
   } else if (sel.cats.length) {
-    // Categories selected with no Team/FA context: default rows in those categories
-    rows = WIDE_DEFAULT.filter(r => sel.cats.includes(r.cat));
-    if (rows.length === 0) {
-      const holders = Array.from(new Set(sel.cats.flatMap(c => CLIENTS_BY_CAT[c] || [])));
-      rows = holders.map((name, idx) => ({
-        name, city: '—', st: '—', vehicle: ['MF','ETF','SMA','CIT'][idx % 4], cat: sel.cats[idx % sel.cats.length],
-        aum: ['$24.4M','$18.2M','$12.8M','$8.4M','$5.2M','$3.1M'][idx] || '$2.0M',
-        perfAdv:'$1.2M', wtd:(2 + idx*0.4).toFixed(1), wtdDir: idx % 5 === 0 ? '↓' : '↑',
-        perfVar: (1.0 - idx*0.4).toFixed(1), feeAdv:'$0.2M', fee:(40 + idx*3).toFixed(1), feeVar:(idx*2 - 4).toFixed(1),
-        infl:'$8.4M', outfl:'($2.1M)', net:'$6.3M', mgrs: 4 + idx, rank: idx + 1,
-      }));
-    }
+    // Categories selected (or the focus-category scope) with no Team/FA picked:
+    // every Team/FA that holds those categories, one row per Team/FA × category.
+    const seen = new Set(), num = (v) => parseFloat(String(v).replace(/[^0-9.]/g, '')) || 0;
+    const add = (r) => { const k = `${r.name}|${r.cat}`; if (!seen.has(k)) { seen.add(k); rows.push(r); } };
+    rows = [];
+    WIDE_DEFAULT.filter(r => sel.cats.includes(r.cat)).forEach(add);
+    sel.cats.forEach(c => (CLIENTS_BY_CAT[c] || []).forEach(n => buildClientBreakdown(n).filter(r => r.cat === c).forEach(add)));
+    rows.sort((a, b) => num(b.aum) - num(a.aum));
   } else {
     rows = WIDE_DEFAULT;
   }

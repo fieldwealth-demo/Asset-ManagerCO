@@ -324,11 +324,11 @@ function LvDimTileRow({ defaults, dims, rows, highlight, measure, period, filter
   const set = (i, v) => setPicks(p => p.map((x, j) => (j === i ? v : x)));
   return (
     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(max(480px, 30%), 1fr))', gap: 14, alignItems: 'stretch' }}>
-      {picks.map((k, i) => (
+      {picks.map((k0, i) => { const k = dims.includes(k0) ? k0 : (defaults[i] || dims[0]); return (
         <LvDimTile key={i} dim={k} onDim={v => set(i, v)} dims={dims}
           rows={rows} highlight={highlight} measure={measure} period={period}
           filters={filters} setFilters={setFilters} fill />
-      ))}
+      ); })}
     </div>
   );
 }

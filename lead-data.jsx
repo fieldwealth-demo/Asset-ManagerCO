@@ -212,7 +212,8 @@ const ML_DIMS = {
   product:  { label: 'Product',           mix: 'product', label_: k => k.replace(/^Field /, ''), color: () => 'rgb(45,212,191)' },
   focus:    { label: 'Focus effort',      mix: 'focus', order: () => ['Franchise', 'Scale', 'Tactical', 'Non-focus'], color: k => ({ Franchise: 'rgb(52,211,153)', Scale: 'rgb(96,165,250)', Tactical: 'rgb(251,191,36)', 'Non-focus': 'rgb(148,163,184)' }[k]) },
   prodCat:  { label: 'Producer category', of: r => r.prodCat, order: () => LV_PROD_CATS, color: k => (k === 'Producer' ? 'rgb(52,211,153)' : k === 'Dabbler' ? 'rgb(251,191,36)' : 'rgb(148,163,184)') },
-  prodBand: { label: 'Production threshold', of: r => r.prodBand, order: () => LV_PROD_BANDS.slice().reverse(), label_: k => (k === '$0' ? '$0 (prospect)' : k), color: k => LV_PROD_BAND_COLORS[k] },
+  prodBand: { label: 'Rolling 12 production', of: r => r.prodBand, order: () => LV_PROD_BANDS.slice().reverse(), label_: k => (k === '$0' ? '$0 (prospect)' : k), color: k => LV_PROD_BAND_COLORS[k] },
+  nprod:    { label: '# of products', of: r => { const n = Math.round(r.nProd || 0); return !n ? '0' : n >= 5 ? '5+' : String(n); }, order: () => ['5+', '4', '3', '2', '1', '0'], label_: k => (k === '0' ? '0 (prospect)' : k === '1' ? '1 product' : `${k} products`), color: k => ({ '5+': 'rgb(16,185,129)', 4: 'rgb(52,211,153)', 3: 'rgb(45,212,191)', 2: 'rgb(96,165,250)', 1: 'rgb(251,191,36)', 0: 'rgb(148,163,184)' }[k]) },
   segment:  { label: 'Segment',           of: r => r.segment, order: () => LV_SEGMENTS, l3: true, label_: k => `Segment ${k}`, color: k => (LV_SEG_META[k] ? LV_SEG_META[k].dot : 'rgb(148,163,184)') },
 };
 const ML_XF_KEYS = Object.keys(ML_DIMS);

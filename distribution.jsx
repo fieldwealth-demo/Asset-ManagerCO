@@ -44,7 +44,7 @@ function DistTerritoryMap({ sigType, selectedTerr, onTerrClick, height = 432 }) 
   React.useEffect(() => {
     if (window.__usTopology) { setTopology(window.__usTopology); return; }
     let cancelled = false;
-    fetch('https://code.highcharts.com/mapdata/countries/us/us-all.topo.json')
+    fetch('maps/us-all.topo.json')
       .then(r => r.json())
       .then(t => { if (!cancelled) { window.__usTopology = t; setTopology(t); } })
       .catch(e => console.error('Map data load failed', e));

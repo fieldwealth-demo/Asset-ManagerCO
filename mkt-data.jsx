@@ -235,17 +235,19 @@ const mkNum = (n) => n.toLocaleString('en-US');
    blended fee rate (multi-product campaigns use the book average). ROI uses
    revenue lift × 3-year average hold, less cost, over cost. */
 const MK_FEE_RATE = { any: 0.0045, core: 0.0030, growth: 0.0055, muni: 0.0040, pc: 0.0110, cplus: 0.0035 };
-const MK_HOLD_YRS = 3;
+const MK_HOLD_YRS = 10;
 const mkRate = (c) => MK_FEE_RATE[c.product] || MK_FEE_RATE.any;
 const mkRev = (c) => c.liftD * mkRate(c);
-/* ROI on a contribution basis, not gross revenue:
-   value = annual revenue on lift-to-date assets × 40% contribution margin,
-   held 3 years with 20% a year redeeming, discounted at an 8% cost of capital
-   (factor ≈ 0.92× one year's revenue). Cost is fully loaded (direct cost plus
+/* ROI on a revenue basis, shared with the ROI Center:
+   value = annual revenue (net management fee, gross less waivers) on
+   lift-to-date assets, carried over the life of the assets with redemption by
+   vehicle (MF/ETF 30%, SMA 20%, private funds 12% a year; 75/15/10 mix, up to
+   10 years), discounted at 8% (factor ≈ 3.1× one year's revenue). Cost is fully loaded (direct cost plus
    $5K setup/content) and, for active campaigns, prorated to days live over the
    26-week window so cost to date matches lift to date. No annualizing. */
-const MK_MARGIN = 0.40, MK_REDEEM = 0.20, MK_COC = 0.08, MK_SETUP_K = 5;
-const MK_VALUE_F = MK_MARGIN * Array.from({ length: MK_HOLD_YRS }, (_, t) => Math.pow(1 - MK_REDEEM, t) / Math.pow(1 + MK_COC, t)).reduce((a, x) => a + x, 0);
+const MK_MARGIN = 1, MK_REDEEM = 0.20, MK_COC = 0.08, MK_SETUP_K = 5;
+const MK_VEH_MIX = [[0.30, 0.75], [0.20, 0.15], [0.12, 0.10]];
+const MK_VALUE_F = MK_MARGIN * MK_VEH_MIX.reduce((acc, [r, w]) => acc + w * Array.from({ length: MK_HOLD_YRS }, (_, t) => Math.pow(1 - r, t) / Math.pow(1 + MK_COC, t)).reduce((a, x) => a + x, 0), 0);
 const mkCost = (c) => { if (!c.costK) return 0; const full = c.costK + MK_SETUP_K; return c.status === 'Active' && c.days ? full * Math.min(1, c.days / (MK_WINDOW_WEEKS * 7)) : full; };
 const mkRoiOf = (revM, costK) => costK ? (revM * MK_VALUE_F * 1e6 - costK * 1000) / (costK * 1000) : 0;
 /* Lift is measured against each campaign's own pre-campaign average daily run

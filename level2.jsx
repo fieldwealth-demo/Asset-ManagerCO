@@ -99,9 +99,12 @@ function L2BookTable({ rows, measure, period, roles, selected, onToggle, onViewC
                   <LvAdvDot grade={r.compAdv} row={r} />
                 </td>
                 <td style={{ ...lvTd, padding: '9px 10px 9px 6px', width: wide ? 200 : 170, maxWidth: wide ? 200 : 170 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
+                  {(window.AMP_PHASE || 3) >= 3 && r.segment && <LvSegBadge seg={r.segment} size={18} />}
                   <div style={{ minWidth: 0 }}>
                     <div style={{ fontWeight: 500, fontSize: 12, color: 'rgb(249,250,251)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{r.name}</div>
                     <div style={{ fontSize: 10, color: 'rgb(107,114,128)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{r.firm} · {r.city}</div>
+                  </div>
                   </div>
                 </td>
                 <td style={colTd}>{M.fmt(r[M.opp])}</td>
@@ -363,7 +366,7 @@ function Level2Page({ onSelectionsChange, onViewClient, filters, setFilters, per
         <style>{'.l2-rail{position:relative}.l2-rail-in{position:absolute;inset:0}@container (max-width: 1180px){.l2-rail{flex-basis:100%!important}.l2-rail-in{position:static!important}.l2-rail-in .l3-sig-list{max-height:200px!important}}'}</style>
         <div className="l2-rail" style={{ flex: '1 0 250px', maxWidth: '100%', minWidth: 0 }}>
           <div className="l2-rail-in">
-            <LvDimRail rows={rows} measure={measure} period={period} filters={filters} setFilters={setFilters} />
+            <LvDimRail rows={rows} measure={measure} period={period} filters={filters} setFilters={setFilters} dims={(window.AMP_PHASE || 3) >= 3 ? ['city', 'segment', ...LV_RAIL_DIMS.slice(1)] : LV_RAIL_DIMS} />
           </div>
         </div>
       <Tile
@@ -401,8 +404,8 @@ function Level2Page({ onSelectionsChange, onViewClient, filters, setFilters, per
         </Tile>
       </div>
 
-      <LvDimTileRow storageKey="amp_l2dims" dims={LV_DIMS_L2}
-        defaults={['firm', 'vehicle', 'product', 'prodCat', 'prodBand', 'productBand']}
+      <LvDimTileRow storageKey="amp_l2dims3" dims={(window.AMP_PHASE || 3) >= 3 ? [...LV_DIMS_L2.slice(0, 9), 'segment', ...LV_DIMS_L2.slice(9)] : LV_DIMS_L2}
+        defaults={(window.AMP_PHASE || 3) >= 3 ? ['firm', 'vehicle', 'product', 'segment', 'prodBand', 'productBand'] : ['firm', 'vehicle', 'product', 'prodCat', 'prodBand', 'productBand']}
         rows={rows} highlight={selected.length ? view : null} measure={measure} period={period}
         filters={filters} setFilters={setFilters} />
     </div>

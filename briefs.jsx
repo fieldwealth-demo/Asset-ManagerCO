@@ -5,7 +5,7 @@
 
 const BRF_AUD = {
   whole: {
-    views: [['brief', 'Morning Brief', 'sun'], ['monthly', 'Monthly Review & Plan', 'chart-line']],
+    views: [['brief', 'Territory Brief', 'sun'], ['monthly', 'Monthly Review & Plan', 'chart-line']],
     pickKey: 'role', pickLs: 'amp_briefs_role',
     picks: [['ext', 'External'], ['int', 'Internal'], ['spec', 'Specialist']],
   },
@@ -70,14 +70,17 @@ function BrfSelect({ label, value, options, onChange }) {
 
 function BriefsPage({ subs, onEdit, audience = 'whole' }) {
   const A = BRF_AUD[audience];
-  const vLs = audience === 'lead' ? 'amp_lbriefs_view' : 'amp_briefs_view';
+  // Opens on the default brief every visit (Territory Brief / Leadership Monthly
+  // Review); a link from Ask Field can ask for a specific one, once.
+  const vLs = audience === 'lead' ? 'amp_lbriefs_view2' : 'amp_briefs_view';
   const [view, setView] = React.useState(() => {
-    try { const v = localStorage.getItem(vLs); return A.views.some(x => x[0] === v) ? v : A.views[0][0]; } catch (e) { return A.views[0][0]; }
+    const dflt = audience === 'lead' ? 'lmonthly' : 'brief';
+    try { const v = localStorage.getItem(vLs); localStorage.removeItem(vLs); return A.views.some(x => x[0] === v) ? v : dflt; } catch (e) { return dflt; }
   });
   const [pick, setPick] = React.useState(() => {
     try { const v = localStorage.getItem(A.pickLs); return A.picks.some(x => x[0] === v) ? v : A.picks[0][0]; } catch (e) { return A.picks[0][0]; }
   });
-  React.useEffect(() => { try { localStorage.setItem(vLs, view); localStorage.setItem(A.pickLs, pick); } catch (e) {} }, [view, pick]);
+  React.useEffect(() => { try { localStorage.setItem(A.pickLs, pick); } catch (e) {} }, [pick]);
   const lead = audience === 'lead';
   const lsGet = (k, d) => { try { return localStorage.getItem(k) || d; } catch (e) { return d; } };
   const [region, setRegion] = React.useState(() => lsGet('amp_lbriefs_region', 'National'));
@@ -131,7 +134,9 @@ function BriefsPage({ subs, onEdit, audience = 'whole' }) {
   const mailWho = !lead ? '' : view === 'sabrief' ? firm : P ? P.name : region !== 'National' ? `${region} region` : 'National';
   const emailDraft = () => {
     const subj = `${SUB_TYPES[shown.type].label}${mailWho ? ' · ' + mailWho : ''}`;
-    emailOutlookDraft({ url: subOutlookUrl(...srcArgs), to: emailAddressOf(mailTo), subject: subj }).then(() => setDrafted(mailTo || 'draft')).catch(() => {});
+    setDrafted(''); setDlBusy('Preparing email…');
+    emailOutlookDraft({ url: subOutlookUrl(...srcArgs), to: emailAddressOf(mailTo), subject: subj })
+      .then(m => { setDlBusy(''); setDrafted(m || ''); }).catch(() => { setDlBusy(''); setDrafted('Could not build the email'); });
   };
   const [dl, setDl] = React.useState(false);
   const [dlBusy, setDlBusy] = React.useState('');
@@ -146,25 +151,21 @@ function BriefsPage({ subs, onEdit, audience = 'whole' }) {
       forRole: P ? [P.role, P.region].filter(Boolean).join(' · ') : (region !== 'National' && BRF_MGR[region] ? BRF_MGR[region] + ' · Regional Sales Manager' : ''),
       date: new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }),
     };
-    if (kind === 'pdf') { briefPdf(ref.current, dlFile, cover); return; }
-    setDlBusy('Building PowerPoint…');
-    briefPptx(ref.current, { title: dlTitle, subtitle: `${SUB_TYPES[shown.type].label} · September${mailWho ? ' · ' + mailWho : ''}`, file: dlFile, cover })
-      .then(() => setDlBusy('')).catch(() => setDlBusy('Could not build the deck'));
+    const pdf = kind === 'pdf';
+    setDlBusy(pdf ? 'Preparing PDF preview…' : 'Preparing PowerPoint preview…');
+    (pdf ? briefPdf(ref.current, dlFile, cover)
+      : briefPptx(ref.current, { title: dlTitle, subtitle: `${SUB_TYPES[shown.type].label} · September${mailWho ? ' · ' + mailWho : ''}`, file: dlFile, cover }))
+      .then(() => setDlBusy('')).catch(e => setDlBusy((e && e.message) || `Could not build the ${pdf ? 'PDF' : 'deck'}`));
   };
   const status = !sub ? { c: 'rgb(107,114,128)', t: 'Not subscribed' }
     : !sub.active ? { c: 'rgb(107,114,128)', t: 'Paused' }
-    : { c: 'rgb(52,211,153)', t: `Emailed ${subSchedule(sub)} ET · next ${subNextSend(sub).split(' · ')[0]}` };
+    : { c: 'rgb(52,211,153)', t: `Emailed ${subSchedule(sub).replace(/^Every/, "every")} ET · next ${subNextSend(sub).split(' · ')[0]}` };
 
   return (
     <div style={{ padding: '20px 24px 48px', display: 'flex', flexDirection: 'column', gap: 14, maxWidth: 928, margin: '0 auto', boxSizing: 'border-box', width: '100%' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'nowrap' }}>
         <BrfSeg icons options={A.views} value={view} onChange={setView} />
         <div style={{ flex: 1 }} />
-        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 7, fontFamily: 'Inter', fontSize: 11.5, color: 'rgb(163,163,163)' }}>
-          <span style={{ width: 7, height: 7, borderRadius: 9999, background: status.c }} />{status.t}
-        </span>
-        {drafted && <span style={{ fontFamily: 'Inter', fontSize: 11.5, color: 'rgb(110,240,180)', display: 'inline-flex', alignItems: 'center', gap: 6 }}><i className="fa-solid fa-circle-check" />{EMAIL_DRAFT_MSG}{drafted !== 'draft' ? ` · to ${drafted}` : ''}</span>}
-        {dlBusy && <span style={{ fontFamily: 'Inter', fontSize: 11.5, color: 'rgb(209,213,219)', display: 'inline-flex', alignItems: 'center', gap: 6 }}><i className="fa-solid fa-spinner fa-spin" />{dlBusy}</span>}
         {canDl && (
           <span style={{ position: 'relative' }}>
             <button onClick={() => setDl(o => !o)} title="Save this review as a PDF or PowerPoint" style={{
@@ -173,7 +174,7 @@ function BriefsPage({ subs, onEdit, audience = 'whole' }) {
             }}><i className="fa-solid fa-download" style={{ fontSize: 11 }} />Download<i className="fa-solid fa-chevron-down" style={{ fontSize: 9 }} /></button>
             {dl && (
               <div style={{ position: 'absolute', right: 0, top: 36, zIndex: 20, minWidth: 210, padding: 4, borderRadius: 10, background: 'rgb(31,41,55)', border: '1px solid rgba(75,85,99,0.7)', boxShadow: '0 10px 30px rgba(0,0,0,0.45)', display: 'flex', flexDirection: 'column', gap: 2 }}>
-                {[['pdf', 'file-pdf', 'PDF', 'Print layout, save as PDF'], ['ppt', 'file-powerpoint', 'PowerPoint', 'One slide per section']].map(([k, ic, l, d]) => (
+                {[['pdf', 'file-pdf', 'PDF', 'Preview, then download'], ['ppt', 'file-powerpoint', 'PowerPoint', 'One slide per section, preview first']].map(([k, ic, l, d]) => (
                   <button key={k} onClick={() => doDl(k)} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 10px', border: 'none', borderRadius: 7, background: 'transparent', cursor: 'pointer', textAlign: 'left' }}
                     onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.06)')} onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
                     <i className={`fa-solid fa-${ic}`} style={{ fontSize: 14, width: 16, color: 'rgb(52,211,153)' }} />
@@ -184,7 +185,7 @@ function BriefsPage({ subs, onEdit, audience = 'whole' }) {
             )}
           </span>
         )}
-        <button onClick={emailDraft} title="Open this brief as an Outlook draft" style={{
+        <button onClick={emailDraft} title="Email this brief" style={{
           height: 32, padding: '0 12px', borderRadius: 8, cursor: 'pointer', border: '1px solid rgba(75,85,99,0.7)', background: 'transparent',
           color: 'rgb(229,231,235)', fontFamily: 'Inter', fontSize: 12, fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: 7,
         }}><i className="fa-solid fa-share" style={{ fontSize: 11 }} />{mailTo ? `Email to ${mailTo.split(' ')[0]}` : 'Email'}</button>
@@ -211,14 +212,17 @@ function BriefsPage({ subs, onEdit, audience = 'whole' }) {
           </>
         )}
         <div style={{ flex: 1 }} />
-        <span style={{ fontFamily: 'Inter', fontSize: 11, color: 'rgb(107,114,128)', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-          <i className="fa-solid fa-arrow-pointer" style={{ fontSize: 9.5 }} />Click a name, signal or figure to open it
+        {drafted && <span style={{ fontFamily: 'Inter', fontSize: 11.5, color: 'rgb(110,240,180)', display: 'inline-flex', alignItems: 'center', gap: 6 }}><i className="fa-solid fa-circle-check" />{drafted}</span>}
+        {dlBusy && <span style={{ fontFamily: 'Inter', fontSize: 11.5, color: 'rgb(209,213,219)', display: 'inline-flex', alignItems: 'center', gap: 6 }}><i className="fa-solid fa-spinner fa-spin" />{dlBusy}</span>}
+        <span title="Click a name, signal or figure in the brief to open it" style={{ display: 'inline-flex', alignItems: 'center', gap: 7, fontFamily: 'Inter', fontSize: 11.5, color: 'rgb(163,163,163)', whiteSpace: 'nowrap' }}>
+          <span style={{ width: 7, height: 7, borderRadius: 9999, background: status.c, flexShrink: 0 }} />{status.t}
         </span>
       </div>
+      {window.RoiBriefStrip && <RoiBriefStrip view={view} audience={audience} region={region} person={person} pick={pick} per={view === 'monthly' || view === 'lmonthly' ? 'month' : { Daily: 'day', Weekly: 'week', Monthly: 'month' }[shown.freq || (shown.days && shown.days.length > 1 ? 'Daily' : 'Weekly')]} />}
       <iframe ref={ref} key={src} src={src} scrolling="no" title={A.views.find(v => v[0] === view)[1]}
         style={{ width: '100%', height: h, border: 0, background: 'transparent', colorScheme: 'dark', display: 'block' }} />
     </div>
   );
 }
 
-Object.assign(window, { BriefsPage });
+Object.assign(window, { BriefsPage, BRF_MGR, brfRegionMap });

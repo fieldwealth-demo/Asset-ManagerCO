@@ -372,7 +372,7 @@ const TV_FIPS_ABBR = {
 let _tvUsPromise = null;
 function tvLoadUs() {
   if (!_tvUsPromise) {
-    _tvUsPromise = fetch('https://cdn.jsdelivr.net/npm/us-atlas@3.0.1/states-10m.json')
+    _tvUsPromise = fetch('maps/states-10m.json')
       .then(r => r.json())
       .then(topo => topojson.feature(topo, topo.objects.states).features.map(f => ({
         ...f, abbr: TV_FIPS_ABBR[f.id] || null,
