@@ -162,12 +162,12 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .avatar.ring { box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--green-fill); }
 
 /* ---------- drawer (Field mark → recent chats) ---------- */
-.drawer-wrap { position: fixed; inset: 0; z-index: 70; pointer-events: none; }
-.drawer-wrap.open { pointer-events: auto; }
+.drawer-wrap { position: fixed; top: 0; bottom: 0; left: 0; right: 0; margin: 0 auto; max-width: var(--col); overflow: hidden; z-index: 70; pointer-events: none; visibility: hidden; transition: visibility 0s linear .28s; }
+.drawer-wrap.open { pointer-events: auto; visibility: visible; transition: visibility 0s; }
 .drawer-scrim { position: absolute; inset: 0; background: rgba(3, 8, 16, 0.62); opacity: 0; transition: opacity .22s; }
 .drawer-wrap.open .drawer-scrim { opacity: 1; }
 .drawer {
-  position: absolute; top: 0; bottom: 0; left: max(0px, calc((100vw - var(--col)) / 2)); width: min(86vw, 380px);
+  position: absolute; top: 0; bottom: 0; left: 0; width: min(86%, 380px);
   background: var(--bg-raise); border-right: 1px solid var(--line);
   padding: calc(var(--safe-t) + 14px) 16px calc(var(--safe-b) + 16px) max(16px, env(safe-area-inset-left, 0px));
   display: flex; flex-direction: column; gap: 8px;
